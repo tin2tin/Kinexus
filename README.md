@@ -2,8 +2,14 @@
 
 CYOA Studio Pro is a powerful, single-file, zero-installation tool for creating, styling, and exporting choice-based narrative games. It runs entirely in your web browser, providing a complete workflow from writing your story to packaging a distributable ZIP file for platforms like [itch.io](https://itch.io/).
 
-![image](https://i.imgur.com/your-screenshot-here.png) 
-*(Replace this with a screenshot of the editor)*
+<img width="1919" height="957" alt="image" src="https://github.com/user-attachments/assets/279f6a85-7f70-49c7-80ff-d4564b802b56" />
+<img width="1919" height="959" alt="image" src="https://github.com/user-attachments/assets/25855fd8-cb0e-475e-a2d3-8694923da5c3" />
+
+## Try It
+
+<div align="left">
+  <a href="https://htmlpreview.github.io/?https://raw.githubusercontent.com/tin2tin/CYOA_Studio_Pro/master/index.html">OPEN HERE!</a><br><br>
+</div>
 
 ## Features
 

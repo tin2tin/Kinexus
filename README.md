@@ -1,87 +1,115 @@
-# CYOA Studio
+# CYOA Studio (Choose Your Own Adventure Editor)
 
 CYOA Studio is a powerful, single-file, zero-installation tool for creating, styling, and exporting choice-based narrative games. It runs entirely in your web browser, providing a complete workflow from writing your story to packaging a distributable ZIP file for platforms like [itch.io](https://itch.io/).
 
 <img width="1919" height="959" alt="image" src="https://github.com/user-attachments/assets/29d32050-1668-4c53-8f1a-7f9ba144128c" />
-<img width="1919" height="957" alt="image" src="https://github.com/user-attachments/assets/5e5bf8e6-bc71-4394-9cdb-ab7e2129b19c" />
-<img width="1919" height="960" alt="image" src="https://github.com/user-attachments/assets/981509d8-acf2-4e0b-9c41-eb0676853fb9" />
-<img width="1919" height="958" alt="image" src="https://github.com/user-attachments/assets/3b60724b-92e2-49ab-b864-64edc3830c5e" />
 
 ## Try It
 
 <div align="left">
-  <a href="https://htmlpreview.github.io/?https://raw.githubusercontent.com/tin2tin/CYOA_Studio_Pro/master/index.html">OPEN HERE!</a><br><br>
+  <a href="https://htmlpreview.github.io/?https://raw.githubusercontent.com/tin2tin/CYOA_Studio_Pro/master/index.html">CLICK HERE!</a><br><br>
 </div>
 
 ## Features
 
-*   **Single-File Application:** The entire editor is one `.html` file. No installation, no servers, no dependencies.
-*   **Visual Editor & Live Preview:** Write your story, add choices, and instantly preview your game in the built-in player.
-*   **Autosaving & Session Restore:** Never lose your work. Your session is automatically saved in the browser, and you'll be prompted to restore it if you accidentally close the tab.
+*   **Visual Story Creation:**
+    *   A rich text editor for writing your narrative.
+    *   Easily add, edit, and link choices between scenes.
+    *   Includes an integrated **Generative AI Image** tool to create and add unique artwork for your scenes directly within the editor.
+
 *   **Interactive Story Map:**
-    *   A collapsible tree view to visualize your story's branches.
-    *   Safely rename scenes with automatic link updating.
-    *   Right-click any scene to set it as the starting point.
-*   **Integrated Asset Management:** Set a project root folder and pick your images and sounds from a list, preventing typos and broken paths.
-*   **Visual Style Editor:** A powerful modal for customizing the colors, fonts, and layout of your game's interface. Changes are saved with your project and reflected in the export.
-*   **Data & Project Export:**
-    *   Export specific data, like all AI image prompts, to a structured `.json` file.
-    *   Export the complete, playable project as a `.zip` file, containing the game, your custom theme, and all required assets.
+    *   A collapsible tree view provides a clear visualization of your story's branches.
+    *   Status icons instantly show the start scene, dead ends, orphan scenes, and which scenes have images or audio.
+    *   Safely rename scenes with automatic link updating across all choices.
+    *   Search and filter your scenes to quickly find what you need.
 
-## How to Use the Editor
+*   **Live Player & Preview:**
+    *   Instantly playtest your game from the start or the current scene using the built-in player.
+    *   Launch a full, clean preview of your project in a new browser tab at any time.
 
-Follow these steps to create your first game.
+*   **Integrated Asset Management:** Select image and audio files from your computer. The studio automatically copies them into your project folder on save, ensuring all asset paths are correct and ready for export.
 
-### 1. Setup Your Project Folder
+*   **Powerful Style Editor:** Customize the visual theme of your game, including layout, colors, fonts, padding, background images, and even global background music. Your custom style is saved with the project.
 
-Before you start, create a main folder for your game on your computer. Inside this folder, create two sub-folders: `images` and `sounds`.
+*   **One-Click Export:**
+    *   Export your complete, playable project as a self-contained `.zip` file. This bundle includes the game, your custom theme, and all required assets, ready to be shared or hosted.
+    *   Export specific data, such as all AI image prompts, to a structured `.json` file for analysis or external use.
 
-```
-my-amazing-game/
-├── images/
-│   ├── scene1.jpg
-│   └── scene2.png
-└── sounds/
-    ├── ambient_wind.mp3
-    └── title_music.ogg
-```
+*   **Single-File, Zero Installation:** The entire studio is a single `.html` file. It runs directly in your browser with no installation, servers, or dependencies required.
 
-### 2. Set the Project Root
+*   **Local-First Project Management:** Works directly with folders on your computer via the File System Access API. Your project, including the story file and all assets, is saved locally, not in the cloud. The app tracks unsaved changes to prevent data loss.
 
-1.  Open the `cyoa-studio.html` file in your browser.
-2.  Click the **"Set Project Root"** button.
-3.  In the file dialog, select the main folder you created (e.g., `my-amazing-game`).
-4.  The editor will scan the folder and its sub-folders for compatible asset files.
+Of course! Here is the updated "How to Get Started" guide, rewritten to accurately reflect the app's modern, streamlined workflow.
 
-### 3. Create Your Story
+***
 
-*   **Create Scenes:** Use the **`+`** button in the "Story Map" to create new scenes. Give them short, unique IDs (e.g., `start`, `trench_battle`).
-*   **Navigate:** Click a scene in the Story Map to load it into the editor. Right-click for more options like **"Set as Start Scene"**. Use the `[+]` and `[-]` toggles to collapse and expand branches.
-*   **Edit Content:** Fill in the fields in the Scene Editor. Add descriptive text, AI image prompts, and link to assets.
-*   **Add Choices:** Click the **"+ Add Choice"** button. Write the text the player will see and select the target scene from the dropdown menu.
+## Screenshots
 
-### 4. Add Assets
+<img width="1919" height="957" alt="image" src="https://github.com/user-attachments/assets/5e5bf8e6-bc71-4394-9cdb-ab7e2129b19c" />
+<img width="1919" height="960" alt="image" src="https://github.com/user-attachments/assets/981509d8-acf2-4e0b-9c41-eb0676853fb9" />
+<img width="1919" height="958" alt="image" src="https://github.com/user-attachments/assets/3b60724b-92e2-49ab-b864-64edc3830c5e" />
 
-Once the project root is set, you can easily add images and sounds:
+***
 
-1.  Click the **"Select..."** button next to the "Image Filename" or "Ambience Sound" field.
-2.  A modal will appear listing all the compatible files found in your project folder.
-3.  Click on a file to automatically insert its correct path (e.g., `images/scene1.jpg`).
+## How to Get Started
 
-### 5. Customize the Look
+Creating your first game is a straightforward process. The app handles all the file and folder setup for you.
 
-1.  Click the **"Style Editor"** button.
-2.  Use the color pickers, dropdowns, and number fields to change the appearance of your game.
-3.  You can preview your changes by clicking one of the **"Play"** buttons. Your style settings are saved with your project file.
+### 1. Create or Open a Project
 
-### 6. Save and Export
+First, open the `cyoa-studio.html` file in your browser. From the **Menu**, you have two options:
 
-*   **Save Project File:** Click the main **"Save"** button. This downloads a `.json` file containing your entire story structure and style settings. **This is your source file.** Save it frequently.
-*   **Export Playable Game:** When you are finished, click **"Export Playable Project"**. This will package your story, assets, and theme into a single `.zip` file that you can share or upload.
+*   **A. New Project:**
+    1.  Click **"New Project"**.
+    2.  Enter a name for your game (e.g., "Space Adventure").
+    3.  Choose a location on your computer to save it.
+    4.  The app will automatically create a complete project folder for you, including sub-folders for `images` and `sounds`, and the main `story.json` file.
 
+*   **B. Open Existing Project:**
+    1.  Click **"Open Project"**.
+    2.  Navigate to and select a project folder you previously created with the app.
+
+### 2. Create Your Story
+
+*   **Create Scenes:** Use the **round blue '+' button** in the "Story Map" header to create new scenes. Give them short, unique IDs (e.g., `start`, `cockpit`, `alien_encounter`).
+*   **Navigate:** Click any scene in the Story Map to load it into the editor. Right-click a scene for more options, like **"Set as Start Scene"**. Use the `[+]` and `[-]` toggles to collapse and expand branches.
+*   **Edit Content:** Write your narrative in the "Story Text" area.
+*   **Add Choices:** Click the **round blue '+' button** below the choices list. Write the text the player will see and select the target scene from the dropdown menu.
+
+### 3. Add Media (Image & Audio)
+
+You have two ways to add images, and one way to add audio:
+
+1.  **From Your Computer:**
+    *   Click the **yellow folder icon** next to the "Image" or "Audio" field.
+    *   Select any image or audio file from your computer.
+    *   Or you can drag & drop the files to the string widgets. 
+    *   The app automatically sets the correct path. The file will be copied into your project's `images/` or `sounds/` folder the next time you click **"Save Project"**.
+
+2.  **Using Generative AI (for Images):**
+    *   Write a descriptive prompt in the "Generative AI Image" text box.
+    *   Click the **purple Render button** (with the stars icon) to create an image.
+    *   Once you're happy with the result, click the **green Add button** (with the plus icon) to add it to your scene.
+
+### 4. Customize the Look & Feel
+
+1.  Click **"Menu"** and select **"Style Template Editor"**.
+2.  Use the controls to change your game's layout, fonts, colors, and even add background music.
+3.  You can see your changes by using the **Preview** or **Play** buttons. Your style settings are saved with your project.
+
+### 5. Save & Export
+
+It's crucial to understand the difference between saving and exporting:
+
+*   **Save Project:** Click the main **"Save Project"** button in the Menu. This saves all your work (story, choices, asset paths, styles) directly to the `story.json` file inside your project folder. **Save your project frequently!**
+
+*   **Export Standalone Game:** When your game is complete, click **"Menu"** -> **"Export Standalone Game"**. This packages your story, all required assets, and your custom theme into a single `.zip` file that you can share or upload anywhere. This is the final, playable product.
+
+  
 ---
 
-## The Story File Format (For LLM Instruction)
+
+## The Story File Format
 
 To generate stories for this editor, you must produce a valid JSON file adhering to the following structure.
 

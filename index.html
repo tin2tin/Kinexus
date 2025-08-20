@@ -11,36 +11,69 @@
             --primary-color: #4a78ad; --secondary-color: #6c757d; --light-bg: #121212;
             --dark-text: #e0e0e0; --border-color: #333333; --success-color: #5a8f66;
             --danger-color: #b85a66; --warning-color: #c7921a; --warning-text: #ffffff; /* Darker yellow, white text */
+            --purple-color: #8e63a9;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; height: 100vh; margin: 0; background-color: var(--light-bg); color: var(--dark-text); font-size: 16px; }
         /* Dark Scrollbars */
-        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar { width: 12px; height: 12px; }
         ::-webkit-scrollbar-track { background: #1e1e1e; }
         ::-webkit-scrollbar-thumb { background-color: #444; border-radius: 6px; border: 2px solid #1e1e1e; }
         ::-webkit-scrollbar-thumb:hover { background-color: #555; }
         html { scrollbar-color: #444 #1e1e1e; }
         /* Layout */
-        #tree-view-container { width: 350px; background-color: #1e1e1e; border-right: 1px solid var(--border-color); padding: 15px; display: flex; flex-direction: column; }
+        #tree-view-container { 
+            width: 350px; 
+            min-width: 250px; /* Prevent from becoming too small */
+            max-width: 800px; /* Prevent from becoming too large */
+            background-color: #1e1e1e; 
+            border-right: 1px solid var(--border-color); 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            resize: horizontal; /* Enable user resizing */
+            overflow: hidden; /* Hide the default browser resize handle overflow */
+        }
         #editor-container { flex-grow: 1; padding: 20px; overflow-y: auto; background-color: var(--light-bg); }
         #editor-container fieldset { border: none; padding: 0; margin: 0; }
         #editor-container fieldset:disabled { opacity: 0.5; pointer-events: none; }
-        #player-container { display: none; flex-grow: 1; overflow-y: auto; position: relative; }
+        #player-container { display: none; flex-grow: 1; overflow-y: auto; position: relative; justify-content: center; align-items: center; }
         /* Headers */
         h1, h2, h3 { border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; margin-top: 0; }
-        .header { display: flex; justify-content: space-between; align-items: center; }
+        .header { display: flex; justify-content: space-between; align-items: baseline; }
+        .header h1 { white-space: nowrap; }
         .header h3 { border-bottom: none; } /* Specificity for choice header */
         #main-title-dirty-indicator { color: var(--danger-color); font-size: 0.7em; margin-left: 5px; display: none; }
         /* Tree View */
         hr { border: none; border-top: 1px solid var(--border-color); margin: 15px 0; }
-        #tree-view { list-style-type: none; padding-left: 0; flex-grow: 1; overflow-y: auto; }
-        #tree-view ul { list-style-type: none; padding-left: 20px; border-left: 1px solid #444; }
+        #tree-view { list-style-type: none; padding-left: 0; flex-grow: 1; overflow: auto; min-height: 100px; }
+        #tree-view > ul { display: table; width: 100%; list-style-type: none; padding-left: 0; }
+        #tree-view ul ul { list-style-type: none; padding-left: 20px; border-left: 1px solid #444; }
         #tree-view li { margin-top: 5px; color: var(--dark-text); }
-        .scene-node { cursor: pointer; padding: 5px 8px; border-radius: 4px; display: flex; align-items: center; gap: 6px; }
+        .scene-node { 
+            cursor: pointer; 
+            padding: 5px 8px; 
+            border-radius: 4px; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
         .scene-node:hover { background-color: #333333; }
         .scene-node.active { background-color: var(--primary-color); color: white; font-weight: bold; }
-        .scene-node.is-start::before { content: '▶'; font-size: 0.8em; color: var(--success-color); }
-        .scene-node.active.is-start::before { color: white; }
-        .tree-toggle { font-family: monospace; width: 20px; text-align: center; border-radius: 4px; background: #333333; user-select: none; color: var(--dark-text); }
+        .scene-node-text { white-space: nowrap; }
+        .scene-node-icons { display: flex; gap: 4px; align-items: center; }
+        .scene-node-icons svg { width: 14px; height: 14px; flex-shrink: 0; }
+        .scene-node-icons .icon-start { fill: var(--success-color); }
+        .scene-node-icons .icon-image { fill: #8ab4f8; } /* Light blue */
+        .scene-node-icons .icon-sound { fill: #fdd663; } /* Yellow */
+        .scene-node-icons .icon-deadend { fill: var(--danger-color); }
+        .scene-node-icons .icon-orphan { fill: var(--warning-color); }
+        .scene-node.active .scene-node-icons svg { fill: white; }
+        .choice-node { list-style-type: none; position: relative; padding: 3px 0 3px 25px; color: #a0a0a0; font-style: italic; font-size: 0.9em; }
+        .choice-node::before { content: ''; position: absolute; top: -10px; left: 5px; width: 15px; height: 18px; border-bottom: 1px solid #444; border-left: 1px solid #444; border-radius: 0 0 0 5px; }
+        .choice-node-text { white-space: nowrap; }
+        .tree-toggle { font-family: monospace; width: 20px; text-align: center; border-radius: 4px; background: #333333; user-select: none; color: var(--dark-text); flex-shrink: 0; }
         .scene-node.active .tree-toggle { background: #ffffff; color: var(--primary-color); }
         .tree-toggle.empty { opacity: 0; cursor: default; }
         /* Buttons */
@@ -55,21 +88,25 @@
         .btn-warning { background-color: var(--warning-color); color: var(--warning-text); }
         .btn-danger { background-color: var(--danger-color); }
         .btn-secondary { background-color: var(--secondary-color); }
+        .btn-purple { background-color: var(--purple-color); }
         .file-icon-btn { padding: 8px; min-width: 40px; }
+        .btn-round { border-radius: 50%; width: 36px; height: 36px; padding: 0; font-size: 1.5em; line-height: 36px; flex-shrink: 0; }
         #image-file-input, #sound-file-input { display: none; }
         /* Editor Panel */
         .form-group { margin-bottom: 15px; }
         .form-group.inline { display: flex; align-items: center; gap: 10px; }
         .form-group.inline input, .form-group.inline select { flex-grow: 1; }
         label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input[type="text"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #444444; border-radius: 4px; font-size: 1em; background-color: #1e1e1e; color: var(--dark-text); }
+        input[type="text"], input[type="search"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #444444; border-radius: 4px; font-size: 1em; background-color: #1e1e1e; color: var(--dark-text); }
         input[type="text"]:disabled { background-color: #333333; cursor: not-allowed; }
         textarea { height: 100px; resize: vertical; }
+        .media-row { display: flex; gap: 20px; align-items: stretch; }
+        .media-row > .form-group { flex: 1; }
         /* AI Image Generator */
-        #ai-image-generator { border: 1px solid var(--border-color); padding: 10px; border-radius: 4px; margin-top: 5px; display: flex; gap: 10px; align-items: center; }
-        #ai-image-preview { width: 128px; height: 128px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; }
+        #ai-image-generator { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
+        #ai-image-preview { width: 128px; height: 128px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; position: relative; }
         #ai-image-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        #ai-image-controls { display: flex; gap: 10px; align-items: center; width: 100%; }
+        #ai-image-controls { display: flex; gap: 10px; align-items: center; flex-grow: 1; }
         /* Modal Styles */
         .modal { display: none; opacity: 0; visibility: hidden; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; transition: opacity 0.2s, visibility 0.2s; }
         .modal.visible { display: flex; opacity: 1; visibility: visible; }
@@ -78,6 +115,7 @@
         .modal-close:hover { color: #ffffff; }
         .modal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         .modal-grid label { display: flex; flex-direction: column; }
+        .modal-grid .grid-span-2 { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         input[type="color"] { width: 100%; height: 40px; padding: 0; border: none; cursor: pointer; }
         /* Style Editor Modal Specific Override */
         #style-editor-modal.visible { background-color: transparent; justify-content: flex-start; align-items: flex-start; pointer-events: none; }
@@ -98,8 +136,23 @@
         .layout-side-by-side { flex-direction: row; align-items: flex-start; } .layout-side-by-side #player-image-container { width: 40%; flex-shrink: 0; } .layout-side-by-side #player-content-container { width: 60%; }
         #stop-play-x { position: absolute; top: 10px; right: 10px; background: var(--danger-color); color: white; border: none; font-size: 1.5em; padding: 5px 10px; cursor: pointer; z-index: 10; }
         #restart-play { position: absolute; top: 10px; right: 60px; z-index: 10; }
-        #image-preview { width: 128px; height: 128px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; }
+        #image-preview { width: 128px; height: 128px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; position: relative; }
         #image-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        /* Fullscreen Viewer */
+        #fullscreen-viewer { flex-direction: column; }
+        #fullscreen-image { max-width: 90vw; max-height: 80vh; object-fit: contain; }
+        #fullscreen-minimize { margin-top: 15px; }
+        .thumbnail-fullscreen-icon {
+            position: absolute;
+            bottom: 4px; right: 4px; width: 24px; height: 24px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white; border-radius: 4px;
+            cursor: pointer; display: flex; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        #image-preview:hover .thumbnail-fullscreen-icon,
+        #ai-image-preview:hover .thumbnail-fullscreen-icon { opacity: 1; }
+        .thumbnail-fullscreen-icon svg { width: 16px; height: 16px; }
     </style>
 </head>
 <body>
@@ -107,67 +160,119 @@
 <!-- Main Editor UI -->
 <div id="tree-view-container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <button id="project-menu-btn" class="btn-primary">
+        <button id="project-menu-btn" class="btn-primary" title="Open Project Menu">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
             Menu
         </button>
-        <button id="preview-btn" class="btn-success">Preview</button>
     </div>
-    <hr>
-    <div class="header"><h2>Story Map</h2><button id="new-scene-btn" title="Create New Scene">+ Scene</button></div>
+    <div class="header"><h2>Story Map</h2><button id="new-scene-btn" class="btn-round" title="Create New Scene">+</button></div>
     <ul id="tree-view"></ul>
+    <div class="form-group inline" style="margin-top: 10px; margin-bottom: 0;">
+        <input type="search" id="scene-search-input" placeholder="Filter scenes...">
+        <button id="scene-search-btn" class="file-icon-btn" title="Search Scenes">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
+        </button>
+    </div>
 </div>
 
 <div id="editor-container">
     <fieldset id="editor-fieldset">
-        <div class="header"><h1>Scene Editor <span id="main-title-dirty-indicator">(unsaved)</span></h1><div class="btn-group"><button id="play-from-start-btn" class="btn-success">Play Start</button><button id="play-from-current-btn" class="btn-success">Play Current</button><button id="save-scene-btn" class="btn-warning">Save Changes</button><button id="delete-scene-btn" class="btn-danger">Delete Scene</button></div></div>
+        <div class="header">
+            <h1>Scene Editor <span id="main-title-dirty-indicator">(unsaved)</span></h1>
+            <div style="flex-grow: 1; display: flex; justify-content: center;">
+                <div class="form-group inline" id="scene-id-group" style="margin-bottom: 0; min-width: 250px;">
+                    <label for="scene-id" style="margin-bottom: 0; white-space: nowrap;">Scene ID</label>
+                    <input type="text" id="scene-id" disabled style="padding-top: 10px; padding-bottom: 10px;">
+                    <button id="rename-scene-btn" title="Rename Scene ID" style="padding: 10px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button id="preview-btn" class="btn-success" title="Preview Project in New Tab">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445z"/></svg>
+                </button>
+                <button id="play-from-start-btn" class="btn-success" title="Play from Start Scene">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                </button>
+                <button id="play-from-current-btn" class="btn-success" title="Play from Current Scene">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="transform: scaleX(1.2);"><path d="M10.804 8 5 4.633v6.734L10.804 8zM4 4v8h-1V4h1zm8 0v8h-1V4h1z"/></svg>
+                </button>
+                <button id="save-scene-btn" class="btn-warning" title="Save Changes to Memory">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.5 0h-2A1.5 1.5 0 0 0 1 1.5V15a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2.5A1.5 1.5 0 0 0 13.5 1h-2a.5.5 0 0 1 0-1h-2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H4.5zM3 14V2.5A.5.5 0 0 1 3.5 2H5v1.5A1.5 1.5 0 0 0 6.5 5h3A1.5 1.5 0 0 0 11 3.5V2h1.5a.5.5 0 0 1 .5.5V14a.5.5 0 0 1-.5.5H3.5a.5.5 0 0 1-.5-.5z"/></svg>
+                </button>
+                <button id="delete-scene-btn" class="btn-danger" title="Delete Current Scene">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
+                </button>
+            </div>
+        </div>
         <div id="editor-panel">
-            <div class="form-group inline"><label for="scene-id">Scene ID</label><input type="text" id="scene-id" disabled><button id="rename-scene-btn">Rename</button></div>
-            <div class="form-group"><label for="scene-text">Story Text</label><textarea id="scene-text"></textarea></div>
             
-            <div class="header"><h3>Choices</h3></div>
+            <div class="form-group"><label>Story Text</label><textarea id="scene-text"></textarea></div>
+            
+            <label>Choices</label>
             <div id="choices-container"></div>
             <div style="display: flex; justify-content: flex-end;">
-                <button id="add-choice-btn" style="width: auto; margin-top: 5px;">+ Choice</button>
+                <button id="add-choice-btn" class="btn-round" title="Add New Choice">+</button>
             </div>
             <hr>
-            
-            <div class="form-group">
-                <label for="scene-image">Image File Name</label>
-                <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
-                    <div id="image-preview"><span>Thumbnail</span></div>
-                    <div style="flex-grow: 1;">
-                        <div class="form-group inline" style="margin:0;">
-                            <input type="text" id="scene-image" placeholder="e.g., images/trench.jpg">
-                            <button id="select-image-btn" class="btn-secondary file-icon-btn" title="Select Image File">
+
+            <div class="media-row">
+                <div class="form-group">
+                    <label for="scene-image">Image</label>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                        <div id="image-preview">
+                            <span>Thumbnail</span>
+                            <div class="thumbnail-fullscreen-icon" title="View Fullscreen">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/></svg>
+                            </div>
+                        </div>
+                        <div style="flex-grow: 1;">
+                            <div class="form-group inline" style="margin:0;">
+                                <input type="text" id="scene-image" placeholder="e.g., images/trench.jpg">
+                                <button id="select-image-btn" class="btn-warning file-icon-btn" title="Select Image File">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="display: flex; flex-direction: column;">
+                    <label for="scene-sound">Audio</label>
+                    <div style="display: flex; align-items: center; flex-grow: 1;">
+                         <div class="form-group inline" style="margin:0; width: 100%;">
+                            <input type="text" id="scene-sound" placeholder="e.g., sounds/wind.mp3">
+                            <button id="select-sound-btn" class="btn-warning file-icon-btn" title="Select Sound File">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <hr>
 
             <div class="form-group">
-                <label for="scene-image-prompt">AI Image Prompt (via Pollinations.ai)</label>
+                <label for="scene-image-prompt">Generative AI Image (via Pollinations.ai)</label>
                 <div id="ai-image-generator">
-                    <div id="ai-image-preview"><span>Preview</span></div>
-                    <div id="ai-image-controls">
-                        <textarea id="scene-image-prompt" placeholder="A stunning vista of a fantasy castle at sunset, digital art" style="flex-grow: 1; height: 80px; resize: none; margin-top:0;"></textarea>
-                        <div class="btn-group" style="flex-direction: column; flex-shrink: 0; gap: 5px; margin-top: 0;">
-                            <button id="render-ai-image-btn" class="btn-secondary" style="margin-top:0;">Render</button>
-                            <button id="add-ai-image-btn" class="btn-success" style="margin-top:0;">Add to Scene</button>
+                    <div id="ai-image-preview">
+                        <span>Preview</span>
+                        <div class="thumbnail-fullscreen-icon" title="View Fullscreen">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/></svg>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="scene-sound">Ambience Sound</label>
-                <div class="form-group inline" style="margin:0;">
-                    <input type="text" id="scene-sound" placeholder="e.g., sounds/wind.mp3">
-                    <button id="select-sound-btn" class="btn-secondary file-icon-btn" title="Select Sound File">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
-                    </button>
+                    <div id="ai-image-controls">
+                        <textarea id="scene-image-prompt" placeholder="A stunning vista of a fantasy castle at sunset, digital art" style="flex-grow: 1; height: 128px; resize: none; margin-top:0;"></textarea>
+                        <div class="btn-group" style="flex-direction: column; flex-shrink: 0; gap: 5px; margin-top: 0; align-self: stretch; justify-content: center;">
+                            <button id="render-ai-image-btn" class="btn-purple" style="margin-top:0;" title="Render AI Image">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg>
+                            </button>
+                            <button id="add-ai-image-btn" class="btn-success" style="margin-top:0;" title="Add Rendered Image to Scene">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -179,14 +284,15 @@
 <input type="file" id="sound-file-input" accept="audio/*">
 
 <!-- Player and Context Menu -->
-<div id="player-container"><button id="stop-play-x" class="btn-danger">X</button><button id="restart-play" class="btn-secondary">Restart</button><div id="player-inner-container"><div id="player-image-container"><img id="player-image" src=""></div><div id="player-content-container"><div id="player-text"></div><div id="player-choices"></div></div></div><audio id="ambience-player" loop></audio><audio id="music-player" loop></audio></div>
+<div id="player-container"><button id="stop-play-x" class="btn-danger">X</button><button id="restart-play" class="btn-secondary" title="Restart Game"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg></button><div id="player-inner-container"><div id="player-image-container"><img id="player-image" src=""></div><div id="player-content-container"><div id="player-text"></div><div id="player-choices"></div></div></div><audio id="ambience-player" loop></audio><audio id="music-player" loop></audio></div>
 <div id="tree-context-menu"><button id="set-start-scene-btn">Set as Start Scene</button></div>
 
 <!-- Modals -->
-<div id="project-menu-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Menu</h2><div class="btn-group" style="flex-direction: column; gap: 15px; align-items: stretch;"><button id="new-project-btn" class="btn-secondary">New Project</button><button id="open-project-btn" class="btn-secondary">Open Project</button><button id="save-story-btn" class="btn-success">Save Project</button><hr style="border-color: #444;"><button id="export-project-btn" class="btn-warning">Export Playable Project</button><button id="export-data-btn" class="btn-warning">Export Data</button><hr style="border-color: #444;"><button id="style-editor-btn">Style Editor</button><button id="about-editor-btn">About Text Editor</button></div></div></div>
-<div id="about-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>About Text Editor</h2><p>This information will be displayed in the player's "About" section.</p><div class="form-group"><label for="creator-name">Creator Name</label><input type="text" id="creator-name" placeholder="Your name or alias"></div><div class="form-group"><label for="about-text">About Text</label><textarea id="about-text" placeholder="A brief description of your project."></textarea></div></div></div>
+<div id="project-menu-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Menu</h2><div class="btn-group" style="flex-direction: column; gap: 15px; align-items: stretch;"><button id="new-project-btn" class="btn-secondary">New Project</button><button id="open-project-btn" class="btn-secondary">Open Project</button><button id="save-story-btn" class="btn-success">Save Project</button><hr style="border-color: #444;"><button id="style-editor-btn">Style Template Editor</button><button id="about-editor-btn">Project Text Editor</button><hr style="border-color: #444;"><button id="export-data-btn" class="btn-warning">Export Data</button><button id="export-project-btn" class="btn-warning">Export Standalone Game</button></div></div></div>
+<div id="about-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Text Editor</h2><p>This information will be displayed in the player's "About" section.</p><div class="form-group"><label for="story-title">Story Title</label><input type="text" id="story-title" placeholder="Your story title"></div><div class="form-group"><label for="creator-name">Creator Name</label><input type="text" id="creator-name" placeholder="Your name or alias"></div><div class="form-group"><label for="about-text">About Text</label><textarea id="about-text" placeholder="A brief description of your project."></textarea></div></div></div>
 <div id="export-data-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Export Specific Data</h2><p>Select data to export as a JSON file.</p><button data-export-type="imagePrompts">Export All Image Prompts</button></div></div>
-<div id="style-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Visual Template Editor</h2><p>Changes are saved automatically.</p><div id="style-editor-grid" class="modal-grid"></div></div></div>
+<div id="style-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Style Template Editor</h2><div id="style-editor-grid" class="modal-grid"></div></div></div>
+<div id="fullscreen-viewer" class="modal"><img id="fullscreen-image" src=""><button id="fullscreen-minimize" class="btn-secondary">Minimize</button></div>
 
 <!-- JSZip Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -291,6 +397,7 @@ const App = {
         projectDirectoryHandle: null,
         pendingAssetCopies: new Map(),
         aiImageUrl: null,
+        orphanSceneIds: new Set(),
     },
     elements: {},
 
@@ -323,7 +430,7 @@ const App = {
             'tree-context-menu', 'main-title-dirty-indicator',
             'save-story-btn', 'player-image', 'player-text', 'player-choices', 'player-inner-container',
             'editor-fieldset', 'ai-image-preview', 'render-ai-image-btn', 'add-ai-image-btn', 'image-preview',
-            'creator-name', 'about-text'
+            'story-title', 'creator-name', 'about-text'
         ];
         ids.forEach(id => this.elements[id] = document.getElementById(id));
     },
@@ -343,9 +450,9 @@ const App = {
         document.getElementById('select-sound-btn').addEventListener('click', () => App.assets.selectFile('sounds', 'scene-sound'));
         this.elements['scene-image'].addEventListener('change', (e) => this.ui.updateImageThumbnail(e.target.value));
 
-        ['creator-name', 'about-text'].forEach(id => {
+        ['story-title', 'creator-name', 'about-text'].forEach(id => {
             this.elements[id].addEventListener('input', (e) => {
-                const key = id === 'creator-name' ? 'creatorName' : 'aboutText';
+                const key = id === 'story-title' ? 'title' : id === 'creator-name' ? 'creatorName' : 'aboutText';
                 this.state.storyData.meta[key] = e.target.value;
                 this.setDirty(true);
             });
@@ -373,6 +480,33 @@ const App = {
         document.getElementById('project-menu-btn').addEventListener('click', () => this.modals.show('project-menu-modal'));
 
         window.addEventListener('beforeunload', (e) => { if (this.state.isDirty) { e.preventDefault(); e.returnValue = ''; } });
+        
+        // Scene Search/Filter Functionality
+        const searchInput = document.getElementById('scene-search-input');
+        searchInput.addEventListener('input', () => {
+            this.tree.render(searchInput.value);
+        });
+        document.getElementById('scene-search-btn').addEventListener('click', () => {
+             this.tree.render(searchInput.value);
+        });
+
+        // Fullscreen Viewer Logic
+        document.querySelectorAll('.thumbnail-fullscreen-icon').forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const parentPreview = e.currentTarget.parentElement;
+                const img = parentPreview.querySelector('img');
+                if (img && img.src) {
+                    App.ui.showFullscreenImage(img.src);
+                }
+            });
+        });
+        document.getElementById('fullscreen-minimize').addEventListener('click', () => App.modals.hide(document.getElementById('fullscreen-viewer')));
+        document.getElementById('fullscreen-viewer').addEventListener('click', (e) => {
+            if (e.target.id === 'fullscreen-viewer') {
+                App.modals.hide(document.getElementById('fullscreen-viewer'));
+            }
+        });
     },
     
     setDirty(isDirty) {
@@ -385,6 +519,8 @@ const App = {
         enableEditor(isEnabled) {
             App.elements['editor-fieldset'].disabled = !isEnabled;
             document.getElementById('new-scene-btn').disabled = !isEnabled;
+            document.getElementById('scene-search-input').disabled = !isEnabled;
+            document.getElementById('scene-search-btn').disabled = !isEnabled;
             App.elements['save-story-btn'].disabled = !isEnabled;
             document.getElementById('export-project-btn').disabled = !isEnabled;
             document.getElementById('export-data-btn').disabled = !isEnabled;
@@ -393,10 +529,16 @@ const App = {
         },
         displayWelcomeMessage() {
             App.elements['tree-view'].innerHTML = `<li>Welcome! Please create a <strong>New Project</strong> or <strong>Open an existing one</strong> to begin.</li>`;
+            document.getElementById('scene-search-input').disabled = true;
+            document.getElementById('scene-search-btn').disabled = true;
         },
         updateAiImagePreview(url, message = '') {
             const preview = App.elements['ai-image-preview'];
+            // Keep the icon
+            const icon = preview.querySelector('.thumbnail-fullscreen-icon');
             preview.innerHTML = '';
+            if (icon) preview.appendChild(icon);
+
             if (url) {
                 const img = document.createElement('img');
                 img.src = url;
@@ -409,20 +551,38 @@ const App = {
         },
         async updateImageThumbnail(path) {
             const preview = App.elements['image-preview'];
-            preview.innerHTML = '<span>Thumbnail</span>';
+            const icon = preview.querySelector('.thumbnail-fullscreen-icon');
+            preview.innerHTML = '';
+            if(icon) preview.appendChild(icon);
+            const defaultSpan = document.createElement('span');
+            defaultSpan.textContent = 'Thumbnail';
+            preview.appendChild(defaultSpan);
+
             if (!path) return;
             try {
                 const url = await App.io.getAssetDataUrl(path);
                 if (url) {
                     preview.innerHTML = `<img src="${url}" alt="Asset thumbnail">`;
                 } else {
-                     preview.innerHTML = '<span>Invalid Path</span>';
+                     defaultSpan.textContent = 'Invalid Path';
                 }
             } catch (e) {
-                preview.innerHTML = '<span>Invalid Path</span>';
+                defaultSpan.textContent = 'Invalid Path';
                 console.warn('Thumbnail load failed:', e);
+            } finally {
+                if(icon) preview.appendChild(icon);
             }
-        }
+        },
+        updateMetaInputs() {
+            const meta = App.state.storyData.meta;
+            App.elements['story-title'].value = meta.title || '';
+            App.elements['creator-name'].value = meta.creatorName || '';
+            App.elements['about-text'].value = meta.aboutText || '';
+        },
+        showFullscreenImage(src) {
+            document.getElementById('fullscreen-image').src = src;
+            App.modals.show('fullscreen-viewer');
+        },
     },
 
     io: {
@@ -463,6 +623,7 @@ const App = {
                 App.tree.selectScene('start');
                 App.ui.enableEditor(true);
                 App.setDirty(false);
+                App.ui.updateMetaInputs();
                 alert(`Project '${projectName}' created successfully!`);
 
             } catch (err) { if (err.name !== 'AbortError') { console.error(err); alert('Could not create the project.'); } }
@@ -493,6 +654,7 @@ const App = {
                 App.tree.selectScene(storyData.meta.startSceneId || 'start');
                 App.ui.enableEditor(true);
                 App.setDirty(false);
+                App.ui.updateMetaInputs();
                 alert(`Project '${storyData.meta.title}' loaded successfully!`);
                 App.modals.hide(document.getElementById('project-menu-modal'));
 
@@ -770,15 +932,110 @@ const App = {
                     reader.readAsDataURL(file);
                 });
             } catch (e) { console.warn(`Asset not found: ${path}`); return null; }
+        },
+        exportData(type) {
+            let data = {};
+            let filename = `${type}.json`;
+            switch(type) {
+                case 'imagePrompts':
+                    Object.values(App.state.storyData.scenes).forEach(scene => {
+                        if (scene.imagePrompt) {
+                            data[scene.id] = scene.imagePrompt;
+                        }
+                    });
+                    break;
+                default:
+                    alert(`Unknown data export type: ${type}`);
+                    return;
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(a.href);
         }
     },
 
     tree: {
-        render() {
+        ICONS: {
+            start: `<svg class="icon-start" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>`,
+            image: `<svg class="icon-image" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>`,
+            sound: `<svg class="icon-sound" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`,
+            deadEnd: `<svg class="icon-deadend" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>`,
+            orphan: `<svg class="icon-orphan" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`,
+        },
+
+        findOrphans() {
+            const scenes = App.state.storyData.scenes;
+            const allSceneIds = new Set(Object.keys(scenes));
+            const reachableSceneIds = new Set();
+            const startSceneId = App.state.storyData.meta.startSceneId;
+            if (startSceneId && scenes[startSceneId]) {
+                const queue = [startSceneId];
+                while (queue.length > 0) {
+                    const current = queue.shift();
+                    if (reachableSceneIds.has(current)) continue;
+                    reachableSceneIds.add(current);
+                    const scene = scenes[current];
+                    if (scene && scene.choices) {
+                        scene.choices.forEach(choice => {
+                            if (choice.target && !reachableSceneIds.has(choice.target)) {
+                                queue.push(choice.target);
+                            }
+                        });
+                    }
+                }
+            }
+            App.state.orphanSceneIds.clear();
+            allSceneIds.forEach(id => {
+                if (!reachableSceneIds.has(id)) {
+                    App.state.orphanSceneIds.add(id);
+                }
+            });
+        },
+
+        render(filterTerm = '') {
+            this.findOrphans();
             const treeView = App.elements['tree-view'];
+            treeView.innerHTML = '';
+            
+            const searchTerm = filterTerm.trim().toLowerCase();
+
+            // --- Filtered View ---
+            if (searchTerm) {
+                const matchingIds = Object.keys(App.state.storyData.scenes || {}).filter(id => id.toLowerCase().includes(searchTerm));
+                
+                if (matchingIds.length > 0) {
+                    const list = document.createElement('ul');
+                    matchingIds.sort().forEach(id => {
+                        const li = document.createElement('li');
+                        const sceneNode = document.createElement('div');
+                        sceneNode.className = 'scene-node';
+                        if (id === App.state.currentSceneId) sceneNode.classList.add('active');
+                        
+                        const text = document.createElement('span');
+                        text.textContent = id;
+                        sceneNode.appendChild(text);
+
+                        sceneNode.onclick = () => {
+                            document.getElementById('scene-search-input').value = '';
+                            this.selectScene(id);
+                        };
+                        li.appendChild(sceneNode);
+                        list.appendChild(li);
+                    });
+                    treeView.appendChild(list);
+                } else {
+                    treeView.innerHTML = `<li>No results found.</li>`;
+                }
+                return;
+            }
+
+            // --- Default Hierarchical Tree View ---
             const collapsedState = {};
             treeView.querySelectorAll('li[data-scene-id]').forEach(li => { if (li.dataset.collapsed === 'true') collapsedState[li.dataset.sceneId] = true; });
-            treeView.innerHTML = '';
+
             const { startSceneId } = App.state.storyData.meta;
             if (startSceneId && App.state.storyData.scenes[startSceneId]) {
                 const rootUl = document.createElement('ul');
@@ -792,10 +1049,11 @@ const App = {
             const li = document.createElement('li');
             li.dataset.sceneId = sceneId;
             if (collapsedState[sceneId]) li.dataset.collapsed = 'true';
+            
             const sceneNode = document.createElement('div');
             sceneNode.className = 'scene-node';
             if (sceneId === App.state.currentSceneId) sceneNode.classList.add('active');
-            if (sceneId === App.state.storyData.meta.startSceneId) sceneNode.classList.add('is-start');
+            
             const toggle = document.createElement('span');
             toggle.className = 'tree-toggle';
             const hasChoices = scene.choices && scene.choices.length > 0;
@@ -803,8 +1061,24 @@ const App = {
                 toggle.textContent = li.dataset.collapsed === 'true' ? '[+]' : '[-]';
                 toggle.onclick = (e) => { e.stopPropagation(); li.dataset.collapsed = !(li.dataset.collapsed === 'true'); this.render(); };
             } else { toggle.classList.add('empty'); }
-            const text = document.createElement('span'); text.textContent = sceneId;
-            sceneNode.appendChild(toggle); sceneNode.appendChild(text);
+
+            const iconsDiv = document.createElement('div');
+            iconsDiv.className = 'scene-node-icons';
+
+            if (sceneId === App.state.storyData.meta.startSceneId) iconsDiv.innerHTML += this.ICONS.start;
+            if (scene.image) iconsDiv.innerHTML += this.ICONS.image;
+            if (scene.ambienceSound) iconsDiv.innerHTML += this.ICONS.sound;
+            if (!hasChoices) iconsDiv.innerHTML += this.ICONS.deadEnd;
+            if (App.state.orphanSceneIds.has(sceneId)) iconsDiv.innerHTML += this.ICONS.orphan;
+
+            const text = document.createElement('span'); 
+            text.className = 'scene-node-text';
+            text.textContent = sceneId;
+
+            sceneNode.appendChild(toggle); 
+            sceneNode.appendChild(iconsDiv);
+            sceneNode.appendChild(text);
+
             sceneNode.onclick = () => this.selectScene(sceneId);
             sceneNode.oncontextmenu = (e) => {
                 e.preventDefault(); App.state.contextSceneId = sceneId;
@@ -819,15 +1093,115 @@ const App = {
             if (hasChoices && li.dataset.collapsed !== 'true') {
                 const childUl = document.createElement('ul');
                 scene.choices.forEach(choice => {
-                    const choiceLi = document.createElement('li'); choiceLi.className = 'choice-node';
-                    choiceLi.textContent = `⤷ "${choice.text}" →`; childUl.appendChild(choiceLi);
+                    const choiceLi = document.createElement('li');
+                    choiceLi.className = 'choice-node';
+                    const choiceTextSpan = document.createElement('span');
+                    choiceTextSpan.className = 'choice-node-text';
+                    choiceTextSpan.textContent = `"${choice.text}"`;
+                    choiceLi.appendChild(choiceTextSpan);
+                    childUl.appendChild(choiceLi);
                     this.buildNode(choice.target, childUl, [...path, sceneId], collapsedState);
                 });
                 li.appendChild(childUl);
             }
             parentElement.appendChild(li);
         },
-        selectScene(sceneId) { if (!sceneId || !App.state.storyData.scenes[sceneId]) { console.error(`Attempted to select non-existent scene: ${sceneId}`); return; } App.editor.saveCurrentScene(false); if (App.state.currentSceneId === sceneId) return; App.state.currentSceneId = sceneId; this.render(); App.editor.render(); }
+        selectScene(sceneId) {
+            if (!sceneId || !App.state.storyData.scenes[sceneId]) {
+                console.error(`Attempted to select non-existent scene: ${sceneId}`);
+                return;
+            }
+            App.editor.saveCurrentScene(false);
+            const needsSelectionChange = App.state.currentSceneId !== sceneId;
+            if (needsSelectionChange) {
+                App.state.currentSceneId = sceneId;
+            }
+            
+            this.render(); // Always re-render to clear search and show the full tree.
+            
+            if (needsSelectionChange) {
+                App.editor.render();
+            }
+
+            // Use requestAnimationFrame to ensure the DOM has been updated before scrolling.
+            requestAnimationFrame(() => {
+                const activeNode = App.elements['tree-view'].querySelector('.scene-node.active');
+                if (activeNode) {
+                    activeNode.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                        inline: 'nearest'
+                    });
+                }
+            });
+        },
+        createNewScene() {
+            let newId = prompt("Enter a unique ID for the new scene:");
+            if (!newId) return;
+            while (App.state.storyData.scenes[newId]) {
+                newId = prompt(`Scene ID "${newId}" already exists. Please enter a different one:`);
+                if (!newId) return;
+            }
+            App.state.storyData.scenes[newId] = { id: newId, text: `This is the new scene '${newId}'.`, choices: [] };
+            App.setDirty(true);
+            this.render();
+            this.selectScene(newId);
+        },
+        renameScene() {
+            const oldId = App.state.currentSceneId;
+            if (!oldId) { alert("No scene selected to rename."); return; }
+            let newId = prompt("Enter the new ID for this scene:", oldId);
+            if (!newId || newId === oldId) return;
+            if (App.state.storyData.scenes[newId]) { alert(`Scene ID "${newId}" already exists.`); return; }
+
+            const sceneData = App.state.storyData.scenes[oldId];
+            sceneData.id = newId;
+            App.state.storyData.scenes[newId] = sceneData;
+            delete App.state.storyData.scenes[oldId];
+
+            Object.values(App.state.storyData.scenes).forEach(scene => {
+                if(scene.choices) {
+                    scene.choices.forEach(choice => {
+                        if (choice.target === oldId) choice.target = newId;
+                    });
+                }
+            });
+
+            if (App.state.storyData.meta.startSceneId === oldId) {
+                App.state.storyData.meta.startSceneId = newId;
+            }
+            
+            App.state.currentSceneId = newId;
+            App.setDirty(true);
+            this.render();
+            App.editor.render();
+        },
+        deleteCurrentScene() {
+            const sceneId = App.state.currentSceneId;
+            if (!sceneId) { alert("No scene selected to delete."); return; }
+            if (sceneId === App.state.storyData.meta.startSceneId) { alert("Cannot delete the start scene. Set another scene as the start scene first."); return; }
+            if (!confirm(`Are you sure you want to permanently delete scene "${sceneId}"? This cannot be undone.`)) return;
+
+            delete App.state.storyData.scenes[sceneId];
+            Object.values(App.state.storyData.scenes).forEach(scene => {
+                if(scene.choices) {
+                     scene.choices.forEach(choice => {
+                        if (choice.target === sceneId) choice.target = ''; // Mark as broken link
+                    });
+                }
+            });
+            
+            App.state.currentSceneId = null;
+            App.setDirty(true);
+            this.selectScene(App.state.storyData.meta.startSceneId);
+        },
+        setAsStartScene() {
+            if (App.state.contextSceneId) {
+                App.state.storyData.meta.startSceneId = App.state.contextSceneId;
+                App.setDirty(true);
+                App.tree.render();
+            }
+        }
     },
 
     editor: {
@@ -861,7 +1235,10 @@ const App = {
             scene.text = App.elements['scene-text'].value; 
             scene.choices = Array.from(App.elements['choices-container'].querySelectorAll('.choice-group')).map(div => ({ text: div.querySelector('input[type=text]').value, target: div.querySelector('select').value })).filter(c => c.text && c.target); 
             App.setDirty(true); 
-            App.tree.render(); 
+            // Only re-render the tree if the search is not active
+            if (!document.getElementById('scene-search-input').value) {
+                App.tree.render(); 
+            }
             if(showAlert) { console.log(`Scene '${id}' changes saved to memory.`); }
          },
         addChoiceToDOM(choice = { text: '', target: '' }) { 
@@ -878,15 +1255,19 @@ const App = {
             targetSelect.appendChild(defaultOption); 
             Object.keys(App.state.storyData.scenes || {}).sort().forEach(id => { const option = document.createElement('option'); option.value = id; option.textContent = id; if (id === choice.target) option.selected = true; targetSelect.appendChild(option); }); 
             const goToBtn = document.createElement('button');
-            goToBtn.textContent = 'Go To';
-            goToBtn.className = 'btn-secondary';
-            goToBtn.style.padding = '5px 8px';
-            goToBtn.style.fontSize = '0.8em';
+            goToBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>`;
+            goToBtn.className = 'btn-success';
+            goToBtn.title = "Go to selected scene";
+            goToBtn.style.padding = '8px';
+            goToBtn.style.lineHeight = 1;
             goToBtn.onclick = () => { const targetScene = targetSelect.value; if (targetScene) App.tree.selectScene(targetScene); };
             const deleteBtn = document.createElement('button'); 
-            deleteBtn.textContent = 'X'; 
+            deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>`;
             deleteBtn.className = 'btn-danger'; 
-            deleteBtn.style.flexShrink = '0'; 
+            deleteBtn.title = "Delete Choice";
+            deleteBtn.style.flexShrink = '0';
+            deleteBtn.style.padding = '8px';
+            deleteBtn.style.lineHeight = 1;
             deleteBtn.onclick = () => choiceDiv.remove(); 
             choiceDiv.appendChild(textInput); 
             choiceDiv.appendChild(targetSelect); 
@@ -916,13 +1297,14 @@ const App = {
             App.setDirty(true);
             event.target.value = '';
         },
-        renderPollinationImage() { const promptText = App.elements['scene-image-prompt'].value.trim(); if (!promptText) { alert("Please enter a prompt first."); return; } const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}`; App.state.aiImageUrl = url; App.ui.updateAiImagePreview(null, 'Rendering...'); const tempImg = new Image(); tempImg.onload = () => App.ui.updateAiImagePreview(url); tempImg.onerror = () => { App.ui.updateAiImagePreview(null, 'Render failed.'); App.state.aiImageUrl = null; }; tempImg.src = url; },
+        renderPollinationImage() { const promptText = App.elements['scene-image-prompt'].value.trim(); if (!promptText) { alert("Please enter a prompt first."); return; } const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + "?model=flux&nologo=true"; App.state.aiImageUrl = url; App.ui.updateAiImagePreview(null, 'Rendering...'); const tempImg = new Image(); tempImg.onload = () => App.ui.updateAiImagePreview(url); tempImg.onerror = () => { App.ui.updateAiImagePreview(null, 'Render failed.'); App.state.aiImageUrl = null; }; tempImg.src = url; },
         async addPollinationImageToScene() { if (!App.state.aiImageUrl) { alert("Please render an image first."); return; } App.ui.updateAiImagePreview(null, 'Downloading...'); try { const response = await fetch(App.state.aiImageUrl); if (!response.ok) throw new Error(`Fetch failed: ${response.statusText}`); const imageBlob = await response.blob(); const filename = `${App.state.currentSceneId || 'image'}_${Date.now()}.jpg`; const destinationPath = `images/${filename}`; App.state.pendingAssetCopies.set(destinationPath, imageBlob); App.elements['scene-image'].value = destinationPath; App.ui.updateImageThumbnail(destinationPath); App.setDirty(true); console.log(`Image added to scene. Remember to 'Save Project' to copy the file.`); } catch (err) { console.error("Error adding AI image:", err); alert("Could not download or save the image."); App.ui.updateAiImagePreview(App.state.aiImageUrl); } }
     },
 
     player: {
         async play(sceneId) {
             if (!sceneId || !App.state.storyData.scenes[sceneId]) { alert("Cannot play scene. Please select a valid scene to start from."); return; }
+            App.elements['player-inner-container'].style.height = 'auto'; // Reset height
             App.elements['editor-container'].style.display = 'none';
             App.elements['player-container'].style.display = 'flex';
             await App.styles.applyToPlayer();
@@ -935,7 +1317,7 @@ const App = {
             if (activeNode) { activeNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
 
             const scene = App.state.storyData.scenes[sceneId];
-            const { 'player-image': img, 'player-text': text, 'player-choices': choices, 'ambience-player': audio } = App.elements;
+            const { 'player-image': img, 'player-text': text, 'player-choices': choices, 'ambience-player': audio, 'player-inner-container': innerContainer } = App.elements;
             if (!scene) { text.textContent = `Error: Scene "${sceneId}" not found.`; return; }
             
             text.textContent = scene.text;
@@ -946,6 +1328,11 @@ const App = {
             if (soundUrl) { if(audio.src !== soundUrl) audio.src = soundUrl; audio.play().catch(e => console.warn("Audio autoplay was blocked by the browser.")); } else { audio.pause(); }
             choices.innerHTML = '';
             (scene.choices || []).forEach(choice => { const button = document.createElement('button'); button.className = 'choice-btn'; button.textContent = choice.text; button.onclick = () => this.renderScene(choice.target); choices.appendChild(button); });
+            
+            // Adjust height after rendering content
+            requestAnimationFrame(() => {
+                innerContainer.style.height = 'auto';
+            });
         },
         stop() {
             App.elements['editor-container'].style.display = 'block';
@@ -966,16 +1353,18 @@ const App = {
             grid.innerHTML = `
                 <label>Layout <select id="style-layout"><option value="layout-top-down">Image on Top</option><option value="layout-side-by-side">Image on Side</option></select></label>
                 <label>Font Family <select id="style-font-family"><option value="sans-serif">Sans-Serif</option><option value="serif">Serif</option><option value="monospace">Monospace</option></select></label>
-                <label>Font Size (px) <input type="number" id="style-font-size" min="8" max="48" step="1"></label>
+                <div class="grid-span-2">
+                    <label>Font Size (px) <input type="number" id="style-font-size" min="8" max="48" step="1"></label>
+                    <label>Game Padding (px) <input type="number" id="style-padding" min="0"></label>
+                </div>
                 <label>Background Color <input type="color" id="style-bg-color"></label>
                 <label>Text Color <input type="color" id="style-text-color"></label>
                 <label>Button Color <input type="color" id="style-btn-color"></label>
                 <label>Button Hover Color <input type="color" id="style-btn-hover-color"></label>
                 <label>Button Text Color <input type="color" id="style-btn-text-color"></label>
-                <label>Game Padding (px) <input type="number" id="style-padding" min="0"></label>
-                <label>Background Music <div class="form-group inline" style="margin:0;"><input type="text" id="style-music-path" class="path-input" data-asset-type="sounds" placeholder="sounds/music.mp3"><button class="btn-secondary file-icon-btn">📁</button></div></label>
-                <label>Screen BG Image <div class="form-group inline" style="margin:0;"><input type="text" id="style-screen-bg-image" class="path-input" data-asset-type="images" placeholder="images/bg.jpg"><button class="btn-secondary file-icon-btn">📁</button></div></label>
-                <label>Container BG Image <div class="form-group inline" style="margin:0;"><input type="text" id="style-container-bg-image" class="path-input" data-asset-type="images" placeholder="images/container-bg.png"><button class="btn-secondary file-icon-btn">📁</button></div></label>
+                <label>Background Music <div class="form-group inline" style="margin:0;"><input type="text" id="style-music-path" class="path-input" data-asset-type="sounds" placeholder="sounds/music.mp3"><button class="btn-warning file-icon-btn" title="Select Music File">📁</button></div></label>
+                <label>Screen BG Image <div class="form-group inline" style="margin:0;"><input type="text" id="style-screen-bg-image" class="path-input" data-asset-type="images" placeholder="images/bg.jpg"><button class="btn-warning file-icon-btn" title="Select Screen Background">📁</button></div></label>
+                <label>Container BG Image <div class="form-group inline" style="margin:0;"><input type="text" id="style-container-bg-image" class="path-input" data-asset-type="images" placeholder="images/container-bg.png"><button class="btn-warning file-icon-btn" title="Select Container Background">📁</button></div></label>
             `;
             
             Object.keys(this.getDefaults()).forEach(key => { 

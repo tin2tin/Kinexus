@@ -2,8 +2,10 @@
 
 CYOA Studio is a powerful, single-file, zero-installation tool for creating, styling, and exporting choice-based narrative games. It runs entirely in your web browser, providing a complete workflow from writing your story to packaging a distributable ZIP file for platforms like [itch.io](https://itch.io/).
 
-<img width="1919" height="957" alt="image" src="https://github.com/user-attachments/assets/279f6a85-7f70-49c7-80ff-d4564b802b56" />
-<img width="1919" height="959" alt="image" src="https://github.com/user-attachments/assets/25855fd8-cb0e-475e-a2d3-8694923da5c3" />
+<img width="1919" height="959" alt="image" src="https://github.com/user-attachments/assets/29d32050-1668-4c53-8f1a-7f9ba144128c" />
+<img width="1919" height="957" alt="image" src="https://github.com/user-attachments/assets/5e5bf8e6-bc71-4394-9cdb-ab7e2129b19c" />
+<img width="1919" height="960" alt="image" src="https://github.com/user-attachments/assets/981509d8-acf2-4e0b-9c41-eb0676853fb9" />
+<img width="1919" height="958" alt="image" src="https://github.com/user-attachments/assets/3b60724b-92e2-49ab-b864-64edc3830c5e" />
 
 ## Try It
 

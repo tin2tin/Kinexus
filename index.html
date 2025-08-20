@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,22 +7,31 @@
     <title>CYOA Studio Pro</title>
     <style>
         :root {
-            --primary-color: #0d6efd; --secondary-color: #6c757d; --light-bg: #121212;
-            --dark-text: #e0e0e0; --border-color: #333333; --success-color: #28a745;
-            --danger-color: #dc3545; --warning-color: #ffc107; --warning-text: #212529;
+            /* Desaturated colors as requested */
+            --primary-color: #4a78ad; --secondary-color: #6c757d; --light-bg: #121212;
+            --dark-text: #e0e0e0; --border-color: #333333; --success-color: #5a8f66;
+            --danger-color: #b85a66; --warning-color: #c7921a; --warning-text: #ffffff; /* Darker yellow, white text */
         }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; height: 100vh; margin: 0; background-color: var(--light-bg); color: var(--dark-text); font-size: 16px; }
+        /* Dark Scrollbars */
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { background: #1e1e1e; }
+        ::-webkit-scrollbar-thumb { background-color: #444; border-radius: 6px; border: 2px solid #1e1e1e; }
+        ::-webkit-scrollbar-thumb:hover { background-color: #555; }
+        html { scrollbar-color: #444 #1e1e1e; }
         /* Layout */
         #tree-view-container { width: 350px; background-color: #1e1e1e; border-right: 1px solid var(--border-color); padding: 15px; display: flex; flex-direction: column; }
         #editor-container { flex-grow: 1; padding: 20px; overflow-y: auto; background-color: var(--light-bg); }
         #editor-container fieldset { border: none; padding: 0; margin: 0; }
         #editor-container fieldset:disabled { opacity: 0.5; pointer-events: none; }
-        #player-container { display: none; flex-grow: 1; padding: var(--padding, 20px); overflow-y: auto; background-color: var(--bg-color, #212529); color: var(--text-color, #f8f9fa); font-family: var(--font-family, sans-serif); }
+        #player-container { display: none; flex-grow: 1; overflow-y: auto; position: relative; }
         /* Headers */
         h1, h2, h3 { border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; margin-top: 0; }
         .header { display: flex; justify-content: space-between; align-items: center; }
+        .header h3 { border-bottom: none; } /* Specificity for choice header */
         #main-title-dirty-indicator { color: var(--danger-color); font-size: 0.7em; margin-left: 5px; display: none; }
         /* Tree View */
+        hr { border: none; border-top: 1px solid var(--border-color); margin: 15px 0; }
         #tree-view { list-style-type: none; padding-left: 0; flex-grow: 1; overflow-y: auto; }
         #tree-view ul { list-style-type: none; padding-left: 20px; border-left: 1px solid #444; }
         #tree-view li { margin-top: 5px; color: var(--dark-text); }
@@ -34,21 +44,23 @@
         .scene-node.active .tree-toggle { background: #ffffff; color: var(--primary-color); }
         .tree-toggle.empty { opacity: 0; cursor: default; }
         /* Buttons */
-        button { padding: 10px 15px; margin-top: 10px; background-color: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; transition: background-color 0.2s; }
+        button { padding: 10px 15px; background-color: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; transition: background-color 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .form-group.inline button { margin-top: 0; } /* Alignment fix */
         button:disabled { background-color: var(--secondary-color); cursor: not-allowed; }
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
         .btn-group button { margin-top: 0; }
         .btn-success { background-color: var(--success-color); }
         .btn-success.dirty { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); } 100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(90, 143, 102, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(90, 143, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(90, 143, 102, 0); } }
         .btn-warning { background-color: var(--warning-color); color: var(--warning-text); }
         .btn-danger { background-color: var(--danger-color); }
         .btn-secondary { background-color: var(--secondary-color); }
+        .file-icon-btn { padding: 8px; min-width: 40px; }
         #image-file-input, #sound-file-input { display: none; }
         /* Editor Panel */
         .form-group { margin-bottom: 15px; }
         .form-group.inline { display: flex; align-items: center; gap: 10px; }
-        .form-group.inline input { flex-grow: 1; }
+        .form-group.inline input, .form-group.inline select { flex-grow: 1; }
         label { display: block; font-weight: bold; margin-bottom: 5px; }
         input[type="text"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #444444; border-radius: 4px; font-size: 1em; background-color: #1e1e1e; color: var(--dark-text); }
         input[type="text"]:disabled { background-color: #333333; cursor: not-allowed; }
@@ -57,480 +69,1042 @@
         #ai-image-generator { border: 1px solid var(--border-color); padding: 10px; border-radius: 4px; margin-top: 5px; display: flex; gap: 10px; align-items: center; }
         #ai-image-preview { width: 128px; height: 128px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; }
         #ai-image-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        #ai-image-controls { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        #ai-image-controls { display: flex; gap: 10px; align-items: center; width: 100%; }
         /* Modal Styles */
-        .modal { display: flex; opacity: 0; visibility: hidden; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; transition: opacity 0.2s, visibility 0.2s; }
-        .modal.visible { opacity: 1; visibility: visible; }
+        .modal { display: none; opacity: 0; visibility: hidden; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; transition: opacity 0.2s, visibility 0.2s; }
+        .modal.visible { display: flex; opacity: 1; visibility: visible; }
         .modal-content { position: relative; background-color: #1e1e1e; padding: 20px; border-radius: 8px; width: 80%; max-width: 600px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); color: var(--dark-text); }
         .modal-close { position: absolute; top: 10px; right: 15px; font-size: 1.5em; font-weight: bold; cursor: pointer; color: #aaaaaa; }
         .modal-close:hover { color: #ffffff; }
         .modal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         .modal-grid label { display: flex; flex-direction: column; }
         input[type="color"] { width: 100%; height: 40px; padding: 0; border: none; cursor: pointer; }
+        /* Style Editor Modal Specific Override */
+        #style-editor-modal.visible { background-color: transparent; justify-content: flex-start; align-items: flex-start; pointer-events: none; }
+        #style-editor-modal .modal-content { pointer-events: auto; margin: 20px; max-width: 450px;}
         /* Tree Context Menu */
         #tree-context-menu { display: none; position: absolute; background-color: #1e1e1e; border: 1px solid #333333; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); border-radius: 4px; padding: 5px 0; z-index: 1001; }
         #tree-context-menu button { width: 100%; text-align: left; background: none; color: var(--dark-text); margin: 0; padding: 8px 15px; border-radius: 0; }
         #tree-context-menu button:hover { background-color: var(--primary-color); color: white; }
         /* Player Styles */
-        #player-inner-container { width: 100%; max-width: 800px; padding: var(--padding); border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); display:flex; gap: 20px; margin: 0 auto; }
+        #player-container { background-size: cover; background-position: center; background-attachment: fixed; background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); font-size: var(--font-size); }
+        #player-inner-container { width: 100%; max-width: 800px; padding: var(--padding); border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); display:flex; gap: 20px; margin: 20px auto; background-size: cover; background-position: center; background-color: rgba(0,0,0,0.15);}
         #player-image { max-width: 100%; max-height: 50vh; display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
         #player-text { white-space: pre-wrap; margin-bottom: 20px; }
-        #player-choices button { width: 100%; text-align: left; padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; transition: background-color .2s, transform .1s, border-color .2s; background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid var(--btn-color); }
-        #player-choices button:hover { transform: translateY(-2px); background-color: var(--btn-hover-color); border-color: var(--btn-hover-color); }
+        #player-choices { display: flex; flex-direction: column; gap: 12px; }
+        #player-choices .choice-btn { width: 100%; text-align: left; padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; transition: background-color .2s, transform .1s, border-color .2s; background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid var(--btn-color); }
+        #player-choices .choice-btn:hover { transform: translateY(-2px); background-color: var(--btn-hover-color); border-color: var(--btn-hover-color); }
         .layout-top-down { flex-direction: column; } .layout-top-down #player-image-container { width: 100%; margin-bottom: 20px; } .layout-top-down #player-image { width: 100%; height: auto; }
         .layout-side-by-side { flex-direction: row; align-items: flex-start; } .layout-side-by-side #player-image-container { width: 40%; flex-shrink: 0; } .layout-side-by-side #player-content-container { width: 60%; }
+        #stop-play-x { position: absolute; top: 10px; right: 10px; background: var(--danger-color); color: white; border: none; font-size: 1.5em; padding: 5px 10px; cursor: pointer; z-index: 10; }
+        #restart-play { position: absolute; top: 10px; right: 60px; z-index: 10; }
+        #image-preview { width: 128px; height: 128px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; }
+        #image-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
     </style>
 </head>
 <body>
 
-    <!-- Main Editor UI -->
-    <div id="tree-view-container">
-        <div class="header"><h2>Story Map</h2><button id="new-scene-btn" title="Create New Scene">+</button></div>
-        <ul id="tree-view"></ul>
-        <div class="btn-group" style="flex-direction: column; gap: 15px; margin-top: auto;">
-             <div class="btn-group">
-                <button id="new-project-btn" class="btn-secondary">New Project</button>
-                <button id="open-project-btn" class="btn-secondary">Open Project</button>
-            </div>
-            <button id="save-story-btn" class="btn-success">Save Project</button>
-            <div class="btn-group"><button id="export-data-btn">Export Data</button><button id="style-editor-btn">Style Editor</button></div>
-            <button id="export-project-btn" class="btn-warning">Export Playable Project</button>
-        </div>
+<!-- Main Editor UI -->
+<div id="tree-view-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <button id="project-menu-btn" class="btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
+            Menu
+        </button>
+        <button id="preview-btn" class="btn-success">Preview</button>
     </div>
+    <hr>
+    <div class="header"><h2>Story Map</h2><button id="new-scene-btn" title="Create New Scene">+ Scene</button></div>
+    <ul id="tree-view"></ul>
+</div>
 
-    <div id="editor-container">
-        <fieldset id="editor-fieldset">
-            <div class="header"><h1>Scene Editor <span id="main-title-dirty-indicator">(unsaved)</span></h1><div class="btn-group"><button id="play-from-start-btn" class="btn-success">Play Start</button><button id="play-from-current-btn" class="btn-success">Play Current</button></div></div>
-            <div id="editor-panel">
-                <div class="form-group inline"><label for="scene-id">Scene ID</label><input type="text" id="scene-id" disabled><button id="rename-scene-btn">Rename</button></div>
-                <div class="form-group"><label for="scene-image">Image Filename</label><div class="form-group inline" style="margin:0;"><input type="text" id="scene-image" placeholder="e.g., images/trench.jpg"><button id="select-image-btn" class="btn-secondary">Select...</button></div></div>
-                <div class="form-group"><label for="scene-sound">Ambience Sound</label><div class="form-group inline" style="margin:0;"><input type="text" id="scene-sound" placeholder="e.g., sounds/wind.mp3"><button id="select-sound-btn" class="btn-secondary">Select...</button></div></div>
-                <div class="form-group">
-                    <label for="scene-image-prompt">AI Image Prompt (via Pollinations.ai)</label>
-                    <div id="ai-image-generator">
-                        <div id="ai-image-preview"><span>Preview</span></div>
-                        <div id="ai-image-controls">
-                            <textarea id="scene-image-prompt" placeholder="A stunning vista of a fantasy castle at sunset, digital art"></textarea>
-                            <div class="btn-group">
-                                <button id="render-ai-image-btn" class="btn-secondary">Render</button>
-                                <button id="add-ai-image-btn" class="btn-success">Add to Scene</button>
-                            </div>
+<div id="editor-container">
+    <fieldset id="editor-fieldset">
+        <div class="header"><h1>Scene Editor <span id="main-title-dirty-indicator">(unsaved)</span></h1><div class="btn-group"><button id="play-from-start-btn" class="btn-success">Play Start</button><button id="play-from-current-btn" class="btn-success">Play Current</button><button id="save-scene-btn" class="btn-warning">Save Changes</button><button id="delete-scene-btn" class="btn-danger">Delete Scene</button></div></div>
+        <div id="editor-panel">
+            <div class="form-group inline"><label for="scene-id">Scene ID</label><input type="text" id="scene-id" disabled><button id="rename-scene-btn">Rename</button></div>
+            <div class="form-group"><label for="scene-text">Story Text</label><textarea id="scene-text"></textarea></div>
+            
+            <div class="header"><h3>Choices</h3></div>
+            <div id="choices-container"></div>
+            <div style="display: flex; justify-content: flex-end;">
+                <button id="add-choice-btn" style="width: auto; margin-top: 5px;">+ Choice</button>
+            </div>
+            <hr>
+            
+            <div class="form-group">
+                <label for="scene-image">Image File Name</label>
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                    <div id="image-preview"><span>Thumbnail</span></div>
+                    <div style="flex-grow: 1;">
+                        <div class="form-group inline" style="margin:0;">
+                            <input type="text" id="scene-image" placeholder="e.g., images/trench.jpg">
+                            <button id="select-image-btn" class="btn-secondary file-icon-btn" title="Select Image File">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
+                            </button>
                         </div>
                     </div>
                 </div>
-                <div class="form-group"><label for="scene-text">Story Text</label><textarea id="scene-text"></textarea></div>
-                <h3>Choices</h3><div id="choices-container"></div><button id="add-choice-btn" style="width: auto;">+ Add Choice</button><hr>
-                <div class="btn-group" style="justify-content: space-between; display: flex;"><button id="save-scene-btn" class="btn-warning">Save Changes</button><button id="delete-scene-btn" class="btn-danger">Delete Scene</button></div>
             </div>
-        </fieldset>
-    </div>
 
-    <!-- Hidden Inputs for File Selection -->
-    <input type="file" id="image-file-input" accept="image/*">
-    <input type="file" id="sound-file-input" accept="audio/*">
-    
-    <!-- Player and Context Menu -->
-    <div id="player-container"><div id="player-inner-container"><div id="player-image-container"><img id="player-image" src=""></div><div id="player-content-container"><div id="player-text"></div><div id="player-choices"></div></div></div><audio id="ambience-player" loop></audio><hr><button id="stop-play-btn" class="btn-danger" style="width: 100%;">Stop Play & Return to Editor</button></div>
-    <div id="tree-context-menu"><button id="set-start-scene-btn">Set as Start Scene</button></div>
-    
-    <!-- Modals -->
-    <div id="export-data-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Export Specific Data</h2><p>Select data to export as a JSON file.</p><button data-export-type="imagePrompts">Export All Image Prompts</button></div></div>
-    <div id="style-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Visual Template Editor</h2><p>Changes are saved automatically.</p><div id="style-editor-grid" class="modal-grid"></div></div></div>
+            <div class="form-group">
+                <label for="scene-image-prompt">AI Image Prompt (via Pollinations.ai)</label>
+                <div id="ai-image-generator">
+                    <div id="ai-image-preview"><span>Preview</span></div>
+                    <div id="ai-image-controls">
+                        <textarea id="scene-image-prompt" placeholder="A stunning vista of a fantasy castle at sunset, digital art" style="flex-grow: 1; height: 80px; resize: none; margin-top:0;"></textarea>
+                        <div class="btn-group" style="flex-direction: column; flex-shrink: 0; gap: 5px; margin-top: 0;">
+                            <button id="render-ai-image-btn" class="btn-secondary" style="margin-top:0;">Render</button>
+                            <button id="add-ai-image-btn" class="btn-success" style="margin-top:0;">Add to Scene</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- JSZip Library -->
-    <script>!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):t.JSZip=e()}(this,function(){"use strict";var e="undefined"!=typeof Uint8Array&&"undefined"!=typeof Uint16Array&&"undefined"!=typeof Uint32Array,r=new(e?Uint8Array:Array)(0),t=e?new ArrayBuffer(0):void 0,i="undefined"!=typeof Blob&&function(){try{return new Blob,[!0]}catch(t){return[!1]}}()[0],n="undefined"!=typeof Promise,s=function(){for(var t,e=new Array(256),r=0;r<256;r++){t=r;for(var i=0;i<8;i++)t=1&t?3988292384^t>>>1:t>>>1;e[r]=t}return e}(),o=function(t,e,r,i){var n=s,o=i+r;t^=-1;for(var a=i;a<o;a++)t=t>>>8^n[255&(t^e[a])];return-1^t},a={};function u(t){var e;return e="undefined"!=typeof Promise?new Promise(t):new a(t),e}var h={isNode:"undefined"!=typeof Buffer,isStream:function(t){return t&&"function"==typeof t.on&&"function"==typeof t.pause&&"function"==typeof t.resume}};function l(t,e,r){var i,n=t;switch(e=e||"string",r=r||{},e){case"uint8array":i=new(h.isNode?Buffer:Uint8Array)(n);break;case"arraybuffer":i=new ArrayBuffer(n);break;case"string":i=n;break;case"blob":i=new Blob([n],r);break;default:throw new Error("unsupported output type "+e)}return i}var c=e?new TextEncoder:void 0,f=e?new TextDecoder:void 0;var p=["\0","\x01","\x02","\x03","\x04","\x05","\x06","\a","\b","\t","\n","\v","\f","\r","\x0e","\x0f","\x10","\x11","\x12","\x13","\x14","\x15","\x16","\x17","\x18","\x19","\x1a","\x1b","\x1c","\x1d","\x1e","\x1f"],d=e?{encode:function(t){return c.encode(t)},decode:function(t){return f.decode(t)}}:function(t,e){var r,i,n=[],s=0;for(r=0;r<t.length;r++)i=t.charCodeAt(r),n.push(255&i);return{encode:function(t){for(var e=[],r=0;r<t.length;r++)e.push(255&t.charCodeAt(r));return e},decode:function(t){return String.fromCharCode.apply(null,t)}}};function m(t,e){this.name=t,this.dir=e.dir,this.date=e.date,this.comment=e.comment,this.unixPermissions=e.unixPermissions,this.dosPermissions=e.dosPermissions,this._data=e._data,this._dataBinary=e._dataBinary,this.options=e.options}m.prototype.internalStream=function(t){return this._data.internalStream(t)};function b(){if(!(this instanceof b))return new b;if(arguments.length)throw new Error("The constructor with parameters has been removed in JSZip 3.0, please check the upgrade guide.");this.files={},this.comment=null,this.root="",this.clone=function(){var t=new b;for(var e in this)"function"!=typeof this[e]&&(t[e]=this[e]);return t}}b.prototype.file=function(t,e,r){if(1===arguments.length)return this.files[t];t=this.root+t;var i={name:t,dir:r&&r.dir,date:r&&r.date,comment:r&&r.comment,unixPermissions:r&&r.unixPermissions,dosPermissions:r&&r.dosPermissions,_data:{internalStream:function(t){var e=d.encode(e||"");return{on:function(t,r){"data"===t&&r({data:e,meta:{percent:100}}),"end"===t&&r()},resume:function(){return this},pause:function(){return this}}}},options:r};return this.files[t]=new m(t,i),this},b.prototype.folder=function(t){return this.file(t,null,{dir:!0})},b.prototype.remove=function(t){return t=this.root+t,delete this.files[t],this},b.version="3.10.1",b.loadAsync=function(t,e){return u(function(r,i){var n=new b;n.load(t,e).then(function(){r(n)},i)})},"undefined"!=typeof module?module.exports=b:window.JSZip=b});</script>
-    
-    <!-- Player HTML Template -->
-    <template id="player-template"><!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>__STORY_TITLE__</title><style>body{margin:0;font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;box-sizing:border-box;transition:background-color .3s}#game-container{width:100%;max-width:800px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,.5);display:flex;gap:20px}#image-container{flex-shrink:0}#scene-image{display:block;margin:0 auto;border-radius:8px;object-fit:cover}#scene-text{white-space:pre-wrap;margin-bottom:20px}#choices-container{display:flex;flex-direction:column;gap:12px}.choice-btn{padding:15px 20px;border-radius:6px;cursor:pointer;font-size:1em;text-align:left;transition:background-color .2s,transform .1s, border-color .2s}.choice-btn:hover{transform:translateY(-2px)}.layout-top-down{flex-direction:column}.layout-top-down #image-container{width:100%;margin-bottom:20px}.layout-top-down #scene-image{width:100%;height:auto;max-height:50vh}.layout-side-by-side{flex-direction:row;align-items:flex-start}.layout-side-by-side #image-container{width:40%}.layout-side-by-side #scene-image{width:100%;height:auto}.layout-side-by-side #content-container{width:60%}__CUSTOM_STYLES__</style></head><body><div id="game-container" class="__LAYOUT_CLASS__"><div id="image-container"><img id="scene-image" src=""></div><div id="content-container"><div id="scene-text"></div><div id="choices-container"></div></div><audio id="ambience-player" loop></audio></div><script>document.addEventListener('DOMContentLoaded',()=>{let storyData;const sceneImage=document.getElementById('scene-image'),sceneText=document.getElementById('scene-text'),choicesContainer=document.getElementById('choices-container'),ambiencePlayer=document.getElementById('ambience-player');fetch('story.json').then(response=>response.json()).then(data=>{storyData=data;document.title=storyData.meta.title||'Choose Your Own Adventure';renderScene(storyData.meta.startSceneId)}).catch(error=>{sceneText.textContent="Error: Could not load story.json. "+error});function renderScene(sceneId){const scene=storyData.scenes[sceneId];if(!scene){sceneText.textContent=\`Error: Scene "\${sceneId}" not found.\`;return}sceneText.textContent=scene.text;scene.image?(sceneImage.src=scene.image,sceneImage.style.display='block'):sceneImage.style.display='none';if(scene.ambienceSound){let soundUrl=new URL(scene.ambienceSound,window.location.href).href;if(ambiencePlayer.src!==soundUrl){ambiencePlayer.src=scene.ambienceSound}ambiencePlayer.play().catch(e=>console.warn("Audio autoplay was blocked."))}else{ambiencePlayer.pause()}choicesContainer.innerHTML='';(scene.choices||[]).forEach(choice=>{const button=document.createElement('button');button.textContent=choice.text;button.className='choice-btn';button.onclick=()=>renderScene(choice.target);choicesContainer.appendChild(button)})}})</script></body></html></template>
-    
-    <!-- Main Application Logic -->
-    <script>
-    const App = {
-        state: {
-            storyData: {},
-            currentSceneId: null,
-            isDirty: false,
-            contextSceneId: null,
-            projectDirectoryHandle: null, // Stores the handle to the project folder
-            pendingAssetCopies: new Map(), // Stores { destinationPath: FileObject }
-            aiImageUrl: null, // Stores the current URL of the rendered AI image
-        },
-        elements: {},
+            <div class="form-group">
+                <label for="scene-sound">Ambience Sound</label>
+                <div class="form-group inline" style="margin:0;">
+                    <input type="text" id="scene-sound" placeholder="e.g., sounds/wind.mp3">
+                    <button id="select-sound-btn" class="btn-secondary file-icon-btn" title="Select Sound File">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</div>
 
-        init() {
-            this.cacheElements();
-            this.bindEvents();
-            this.ui.enableEditor(false);
-            this.ui.displayWelcomeMessage();
-        },
+<!-- Hidden Inputs for File Selection -->
+<input type="file" id="image-file-input" accept="image/*">
+<input type="file" id="sound-file-input" accept="audio/*">
 
-        getNewStoryObject() {
-            return { 
-                meta: { title: "New Story", startSceneId: "start", styles: App.styles.getDefaults(), layout: 'layout-top-down' },
-                scenes: { "start": { id: "start", text: "Start here.", image: "", imagePrompt: "", ambienceSound: "", choices: [] } } 
-            };
-        },
-        
-        cacheElements() {
-            const ids = [
-                'tree-view', 'editor-container', 'player-container', 'scene-id', 'scene-image',
-                'scene-image-prompt', 'scene-sound', 'scene-text', 'choices-container',
-                'ambience-player', 'export-data-modal', 'style-editor-modal',
-                'tree-context-menu', 'main-title-dirty-indicator',
-                'save-story-btn', 'player-image', 'player-text', 'player-choices', 'player-inner-container',
-                'editor-fieldset', 'ai-image-preview', 'render-ai-image-btn', 'add-ai-image-btn'
-            ];
-            ids.forEach(id => this.elements[id] = document.getElementById(id));
-        },
+<!-- Player and Context Menu -->
+<div id="player-container"><button id="stop-play-x" class="btn-danger">X</button><button id="restart-play" class="btn-secondary">Restart</button><div id="player-inner-container"><div id="player-image-container"><img id="player-image" src=""></div><div id="player-content-container"><div id="player-text"></div><div id="player-choices"></div></div></div><audio id="ambience-player" loop></audio><audio id="music-player" loop></audio></div>
+<div id="tree-context-menu"><button id="set-start-scene-btn">Set as Start Scene</button></div>
 
-        bindEvents() {
-            // Project Management
-            document.getElementById('new-project-btn').addEventListener('click', () => this.io.newProject());
-            document.getElementById('open-project-btn').addEventListener('click', () => this.io.openProject());
-            this.elements['save-story-btn'].addEventListener('click', () => this.io.saveProject());
-            
-            // Scene Management
-            document.getElementById('new-scene-btn').addEventListener('click', () => this.tree.createNewScene());
-            document.getElementById('rename-scene-btn').addEventListener('click', () => this.tree.renameScene());
-            document.getElementById('delete-scene-btn').addEventListener('click', () => this.tree.deleteCurrentScene());
-            document.getElementById('add-choice-btn').addEventListener('click', () => this.editor.addChoiceToDOM());
-            document.getElementById('save-scene-btn').addEventListener('click', () => this.editor.saveCurrentScene());
-            
-            // Asset Selection
-            document.getElementById('select-image-btn').addEventListener('click', () => document.getElementById('image-file-input').click());
-            document.getElementById('select-sound-btn').addEventListener('click', () => document.getElementById('sound-file-input').click());
-            document.getElementById('image-file-input').addEventListener('change', (e) => this.assets.handleLocalFileSelect(e, 'images'));
-            document.getElementById('sound-file-input').addEventListener('change', (e) => this.assets.handleLocalFileSelect(e, 'sounds'));
+<!-- Modals -->
+<div id="project-menu-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Menu</h2><div class="btn-group" style="flex-direction: column; gap: 15px; align-items: stretch;"><button id="new-project-btn" class="btn-secondary">New Project</button><button id="open-project-btn" class="btn-secondary">Open Project</button><button id="save-story-btn" class="btn-success">Save Project</button><hr style="border-color: #444;"><button id="export-project-btn" class="btn-warning">Export Playable Project</button><button id="export-data-btn" class="btn-warning">Export Data</button><hr style="border-color: #444;"><button id="style-editor-btn">Style Editor</button><button id="about-editor-btn">About Text Editor</button></div></div></div>
+<div id="about-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>About Text Editor</h2><p>This information will be displayed in the player's "About" section.</p><div class="form-group"><label for="creator-name">Creator Name</label><input type="text" id="creator-name" placeholder="Your name or alias"></div><div class="form-group"><label for="about-text">About Text</label><textarea id="about-text" placeholder="A brief description of your project."></textarea></div></div></div>
+<div id="export-data-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Export Specific Data</h2><p>Select data to export as a JSON file.</p><button data-export-type="imagePrompts">Export All Image Prompts</button></div></div>
+<div id="style-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Visual Template Editor</h2><p>Changes are saved automatically.</p><div id="style-editor-grid" class="modal-grid"></div></div></div>
 
-            // AI Image Generator
-            this.elements['render-ai-image-btn'].addEventListener('click', () => this.assets.renderPollinationImage());
-            this.elements['add-ai-image-btn'].addEventListener('click', () => this.assets.addPollinationImageToScene());
+<!-- JSZip Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-            // Player
-            document.getElementById('play-from-start-btn').addEventListener('click', () => this.player.play(this.state.storyData.meta.startSceneId));
-            document.getElementById('play-from-current-btn').addEventListener('click', () => this.player.play(this.state.currentSceneId));
-            document.getElementById('stop-play-btn')?.addEventListener('click', () => this.player.stop());
-            
-            // Export & Style
-            document.getElementById('export-project-btn').addEventListener('click', () => this.io.exportProjectZip());
-            document.getElementById('export-data-btn').addEventListener('click', () => this.modals.show('export-data-modal'));
-            document.getElementById('style-editor-btn').addEventListener('click', () => this.styles.open());
-            
-            // Modals & Context Menu
-            document.querySelectorAll('.modal-close').forEach(el => el.addEventListener('click', (e) => this.modals.hide(e.target.closest('.modal'))));
-            this.elements['export-data-modal'].addEventListener('click', (e) => { if(e.target.dataset.exportType) this.io.exportData(e.target.dataset.exportType); });
-            document.getElementById('set-start-scene-btn').addEventListener('click', () => this.tree.setAsStartScene());
-            document.addEventListener('click', () => this.elements['tree-context-menu'].style.display = 'none');
-            window.addEventListener('click', (e) => { if (e.target.classList.contains('modal')) this.modals.hide(e.target); });
-        },
-        
-        setDirty(isDirty) {
-            this.state.isDirty = isDirty;
-            this.elements['main-title-dirty-indicator'].style.display = isDirty ? 'inline' : 'none';
-            this.elements['save-story-btn'].classList.toggle('dirty', isDirty);
-        },
+<!-- Player HTML Template -->
+<template id="player-template">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>__STORY_TITLE__</title>
+        <style>
+            :root { --primary-color: #4a78ad; --secondary-color: #6c757d; }
+            body { margin: 0; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; transition: background-color .3s; background-size: cover; background-position: center; background-attachment: fixed; }
+            #game-container { width: 100%; max-width: 800px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,.5); display: flex; gap: 20px; position: relative; background-size: cover; background-position: center; }
+            #image-container { flex-shrink: 0; }
+            #scene-image { display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
+            #scene-text { white-space: pre-wrap; margin-bottom: 20px; }
+            #choices-container { display: flex; flex-direction: column; gap: 12px; }
+            .choice-btn { padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; text-align: left; transition: background-color .2s,transform .1s, border-color .2s; }
+            .choice-btn:hover { transform: translateY(-2px); }
+            .layout-top-down { flex-direction: column; }
+            .layout-top-down #image-container { width: 100%; margin-bottom: 20px; }
+            .layout-top-down #scene-image { width: 100%; height: auto; max-height: 50vh; }
+            .layout-side-by-side { flex-direction: row; align-items: flex-start; }
+            .layout-side-by-side #image-container { width: 40%; }
+            .layout-side-by-side #scene-image { width: 100%; height: auto; }
+            .layout-side-by-side #content-container { width: 60%; }
+            #player-menu-btn { position: fixed; top: 15px; right: 15px; z-index: 100; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.5); border-radius: 50%; width: 40px; height: 40px; padding: 0; font-size: 24px; line-height: 40px; text-align: center; cursor: pointer; }
+            .player-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+            .player-modal-content { background-color: #2c2c2c; color: #e0e0e0; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; }
+            .player-modal-close { position: absolute; top: 10px; right: 15px; font-size: 1.5em; font-weight: bold; cursor: pointer; color: #aaa; }
+            .player-modal-close:hover { color: #fff; }
+            .menu-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 15px; }
+            .menu-item button { flex-grow: 1; margin: 0; background-color: var(--secondary-color); padding: 8px 12px; }
+            .menu-item button:disabled { background-color: #444; color: #888; cursor: not-allowed; }
+            .menu-item span { flex-shrink: 0; }
+            .menu-item hr { flex-grow: 1; border: none; border-top: 1px solid #444; }
+            #about-title { text-align: center; }
+            #about-creator { text-align: center; font-style: italic; margin-top: -10px; }
+            #about-text { text-align: left; }
+            .about-footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #444; font-size: 0.8em; text-align: center; white-space: pre-wrap; }
+            .about-footer a { color: #8af; text-decoration: none; }
+            __CUSTOM_STYLES__
+        </style>
+    </head>
+    <body>
+        <div id="game-container" class="__LAYOUT_CLASS__">
+            <div id="image-container"><img id="scene-image" src=""></div>
+            <div id="content-container">
+                <div id="scene-text"></div>
+                <div id="choices-container"></div>
+            </div>
+            <audio id="ambience-player" loop></audio>
+            <audio id="music-player" loop></audio>
+        </div>
+        <button id="player-menu-btn">&#9776;</button>
 
-        // --- SUB-MODULES ---
+        <div id="player-menu-modal" class="player-modal">
+            <div class="player-modal-content">
+                <span class="player-modal-close">&times;</span>
+                <h2>Menu</h2>
+                <div class="menu-item"><button id="restart-btn">Restart Game</button></div>
+                <hr style="border-color: #444;">
+                <div class="menu-item"><button id="save-btn">Save Progress</button><button id="load-btn">Load Progress</button></div>
+                <hr style="border-color: #444;">
+                <div class="menu-item"><span>Music</span><input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.4"></div>
+                <div class="menu-item"><span>Ambience</span><input type="range" id="ambience-volume-slider" min="0" max="1" step="0.05" value="0.8"></div>
+                 <div class="menu-item"><span>Font Size</span><input type="range" id="font-size-slider" min="12" max="28" step="1" value="16"></div>
+                <div class="menu-item"><button id="music-toggle-btn">Music On</button><button id="sound-toggle-btn">Sound On</button></div>
+                <div class="menu-item"><button id="fullscreen-btn">Toggle Fullscreen</button></div>
+                <hr style="border-color: #444;">
+                <div class="menu-item"><button id="about-btn">About</button></div>
+            </div>
+        </div>
 
-        ui: {
-            enableEditor(isEnabled) {
-                App.elements['editor-fieldset'].disabled = !isEnabled;
-                document.getElementById('new-scene-btn').disabled = !isEnabled;
-                App.elements['save-story-btn'].disabled = !isEnabled;
-                document.getElementById('export-project-btn').disabled = !isEnabled;
-                document.getElementById('export-data-btn').disabled = !isEnabled;
-                document.getElementById('style-editor-btn').disabled = !isEnabled;
+        <div id="about-modal" class="player-modal">
+            <div class="player-modal-content">
+                <span class="player-modal-close">&times;</span>
+                <h2 id="about-title"></h2>
+                <p id="about-creator"></p>
+                <p id="about-text"></p>
+                <div class="about-footer">Created in
+CYOA Studio
+<a href="https://github.com/tin2tin/CYOA_Studio" target="_blank">https://github.com/tin2tin/CYOA_Studio</a></div>
+            </div>
+        </div>
+__PLAYER_SCRIPT__
+    </body>
+    </html>
+</template>
+
+<!-- Main Application Logic -->
+<script>
+const App = {
+    state: {
+        storyData: {},
+        currentSceneId: null,
+        isDirty: false,
+        contextSceneId: null,
+        projectDirectoryHandle: null,
+        pendingAssetCopies: new Map(),
+        aiImageUrl: null,
+    },
+    elements: {},
+
+    init() {
+        this.cacheElements();
+        this.bindEvents();
+        this.ui.enableEditor(false);
+        this.ui.displayWelcomeMessage();
+    },
+
+    getNewStoryObject() {
+        return { 
+            meta: { 
+                title: "New Story", 
+                startSceneId: "start",
+                creatorName: "",
+                aboutText: "",
+                styles: App.styles.getDefaults(), 
+                layout: 'layout-top-down' 
             },
-            displayWelcomeMessage() {
-                App.elements['tree-view'].innerHTML = `<li>Welcome! Please create a <strong>New Project</strong> or <strong>Open an existing one</strong> to begin.</li>`;
-            },
-            updateAiImagePreview(url, message = '') {
-                const preview = App.elements['ai-image-preview'];
-                preview.innerHTML = '';
+            scenes: { "start": { id: "start", text: "Start here.", image: "", imagePrompt: "", ambienceSound: "", choices: [] } } 
+        };
+    },
+    
+    cacheElements() {
+        const ids = [
+            'tree-view', 'editor-container', 'player-container', 'scene-id', 'scene-image',
+            'scene-image-prompt', 'scene-sound', 'scene-text', 'choices-container',
+            'ambience-player', 'music-player', 'export-data-modal', 'style-editor-modal', 'about-editor-modal',
+            'tree-context-menu', 'main-title-dirty-indicator',
+            'save-story-btn', 'player-image', 'player-text', 'player-choices', 'player-inner-container',
+            'editor-fieldset', 'ai-image-preview', 'render-ai-image-btn', 'add-ai-image-btn', 'image-preview',
+            'creator-name', 'about-text'
+        ];
+        ids.forEach(id => this.elements[id] = document.getElementById(id));
+    },
+
+    bindEvents() {
+        document.getElementById('new-project-btn').addEventListener('click', () => this.io.newProject());
+        document.getElementById('open-project-btn').addEventListener('click', () => this.io.openProject());
+        this.elements['save-story-btn'].addEventListener('click', () => this.io.saveProject());
+        
+        document.getElementById('new-scene-btn').addEventListener('click', () => this.tree.createNewScene());
+        document.getElementById('rename-scene-btn').addEventListener('click', () => this.tree.renameScene());
+        document.getElementById('delete-scene-btn').addEventListener('click', () => this.tree.deleteCurrentScene());
+        document.getElementById('add-choice-btn').addEventListener('click', () => this.editor.addChoiceToDOM());
+        document.getElementById('save-scene-btn').addEventListener('click', () => this.editor.saveCurrentScene(true));
+        
+        document.getElementById('select-image-btn').addEventListener('click', () => App.assets.selectFile('images', 'scene-image'));
+        document.getElementById('select-sound-btn').addEventListener('click', () => App.assets.selectFile('sounds', 'scene-sound'));
+        this.elements['scene-image'].addEventListener('change', (e) => this.ui.updateImageThumbnail(e.target.value));
+
+        ['creator-name', 'about-text'].forEach(id => {
+            this.elements[id].addEventListener('input', (e) => {
+                const key = id === 'creator-name' ? 'creatorName' : 'aboutText';
+                this.state.storyData.meta[key] = e.target.value;
+                this.setDirty(true);
+            });
+        });
+
+        this.elements['render-ai-image-btn'].addEventListener('click', () => this.assets.renderPollinationImage());
+        this.elements['add-ai-image-btn'].addEventListener('click', () => this.assets.addPollinationImageToScene());
+
+        document.getElementById('play-from-start-btn').addEventListener('click', () => { this.editor.saveCurrentScene(false); this.player.play(this.state.storyData.meta.startSceneId); });
+        document.getElementById('play-from-current-btn').addEventListener('click', () => { this.editor.saveCurrentScene(false); this.player.play(this.state.currentSceneId); });
+        document.getElementById('stop-play-x')?.addEventListener('click', () => this.player.stop());
+        document.getElementById('restart-play')?.addEventListener('click', () => this.player.play(this.state.storyData.meta.startSceneId));
+        
+        document.getElementById('export-project-btn').addEventListener('click', () => this.io.exportProjectZip());
+        document.getElementById('preview-btn').addEventListener('click', () => this.io.previewProject());
+        document.getElementById('export-data-btn').addEventListener('click', () => this.modals.show('export-data-modal'));
+        document.getElementById('style-editor-btn').addEventListener('click', () => this.styles.open());
+        document.getElementById('about-editor-btn').addEventListener('click', () => this.modals.show('about-editor-modal'));
+        
+        document.querySelectorAll('.modal-close').forEach(el => el.addEventListener('click', (e) => this.modals.hide(e.target.closest('.modal'))));
+        this.elements['export-data-modal'].addEventListener('click', (e) => { if(e.target.dataset.exportType) this.io.exportData(e.target.dataset.exportType); });
+        document.getElementById('set-start-scene-btn').addEventListener('click', () => this.tree.setAsStartScene());
+        document.addEventListener('click', (e) => { if (!e.target.closest('.scene-node')) this.elements['tree-context-menu'].style.display = 'none'; });
+        window.addEventListener('click', (e) => { if (e.target.classList.contains('modal')) this.modals.hide(e.target); });
+        document.getElementById('project-menu-btn').addEventListener('click', () => this.modals.show('project-menu-modal'));
+
+        window.addEventListener('beforeunload', (e) => { if (this.state.isDirty) { e.preventDefault(); e.returnValue = ''; } });
+    },
+    
+    setDirty(isDirty) {
+        this.state.isDirty = isDirty;
+        this.elements['main-title-dirty-indicator'].style.display = isDirty ? 'inline' : 'none';
+        this.elements['save-story-btn'].classList.toggle('dirty', isDirty);
+    },
+
+    ui: {
+        enableEditor(isEnabled) {
+            App.elements['editor-fieldset'].disabled = !isEnabled;
+            document.getElementById('new-scene-btn').disabled = !isEnabled;
+            App.elements['save-story-btn'].disabled = !isEnabled;
+            document.getElementById('export-project-btn').disabled = !isEnabled;
+            document.getElementById('export-data-btn').disabled = !isEnabled;
+            document.getElementById('style-editor-btn').disabled = !isEnabled;
+            document.getElementById('about-editor-btn').disabled = !isEnabled;
+        },
+        displayWelcomeMessage() {
+            App.elements['tree-view'].innerHTML = `<li>Welcome! Please create a <strong>New Project</strong> or <strong>Open an existing one</strong> to begin.</li>`;
+        },
+        updateAiImagePreview(url, message = '') {
+            const preview = App.elements['ai-image-preview'];
+            preview.innerHTML = '';
+            if (url) {
+                const img = document.createElement('img');
+                img.src = url;
+                preview.appendChild(img);
+            } else {
+                const span = document.createElement('span');
+                span.textContent = message || 'Preview';
+                preview.appendChild(span);
+            }
+        },
+        async updateImageThumbnail(path) {
+            const preview = App.elements['image-preview'];
+            preview.innerHTML = '<span>Thumbnail</span>';
+            if (!path) return;
+            try {
+                const url = await App.io.getAssetDataUrl(path);
                 if (url) {
-                    const img = document.createElement('img');
-                    img.src = url;
-                    preview.appendChild(img);
+                    preview.innerHTML = `<img src="${url}" alt="Asset thumbnail">`;
                 } else {
-                    const span = document.createElement('span');
-                    span.textContent = message || 'Preview';
-                    preview.appendChild(span);
+                     preview.innerHTML = '<span>Invalid Path</span>';
                 }
+            } catch (e) {
+                preview.innerHTML = '<span>Invalid Path</span>';
+                console.warn('Thumbnail load failed:', e);
             }
-        },
-
-        io: {
-            async newProject() {
-                const projectName = prompt("Enter a name for your new project:", "My CYOA Story");
-                if (!projectName) return;
-
-                try {
-                    const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-                    const projectHandle = await dirHandle.getDirectoryHandle(projectName, { create: true });
-                    await projectHandle.getDirectoryHandle('images', { create: true });
-                    await projectHandle.getDirectoryHandle('sounds', { create: true });
-                    
-                    const storyFileHandle = await projectHandle.getFileHandle('story.json', { create: true });
-                    const writable = await storyFileHandle.createWritable();
-                    const newStory = App.getNewStoryObject();
-                    newStory.meta.title = projectName;
-                    await writable.write(JSON.stringify(newStory, null, 2));
-                    await writable.close();
-
-                    App.state.projectDirectoryHandle = projectHandle;
-                    App.state.storyData = newStory;
-                    App.state.pendingAssetCopies.clear();
-                    App.state.currentSceneId = 'start';
-                    App.tree.selectScene('start');
-                    App.ui.enableEditor(true);
-                    App.setDirty(false);
-                    alert(`Project '${projectName}' created successfully!`);
-
-                } catch (err) { if (err.name !== 'AbortError') { console.error(err); alert('Could not create the project.'); } }
-            },
-
-            async openProject() {
-                try {
-                    const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-                    const storyFileHandle = await dirHandle.getFileHandle('story.json').catch(() => null);
-                    if (!storyFileHandle) { alert("Error: 'story.json' not found. Is this a valid project folder?"); return; }
-                    
-                    const file = await storyFileHandle.getFile();
-                    const storyData = JSON.parse(await file.text());
-
-                    App.state.projectDirectoryHandle = dirHandle;
-                    App.state.storyData = storyData;
-                    App.state.pendingAssetCopies.clear();
-                    App.tree.selectScene(storyData.meta.startSceneId);
-                    App.ui.enableEditor(true);
-                    App.setDirty(false);
-                    alert(`Project '${storyData.meta.title}' loaded successfully!`);
-
-                } catch (err) { if (err.name !== 'AbortError') { console.error(err); alert('Could not open the project.'); } }
-            },
-            
-            async saveProject() {
-                if (!App.state.projectDirectoryHandle) { alert("No project is open."); return; }
-                App.editor.saveCurrentScene(false);
-                
-                try {
-                    if (App.state.pendingAssetCopies.size > 0) {
-                        for (const [relativePath, fileObject] of App.state.pendingAssetCopies.entries()) {
-                            const [folderName, fileName] = relativePath.split('/');
-                            const folderHandle = await App.state.projectDirectoryHandle.getDirectoryHandle(folderName, { create: true });
-                            const fileHandle = await folderHandle.getFileHandle(fileName, { create: true });
-                            const writable = await fileHandle.createWritable();
-                            await writable.write(fileObject);
-                            await writable.close();
-                        }
-                        alert(`Copied ${App.state.pendingAssetCopies.size} new asset(s) to the project folder.`);
-                        App.state.pendingAssetCopies.clear();
-                    }
-
-                    const storyFileHandle = await App.state.projectDirectoryHandle.getFileHandle('story.json', { create: true });
-                    const writable = await storyFileHandle.createWritable();
-                    await writable.write(JSON.stringify(App.state.storyData, null, 2));
-                    await writable.close();
-                    
-                    App.setDirty(false);
-                    alert("Project saved successfully!");
-                } catch (err) { console.error(err); alert("Failed to save project."); }
-            },
-
-            exportData(type) {
-                if (!App.state.storyData.scenes) { alert("No project loaded."); return; }
-                let data;
-                if (type === 'imagePrompts') {
-                    data = Object.fromEntries(Object.entries(App.state.storyData.scenes).map(([id, scene]) => [id, scene.imagePrompt || '']));
-                } else {
-                    alert("Unknown export type.");
-                    return;
-                }
-                const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `${type}.json`;
-                a.click();
-                URL.revokeObjectURL(a.href);
-            },
-
-            async exportProjectZip() {
-                if (!App.state.projectDirectoryHandle) { alert("Please open a project to export."); return; }
-
-                const zip = new JSZip();
-                zip.file("story.json", JSON.stringify(App.state.storyData, null, 2));
-
-                const storyTitle = App.state.storyData.meta.title || 'My Story';
-                let playerHtml = document.getElementById('player-template').innerHTML.replace('__STORY_TITLE__', storyTitle);
-                playerHtml = playerHtml.replace('__LAYOUT_CLASS__', App.state.storyData.meta.layout);
-                playerHtml = playerHtml.replace('__CUSTOM_STYLES__', App.styles.generateCSS());
-                zip.file("index.html", playerHtml);
-                
-                alert("Gathering assets for ZIP export. This may take a moment...");
-
-                async function addFolderToZip(dirHandle, zipFolder) {
-                    for await (const entry of dirHandle.values()) {
-                        if (entry.kind === 'file') {
-                            const file = await entry.getFile();
-                            zipFolder.file(entry.name, file);
-                        } else if (entry.kind === 'directory') {
-                            await addFolderToZip(entry, zipFolder.folder(entry.name));
-                        }
-                    }
-                }
-
-                try {
-                    const imagesHandle = await App.state.projectDirectoryHandle.getDirectoryHandle('images');
-                    await addFolderToZip(imagesHandle, zip.folder('images'));
-                    
-                    const soundsHandle = await App.state.projectDirectoryHandle.getDirectoryHandle('sounds');
-                    await addFolderToZip(soundsHandle, zip.folder('sounds'));
-
-                    zip.generateAsync({ type: "blob" }).then(content => {
-                        const a = document.createElement('a');
-                        a.href = URL.createObjectURL(content);
-                        a.download = `${storyTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_export.zip`;
-                        a.click();
-                        URL.revokeObjectURL(a.href);
-                    });
-                } catch (err) {
-                    console.error("ZIP Export failed:", err);
-                    alert("Could not export project. Check console for details.");
-                }
-            }
-        },
-
-        tree: {
-            render() {
-                const treeView = App.elements['tree-view'];
-                const collapsedState = {};
-                treeView.querySelectorAll('li[data-scene-id]').forEach(li => { if (li.dataset.collapsed === 'true') collapsedState[li.dataset.sceneId] = true; });
-                treeView.innerHTML = '';
-                const { startSceneId } = App.state.storyData.meta;
-                if (startSceneId && App.state.storyData.scenes[startSceneId]) {
-                    const rootUl = document.createElement('ul');
-                    this.buildNode(startSceneId, rootUl, [], collapsedState);
-                    treeView.appendChild(rootUl);
-                }
-            },
-            buildNode(sceneId, parentElement, path, collapsedState) {
-                const scene = App.state.storyData.scenes[sceneId];
-                if (!scene) { parentElement.innerHTML += `<li><span style="color:red">Broken Link: ${sceneId}</span></li>`; return; }
-                const li = document.createElement('li');
-                li.dataset.sceneId = sceneId;
-                if (collapsedState[sceneId]) li.dataset.collapsed = 'true';
-                const sceneNode = document.createElement('div');
-                sceneNode.className = 'scene-node';
-                if (sceneId === App.state.currentSceneId) sceneNode.classList.add('active');
-                if (sceneId === App.state.storyData.meta.startSceneId) sceneNode.classList.add('is-start');
-                const toggle = document.createElement('span');
-                toggle.className = 'tree-toggle';
-                const hasChoices = scene.choices && scene.choices.length > 0;
-                if (hasChoices) {
-                    toggle.textContent = li.dataset.collapsed === 'true' ? '[+]' : '[-]';
-                    toggle.onclick = (e) => { e.stopPropagation(); li.dataset.collapsed = !(li.dataset.collapsed === 'true'); this.render(); };
-                } else { toggle.classList.add('empty'); }
-                const text = document.createElement('span'); text.textContent = sceneId;
-                sceneNode.appendChild(toggle); sceneNode.appendChild(text);
-                sceneNode.onclick = () => this.selectScene(sceneId);
-                sceneNode.oncontextmenu = (e) => {
-                    e.preventDefault(); App.state.contextSceneId = sceneId;
-                    const menu = App.elements['tree-context-menu'];
-                    menu.style.display = 'block'; menu.style.left = `${e.pageX}px`; menu.style.top = `${e.pageY}px`;
-                };
-                li.appendChild(sceneNode);
-                if (path.includes(sceneId)) {
-                    li.querySelector('.scene-node').appendChild(document.createElement('span')).textContent = ' (LOOP)';
-                    parentElement.appendChild(li); return;
-                }
-                if (hasChoices && li.dataset.collapsed !== 'true') {
-                    const childUl = document.createElement('ul');
-                    scene.choices.forEach(choice => {
-                        const choiceLi = document.createElement('li'); choiceLi.className = 'choice-node';
-                        choiceLi.textContent = `⤷ "${choice.text}" →`; childUl.appendChild(choiceLi);
-                        this.buildNode(choice.target, childUl, [...path, sceneId], collapsedState);
-                    });
-                    li.appendChild(childUl);
-                }
-                parentElement.appendChild(li);
-            },
-            selectScene(sceneId) { App.editor.saveCurrentScene(false); if (App.state.currentSceneId === sceneId) return; App.state.currentSceneId = sceneId; this.render(); App.editor.render(); },
-            createNewScene() { 
-                if (!App.state.storyData.scenes) { alert("Please create or open a project first."); return; }
-                const newId = prompt('Enter a unique ID for the new scene:'); 
-                if (newId && !App.state.storyData.scenes[newId]) { 
-                    App.state.storyData.scenes[newId] = { id: newId, text: '', image: '', imagePrompt: '', ambienceSound: '', choices: [] }; 
-                    this.selectScene(newId); App.setDirty(true); 
-                } else if (App.state.storyData.scenes[newId]) { 
-                    alert('A scene with this ID already exists.'); 
-                } 
-            },
-            renameScene() { const oldId = App.state.currentSceneId; if (!oldId) return; const newId = prompt(`Rename scene "${oldId}" to:`, oldId); if (!newId || newId === oldId) return; if (App.state.storyData.scenes[newId]) { alert(`Error: Scene ID "${newId}" already exists.`); return; } Object.values(App.state.storyData.scenes).forEach(scene => { (scene.choices || []).forEach(choice => { if (choice.target === oldId) choice.target = newId; }); }); if (App.state.storyData.meta.startSceneId === oldId) App.state.storyData.meta.startSceneId = newId; const sceneData = App.state.storyData.scenes[oldId]; sceneData.id = newId; App.state.storyData.scenes[newId] = sceneData; delete App.state.storyData.scenes[oldId]; App.state.currentSceneId = newId; App.setDirty(true); this.render(); App.editor.render(); },
-            deleteCurrentScene() { const sceneId = App.state.currentSceneId; if (!sceneId || sceneId === App.state.storyData.meta.startSceneId) { alert('Cannot delete the starting scene.'); return; } if (confirm(`Delete scene "${sceneId}"? This cannot be undone.`)) { const linkedBy = Object.values(App.state.storyData.scenes).filter(s => (s.choices || []).some(c => c.target === sceneId)); if (linkedBy.length > 0) { alert(`Cannot delete. Scene is targeted by: ${linkedBy.map(s => s.id).join(', ')}.`); return; } delete App.state.storyData.scenes[sceneId]; this.selectScene(App.state.storyData.meta.startSceneId); App.setDirty(true); } },
-            setAsStartScene() { if (App.state.contextSceneId) { App.state.storyData.meta.startSceneId = App.state.contextSceneId; App.setDirty(true); this.render(); } }
-        },
-
-        editor: {
-            render() { const scene = App.state.storyData.scenes[App.state.currentSceneId]; const editorPanel = document.getElementById('editor-panel'); if (!scene) { editorPanel.style.display = 'none'; return; } editorPanel.style.display = 'block'; App.elements['scene-id'].value = scene.id || ''; App.elements['scene-image'].value = scene.image || ''; App.elements['scene-image-prompt'].value = scene.imagePrompt || ''; App.elements['scene-sound'].value = scene.ambienceSound || ''; App.elements['scene-text'].value = scene.text || ''; App.elements['choices-container'].innerHTML = ''; (scene.choices || []).forEach(choice => this.addChoiceToDOM(choice)); App.ui.updateAiImagePreview(null); App.state.aiImageUrl = null; },
-            saveCurrentScene(showAlert = true) { if (!App.state.currentSceneId) return; const id = App.state.currentSceneId; const scene = App.state.storyData.scenes[id]; if (!scene) return; scene.image = App.elements['scene-image'].value.trim(); scene.imagePrompt = App.elements['scene-image-prompt'].value.trim(); scene.ambienceSound = App.elements['scene-sound'].value.trim(); scene.text = App.elements['scene-text'].value; scene.choices = Array.from(App.elements['choices-container'].querySelectorAll('.choice-group')).map(div => ({ text: div.querySelector('input[type=text]').value, target: div.querySelector('select').value })).filter(c => c.text && c.target); App.setDirty(true); App.tree.render(); if(showAlert) alert(`Scene '${id}' changes saved to memory. Click 'Save Project' to write to file.`); },
-            addChoiceToDOM(choice = { text: '', target: '' }) { const choiceDiv = document.createElement('div'); choiceDiv.className = 'form-group inline choice-group'; const textInput = document.createElement('input'); textInput.type = 'text'; textInput.placeholder = 'Choice text'; textInput.value = choice.text; const targetSelect = document.createElement('select'); const defaultOption = document.createElement('option'); defaultOption.value = ''; defaultOption.textContent = '-- Select Target --'; targetSelect.appendChild(defaultOption); Object.keys(App.state.storyData.scenes || {}).sort().forEach(id => { const option = document.createElement('option'); option.value = id; option.textContent = id; if (id === choice.target) option.selected = true; targetSelect.appendChild(option); }); const deleteBtn = document.createElement('button'); deleteBtn.textContent = 'X'; deleteBtn.className = 'btn-danger'; deleteBtn.style.flexShrink = '0'; deleteBtn.onclick = () => choiceDiv.remove(); choiceDiv.appendChild(textInput); choiceDiv.appendChild(targetSelect); choiceDiv.appendChild(deleteBtn); App.elements['choices-container'].appendChild(choiceDiv); }
-        },
-        
-        assets: {
-            handleLocalFileSelect(event, assetTypeFolder) { const file = event.target.files[0]; if (!file) return; const destinationPath = `${assetTypeFolder}/${file.name}`; App.state.pendingAssetCopies.set(destinationPath, file); const inputId = assetTypeFolder === 'images' ? 'scene-image' : 'scene-sound'; document.getElementById(inputId).value = destinationPath; App.setDirty(true); event.target.value = ''; },
-            renderPollinationImage() { const promptText = App.elements['scene-image-prompt'].value.trim(); if (!promptText) { alert("Please enter a prompt first."); return; } const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}`; App.state.aiImageUrl = url; App.ui.updateAiImagePreview(null, 'Rendering...'); const tempImg = new Image(); tempImg.onload = () => App.ui.updateAiImagePreview(url); tempImg.onerror = () => { App.ui.updateAiImagePreview(null, 'Render failed.'); App.state.aiImageUrl = null; }; tempImg.src = url; },
-            async addPollinationImageToScene() { if (!App.state.aiImageUrl) { alert("Please render an image first."); return; } if (!App.state.projectDirectoryHandle) { alert("Please save or open a project first."); return; } App.ui.updateAiImagePreview(null, 'Downloading...'); try { const response = await fetch(App.state.aiImageUrl); if (!response.ok) throw new Error(`Fetch failed: ${response.statusText}`); const imageBlob = await response.blob(); const filename = `${App.state.currentSceneId || 'image'}_${Date.now()}.jpg`; const destinationPath = `images/${filename}`; const imagesDirHandle = await App.state.projectDirectoryHandle.getDirectoryHandle('images'); const fileHandle = await imagesDirHandle.getFileHandle(filename, { create: true }); const writable = await fileHandle.createWritable(); await writable.write(imageBlob); await writable.close(); App.elements['scene-image'].value = destinationPath; App.ui.updateAiImagePreview(App.state.aiImageUrl); App.setDirty(true); alert(`Image saved as ${filename} and added to the scene.`); } catch (err) { console.error("Error adding AI image:", err); alert("Could not download or save the image."); App.ui.updateAiImagePreview(App.state.aiImageUrl); } }
-        },
-
-        player: {
-            async play(sceneId) { if (!sceneId || !App.state.projectDirectoryHandle) { alert("Please open a project to play."); return; } App.elements['editor-container'].style.display = 'none'; App.elements['player-container'].style.display = 'block'; await this.renderScene(sceneId); App.styles.applyToPlayer(); },
-            async renderScene(sceneId) {
-                const scene = App.state.storyData.scenes[sceneId];
-                const { 'player-image': img, 'player-text': text, 'player-choices': choices, 'ambience-player': audio } = App.elements;
-                if (!scene) { text.textContent = `Error: Scene "${sceneId}" not found.`; return; }
-
-                async function getAssetUrl(path) {
-                    if (!path) return null;
-                    try {
-                        const [folder, ...fileNameParts] = path.split('/');
-                        const fileName = fileNameParts.join('/');
-                        const dirHandle = await App.state.projectDirectoryHandle.getDirectoryHandle(folder);
-                        const fileHandle = await dirHandle.getFileHandle(fileName);
-                        const file = await fileHandle.getFile();
-                        return URL.createObjectURL(file);
-                    } catch (e) { console.warn(`Asset not found in project: ${path}`); return null; }
-                }
-
-                text.textContent = scene.text;
-                
-                const imageUrl = await getAssetUrl(scene.image);
-                if(imageUrl) { img.src = imageUrl; img.style.display = 'block'; } else { img.style.display = 'none'; }
-                
-                const soundUrl = await getAssetUrl(scene.ambienceSound);
-                if (soundUrl) { if(audio.src !== soundUrl) audio.src = soundUrl; audio.play().catch(e => console.warn(e)); } else { audio.pause(); }
-                
-                choices.innerHTML = '';
-                (scene.choices || []).forEach(choice => { const button = document.createElement('button'); button.textContent = choice.text; button.onclick = () => this.renderScene(choice.target); choices.appendChild(button); });
-            },
-            stop() { App.elements['editor-container'].style.display = 'block'; App.elements['player-container'].style.display = 'none'; App.elements['ambience-player'].pause(); App.elements['ambience-player'].src = ''; }
-        },
-        
-        styles: {
-            open() { const grid = document.getElementById('style-editor-grid'); const styles = App.state.storyData.meta.styles; grid.innerHTML = `<label>Layout <select id="style-layout"><option value="layout-top-down">Image on Top</option><option value="layout-side-by-side">Image on Side</option></select></label><label>Font Family <select id="style-font-family"><option value="sans-serif">Sans-Serif</option><option value="serif">Serif</option><option value="monospace">Monospace</option></select></label><label>Background Color <input type="color" id="style-bg-color"></label><label>Text Color <input type="color" id="style-text-color"></label><label>Button Color <input type="color" id="style-btn-color"></label><label>Button Text Color <input type="color" id="style-btn-text-color"></label><label>Button Hover Color <input type="color" id="style-btn-hover-color"></label><label>Game Padding (px) <input type="number" id="style-padding" min="0"></label>`; document.getElementById('style-bg-color').value = styles['--bg-color']; document.getElementById('style-text-color').value = styles['--text-color']; document.getElementById('style-btn-color').value = styles['--btn-color']; document.getElementById('style-btn-text-color').value = styles['--btn-text-color']; document.getElementById('style-btn-hover-color').value = styles['--btn-hover-color']; document.getElementById('style-font-family').value = styles['--font-family']; document.getElementById('style-padding').value = styles['--padding']; document.getElementById('style-layout').value = App.state.storyData.meta.layout; grid.addEventListener('input', this.handleUpdate); App.modals.show('style-editor-modal'); },
-            handleUpdate(event) { const styles = App.state.storyData.meta.styles; const target = event.target; if(target.type === 'color') styles[`--${target.id.split('-')[1]}-color`] = target.value; else if(target.id === 'style-font-family') styles['--font-family'] = target.value; else if(target.id === 'style-padding') styles['--padding'] = target.value; else if(target.id === 'style-layout') App.state.storyData.meta.layout = target.value; App.styles.applyToPlayer(); App.setDirty(true); },
-            applyToPlayer() { const styles = App.state.storyData.meta.styles; const pc = App.elements['player-container']; Object.keys(styles).forEach(key => { let value = styles[key]; if (key === '--padding') value += 'px'; pc.style.setProperty(key, value); }); App.elements['player-inner-container'].className = App.state.storyData.meta.layout; },
-            generateCSS() { const styles = App.state.storyData.meta.styles; return `:root{--bg-color:${styles['--bg-color']};--text-color:${styles['--text-color']};--btn-color:${styles['--btn-color']};--btn-text-color:${styles['--btn-text-color']};--btn-hover-color:${styles['--btn-hover-color']};} body{background-color:var(--bg-color);color:var(--text-color);font-family:${styles['--font-family']};} #game-container{padding:${styles['--padding']}px;} .choice-btn{background-color:var(--btn-color);color:var(--btn-text-color);border:1px solid var(--btn-color);}.choice-btn:hover{background-color:var(--btn-hover-color);border-color:var(--btn-hover-color);}`; },
-            getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': '#6c757d', '--btn-text-color': '#ffffff', '--btn-hover-color': '#007bff', '--font-family': 'sans-serif', '--padding': '30' }; }
-        },
-        
-        modals: {
-            show(modalId) { document.getElementById(modalId).classList.add('visible'); },
-            hide(modal) { if(modal) modal.classList.remove('visible'); },
-            hideAll() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('visible')); }
         }
-    };
+    },
 
-    document.addEventListener('DOMContentLoaded', () => App.init());
-    </script>
+    io: {
+        async newProject() {
+            const projectName = prompt("Enter a name for your new project:", "My CYOA Story");
+            if (!projectName) return;
+
+            try {
+                const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                let projectHandle;
+                try {
+                    projectHandle = await dirHandle.getDirectoryHandle(projectName);
+                    if (confirm(`A folder named "${projectName}" already exists. Do you want to open it as a project?`)) {
+                         await App.io.openProject(projectHandle);
+                         return;
+                    } else {
+                        return;
+                    }
+                } catch (e) {
+                     if (e.name === 'NotFoundError') {
+                        projectHandle = await dirHandle.getDirectoryHandle(projectName, { create: true });
+                     } else { throw e; }
+                }
+
+                await projectHandle.getDirectoryHandle('images', { create: true });
+                await projectHandle.getDirectoryHandle('sounds', { create: true });
+                
+                const storyFileHandle = await projectHandle.getFileHandle('story.json', { create: true });
+                const writable = await storyFileHandle.createWritable();
+                const newStory = App.getNewStoryObject();
+                newStory.meta.title = projectName;
+                await writable.write(JSON.stringify(newStory, null, 2));
+                await writable.close();
+
+                App.state.projectDirectoryHandle = projectHandle;
+                App.state.storyData = newStory;
+                App.state.pendingAssetCopies.clear();
+                App.tree.selectScene('start');
+                App.ui.enableEditor(true);
+                App.setDirty(false);
+                alert(`Project '${projectName}' created successfully!`);
+
+            } catch (err) { if (err.name !== 'AbortError') { console.error(err); alert('Could not create the project.'); } }
+        },
+
+        async openProject(dirHandle = null) {
+            try {
+                if (!dirHandle) {
+                    dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                }
+                const storyFileHandle = await dirHandle.getFileHandle('story.json').catch(() => null);
+                if (!storyFileHandle) { alert("Error: 'story.json' not found. Is this a valid project folder?"); return; }
+                
+                const file = await storyFileHandle.getFile();
+                const storyData = JSON.parse(await file.text());
+                
+                const defaultStory = App.getNewStoryObject();
+                storyData.meta = { ...defaultStory.meta, ...storyData.meta };
+                storyData.meta.styles = { ...defaultStory.meta.styles, ...storyData.meta.styles };
+
+
+                await dirHandle.getDirectoryHandle('images', { create: true });
+                await dirHandle.getDirectoryHandle('sounds', { create: true });
+
+                App.state.projectDirectoryHandle = dirHandle;
+                App.state.storyData = storyData;
+                App.state.pendingAssetCopies.clear();
+                App.tree.selectScene(storyData.meta.startSceneId || 'start');
+                App.ui.enableEditor(true);
+                App.setDirty(false);
+                alert(`Project '${storyData.meta.title}' loaded successfully!`);
+                App.modals.hide(document.getElementById('project-menu-modal'));
+
+            } catch (err) { if (err.name !== 'AbortError') { console.error(err); alert('Could not open the project.'); } }
+        },
+        
+        async saveProject() {
+            if (!App.state.projectDirectoryHandle) { alert("No project is open."); return; }
+            App.editor.saveCurrentScene(false);
+            
+            try {
+                if (App.state.pendingAssetCopies.size > 0) {
+                    for (const [relativePath, fileObject] of App.state.pendingAssetCopies.entries()) {
+                        const pathParts = relativePath.split('/');
+                        const fileName = pathParts.pop();
+                        let currentHandle = App.state.projectDirectoryHandle;
+                        for (const part of pathParts) {
+                            currentHandle = await currentHandle.getDirectoryHandle(part, { create: true });
+                        }
+                        const fileHandle = await currentHandle.getFileHandle(fileName, { create: true });
+                        const writable = await fileHandle.createWritable();
+                        await writable.write(fileObject);
+                        await writable.close();
+                    }
+                    console.log(`Copied ${App.state.pendingAssetCopies.size} new asset(s) to the project folder.`);
+                    App.state.pendingAssetCopies.clear();
+                }
+
+                const storyFileHandle = await App.state.projectDirectoryHandle.getFileHandle('story.json', { create: true });
+                const writable = await storyFileHandle.createWritable();
+                await writable.write(JSON.stringify(App.state.storyData, null, 2));
+                await writable.close();
+                
+                App.setDirty(false);
+                console.log("Project saved successfully!");
+                alert("Project saved successfully!");
+
+            } catch (err) { console.error(err); alert("Failed to save project. Check the console for errors."); }
+        },
+        
+        async getFormattedPlayerHTML(isForExport = false) {
+            const storyData = JSON.parse(JSON.stringify(App.state.storyData));
+            let storyJsonString;
+
+            if (isForExport) {
+                storyJsonString = JSON.stringify(storyData, null, 2);
+            } else { // For Preview
+                const assetPaths = new Set();
+                Object.values(storyData.scenes).forEach(scene => {
+                    if (scene.image) assetPaths.add(scene.image);
+                    if (scene.ambienceSound) assetPaths.add(scene.ambienceSound);
+                });
+                if(storyData.meta.styles['--music-path']) assetPaths.add(storyData.meta.styles['--music-path']);
+                if(storyData.meta.styles['--screen-bg-image']) assetPaths.add(storyData.meta.styles['--screen-bg-image']);
+                if(storyData.meta.styles['--container-bg-image']) assetPaths.add(storyData.meta.styles['--container-bg-image']);
+
+                const assetDataUrls = {};
+                for (const path of assetPaths) {
+                    assetDataUrls[path] = await App.io.getAssetDataUrl(path);
+                }
+
+                Object.values(storyData.scenes).forEach(scene => {
+                    if (scene.image && assetDataUrls[scene.image]) scene.image = assetDataUrls[scene.image];
+                    if (scene.ambienceSound && assetDataUrls[scene.ambienceSound]) scene.ambienceSound = assetDataUrls[scene.ambienceSound];
+                });
+                if(storyData.meta.styles['--music-path'] && assetDataUrls[storyData.meta.styles['--music-path']]) storyData.meta.styles['--music-path'] = assetDataUrls[storyData.meta.styles['--music-path']];
+                if(storyData.meta.styles['--screen-bg-image'] && assetDataUrls[storyData.meta.styles['--screen-bg-image']]) storyData.meta.styles['--screen-bg-image'] = assetDataUrls[storyData.meta.styles['--screen-bg-image']];
+                if(storyData.meta.styles['--container-bg-image'] && assetDataUrls[storyData.meta.styles['--container-bg-image']]) storyData.meta.styles['--container-bg-image'] = assetDataUrls[storyData.meta.styles['--container-bg-image']];
+                
+                storyJsonString = JSON.stringify(storyData);
+            }
+
+            const playerScript = `
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const storyData = ${storyJsonString};
+                const sceneImage = document.getElementById('scene-image'), sceneText = document.getElementById('scene-text'), choicesContainer = document.getElementById('choices-container'), ambiencePlayer = document.getElementById('ambience-player'), musicPlayer = document.getElementById('music-player'), playerMenuBtn = document.getElementById('player-menu-btn'), playerMenuModal = document.getElementById('player-menu-modal'), aboutModal = document.getElementById('about-modal'), gameContainer = document.getElementById('game-container');
+                let currentSceneId;
+
+                function isStorageAvailable() {
+                    try {
+                        const storage = window.localStorage;
+                        const x = '__storage_test__';
+                        storage.setItem(x, x);
+                        storage.removeItem(x);
+                        return true;
+                    } catch (e) {
+                        return false;
+                    }
+                }
+
+                const storageAvailable = isStorageAvailable();
+
+                function setupMenu() {
+                    const saveBtn = document.getElementById('save-btn');
+                    const loadBtn = document.getElementById('load-btn');
+                    const fontSizeSlider = document.getElementById('font-size-slider');
+
+                    playerMenuBtn.onclick = () => playerMenuModal.style.display = 'flex';
+                    [playerMenuModal, aboutModal].forEach(m => m.querySelector('.player-modal-close').onclick = () => m.style.display = 'none');
+                    document.getElementById('about-btn').onclick = () => { playerMenuModal.style.display = 'none'; aboutModal.style.display = 'flex'; };
+                    document.getElementById('restart-btn').onclick = () => { if (storageAvailable) { localStorage.removeItem('cyoa-save-' + storyData.meta.title); } renderScene(storyData.meta.startSceneId); playerMenuModal.style.display = 'none'; };
+                    document.getElementById('fullscreen-btn').onclick = () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(e => console.warn(e)); } else { document.exitFullscreen(); } };
+                    
+                    if (!storageAvailable) {
+                        saveBtn.disabled = true;
+                        loadBtn.disabled = true;
+                        saveBtn.title = "Saving is disabled when running from a local file.";
+                        loadBtn.title = "Loading is disabled when running from a local file.";
+                    } else {
+                        saveBtn.onclick = () => { localStorage.setItem('cyoa-save-' + storyData.meta.title, currentSceneId); alert('Progress saved!'); playerMenuModal.style.display = 'none'; };
+                        loadBtn.onclick = () => { const savedId = localStorage.getItem('cyoa-save-' + storyData.meta.title); if (savedId && storyData.scenes[savedId]) { renderScene(savedId); } else { alert('No save data found.'); } playerMenuModal.style.display = 'none'; };
+                    }
+
+                    document.getElementById('music-toggle-btn').onclick = function() { musicPlayer.muted = !musicPlayer.muted; this.textContent = musicPlayer.muted ? 'Music Off' : 'Music On'; };
+                    document.getElementById('sound-toggle-btn').onclick = function() { ambiencePlayer.muted = !ambiencePlayer.muted; this.textContent = ambiencePlayer.muted ? 'Sound Off' : 'Sound On'; };
+                    document.getElementById('volume-slider').oninput = function() { musicPlayer.volume = this.value; };
+                    document.getElementById('ambience-volume-slider').oninput = function() { ambiencePlayer.volume = this.value; };
+                    
+                    musicPlayer.volume = document.getElementById('volume-slider').value;
+                    ambiencePlayer.volume = document.getElementById('ambience-volume-slider').value;
+                    
+                    function applyFontSize(size) {
+                        gameContainer.style.fontSize = size + 'px';
+                        fontSizeSlider.value = size;
+                    }
+
+                    if (storageAvailable) {
+                        const savedSize = localStorage.getItem('cyoa-fontsize-' + storyData.meta.title);
+                        if (savedSize) { applyFontSize(savedSize); }
+                    }
+
+                    fontSizeSlider.oninput = function() {
+                        applyFontSize(this.value);
+                        if (storageAvailable) { localStorage.setItem('cyoa-fontsize-' + storyData.meta.title, this.value); }
+                    };
+
+                    document.getElementById('about-title').textContent = storyData.meta.title;
+                    document.getElementById('about-creator').textContent = storyData.meta.creatorName ? 'By ' + storyData.meta.creatorName : '';
+                    document.getElementById('about-text').textContent = storyData.meta.aboutText;
+                }
+
+                function setupGlobalStyles() {
+                    const styles = storyData.meta.styles || {};
+                    if (styles['--music-path']) { 
+                        musicPlayer.src = styles['--music-path']; 
+                        musicPlayer.play().catch(e=>console.log("Music autoplay blocked by browser. This is normal. Will try again on first click."));
+                    }
+                    // Try to play music on the first user interaction
+                    document.body.addEventListener('click', () => {
+                        if(musicPlayer.src && musicPlayer.paused) {
+                            musicPlayer.play().catch(e => console.warn("Could not start music even after interaction."));
+                        }
+                    }, { once: true });
+                }
+
+                function renderScene(sceneId) {
+                    currentSceneId = sceneId;
+                    const scene = storyData.scenes[sceneId];
+                    if (!scene) { sceneText.textContent = 'Error: Scene "' + sceneId + '" not found.'; return; }
+                    sceneText.textContent = scene.text;
+                    
+                    const imageUrl = scene.image;
+                    scene.image ? (sceneImage.src = imageUrl, sceneImage.parentElement.style.display = 'block') : sceneImage.parentElement.style.display = 'none';
+                    
+                    const soundUrl = scene.ambienceSound;
+                    if (soundUrl) {
+                        const currentUrl = new URL(ambiencePlayer.src || window.location.href);
+                        const newUrl = new URL(soundUrl, window.location.href);
+                        if (currentUrl.href !== newUrl.href) {
+                            ambiencePlayer.src = soundUrl;
+                        }
+                        if(ambiencePlayer.paused) ambiencePlayer.play().catch(e => console.warn("Ambience autoplay blocked."));
+                    } else {
+                        ambiencePlayer.pause();
+                    }
+                    
+                    choicesContainer.innerHTML = '';
+                    (scene.choices || []).forEach(choice => { const button = document.createElement('button'); button.textContent = choice.text; button.className = 'choice-btn'; button.onclick = () => renderScene(choice.target); choicesContainer.appendChild(button); });
+                }
+
+                setupMenu();
+                setupGlobalStyles();
+                document.title = storyData.meta.title || 'Choose Your Own Adventure';
+                let startingScene = storyData.meta.startSceneId;
+                if(storageAvailable) {
+                    const savedSceneId = localStorage.getItem('cyoa-save-' + storyData.meta.title);
+                     if(savedSceneId && storyData.scenes[savedSceneId]) {
+                        startingScene = savedSceneId;
+                    }
+                }
+                renderScene(startingScene);
+            });
+        <\/script>`;
+
+            return document.getElementById('player-template').innerHTML
+                .replace('__STORY_TITLE__', storyData.meta.title || 'My Story')
+                .replace('__LAYOUT_CLASS__', storyData.meta.layout)
+                .replace('__CUSTOM_STYLES__', App.styles.generateCSS(storyData.meta.styles))
+                .replace('__PLAYER_SCRIPT__', playerScript);
+        },
+
+        async exportProjectZip() {
+            if (!App.state.projectDirectoryHandle) { alert("Please open a project to export."); return; }
+            App.editor.saveCurrentScene(false);
+            alert("Preparing project for export. This may take a moment...");
+            
+            const zip = new window.JSZip();
+            
+            const playerHtml = await this.getFormattedPlayerHTML(true);
+            zip.file("index.html", playerHtml);
+
+            async function addFolderToZip(dirHandle, zipFolder) {
+                for await (const entry of dirHandle.values()) {
+                    if (entry.kind === 'file') {
+                        const file = await entry.getFile();
+                        zipFolder.file(entry.name, file);
+                    } else if (entry.kind === 'directory') {
+                        await addFolderToZip(entry, zipFolder.folder(entry.name));
+                    }
+                }
+            }
+
+            try {
+                const imagesHandle = await App.state.projectDirectoryHandle.getDirectoryHandle('images').catch(() => null);
+                if (imagesHandle) await addFolderToZip(imagesHandle, zip.folder('images'));
+                const soundsHandle = await App.state.projectDirectoryHandle.getDirectoryHandle('sounds').catch(() => null);
+                if (soundsHandle) await addFolderToZip(soundsHandle, zip.folder('sounds'));
+
+                zip.generateAsync({ type: "blob" }).then(content => {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(content);
+                    a.download = `${App.state.storyData.meta.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_export.zip`;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                });
+            } catch (err) { console.error("ZIP Export failed:", err); alert("Could not export project. Check console for details."); }
+        },
+        
+        async previewProject() {
+            if (!App.state.projectDirectoryHandle) { alert("Please open a project to preview."); return; }
+            App.editor.saveCurrentScene(false);
+            try {
+                const playerHtml = await this.getFormattedPlayerHTML(false);
+                const blob = new Blob([playerHtml], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+            } catch (err) { console.error("Preview failed:", err); alert("Could not generate preview. Check console for details."); }
+        },
+        
+        async getAssetDataUrl(path) {
+            if (!path) return null;
+            if (App.state.pendingAssetCopies.has(path)) {
+                const file = App.state.pendingAssetCopies.get(path);
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+            try {
+                const pathParts = path.split('/');
+                const fileName = pathParts.pop();
+                let dirHandle = App.state.projectDirectoryHandle;
+                for (const part of pathParts) {
+                    dirHandle = await dirHandle.getDirectoryHandle(part);
+                }
+                const fileHandle = await dirHandle.getFileHandle(fileName);
+                const file = await fileHandle.getFile();
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            } catch (e) { console.warn(`Asset not found: ${path}`); return null; }
+        }
+    },
+
+    tree: {
+        render() {
+            const treeView = App.elements['tree-view'];
+            const collapsedState = {};
+            treeView.querySelectorAll('li[data-scene-id]').forEach(li => { if (li.dataset.collapsed === 'true') collapsedState[li.dataset.sceneId] = true; });
+            treeView.innerHTML = '';
+            const { startSceneId } = App.state.storyData.meta;
+            if (startSceneId && App.state.storyData.scenes[startSceneId]) {
+                const rootUl = document.createElement('ul');
+                this.buildNode(startSceneId, rootUl, [], collapsedState);
+                treeView.appendChild(rootUl);
+            }
+        },
+        buildNode(sceneId, parentElement, path, collapsedState) {
+            const scene = App.state.storyData.scenes[sceneId];
+            if (!scene) { parentElement.innerHTML += `<li><span style="color:red">Broken Link: ${sceneId}</span></li>`; return; }
+            const li = document.createElement('li');
+            li.dataset.sceneId = sceneId;
+            if (collapsedState[sceneId]) li.dataset.collapsed = 'true';
+            const sceneNode = document.createElement('div');
+            sceneNode.className = 'scene-node';
+            if (sceneId === App.state.currentSceneId) sceneNode.classList.add('active');
+            if (sceneId === App.state.storyData.meta.startSceneId) sceneNode.classList.add('is-start');
+            const toggle = document.createElement('span');
+            toggle.className = 'tree-toggle';
+            const hasChoices = scene.choices && scene.choices.length > 0;
+            if (hasChoices) {
+                toggle.textContent = li.dataset.collapsed === 'true' ? '[+]' : '[-]';
+                toggle.onclick = (e) => { e.stopPropagation(); li.dataset.collapsed = !(li.dataset.collapsed === 'true'); this.render(); };
+            } else { toggle.classList.add('empty'); }
+            const text = document.createElement('span'); text.textContent = sceneId;
+            sceneNode.appendChild(toggle); sceneNode.appendChild(text);
+            sceneNode.onclick = () => this.selectScene(sceneId);
+            sceneNode.oncontextmenu = (e) => {
+                e.preventDefault(); App.state.contextSceneId = sceneId;
+                const menu = App.elements['tree-context-menu'];
+                menu.style.display = 'block'; menu.style.left = `${e.pageX}px`; menu.style.top = `${e.pageY}px`;
+            };
+            li.appendChild(sceneNode);
+            if (path.includes(sceneId)) {
+                li.querySelector('.scene-node').appendChild(document.createElement('span')).textContent = ' (LOOP)';
+                parentElement.appendChild(li); return;
+            }
+            if (hasChoices && li.dataset.collapsed !== 'true') {
+                const childUl = document.createElement('ul');
+                scene.choices.forEach(choice => {
+                    const choiceLi = document.createElement('li'); choiceLi.className = 'choice-node';
+                    choiceLi.textContent = `⤷ "${choice.text}" →`; childUl.appendChild(choiceLi);
+                    this.buildNode(choice.target, childUl, [...path, sceneId], collapsedState);
+                });
+                li.appendChild(childUl);
+            }
+            parentElement.appendChild(li);
+        },
+        selectScene(sceneId) { if (!sceneId || !App.state.storyData.scenes[sceneId]) { console.error(`Attempted to select non-existent scene: ${sceneId}`); return; } App.editor.saveCurrentScene(false); if (App.state.currentSceneId === sceneId) return; App.state.currentSceneId = sceneId; this.render(); App.editor.render(); }
+    },
+
+    editor: {
+        render() { 
+            const scene = App.state.storyData.scenes[App.state.currentSceneId]; 
+            const meta = App.state.storyData.meta;
+            const editorPanel = document.getElementById('editor-panel'); 
+            if (!scene) { editorPanel.style.display = 'none'; return; } 
+            editorPanel.style.display = 'block'; 
+            App.elements['scene-id'].value = scene.id || ''; 
+            App.elements['scene-text'].value = scene.text || ''; 
+            App.elements['choices-container'].innerHTML = ''; 
+            (scene.choices || []).forEach(choice => this.addChoiceToDOM(choice)); 
+            App.elements['scene-image'].value = scene.image || ''; 
+            App.ui.updateImageThumbnail(scene.image); 
+            App.elements['scene-image-prompt'].value = scene.imagePrompt || ''; 
+            App.elements['scene-sound'].value = scene.ambienceSound || ''; 
+            App.ui.updateAiImagePreview(null); 
+            App.state.aiImageUrl = null; 
+            App.elements['creator-name'].value = meta.creatorName || '';
+            App.elements['about-text'].value = meta.aboutText || '';
+        },
+        saveCurrentScene(showAlert = false) { 
+            if (!App.state.currentSceneId) return; 
+            const id = App.state.currentSceneId; 
+            const scene = App.state.storyData.scenes[id]; 
+            if (!scene) return; 
+            scene.image = App.elements['scene-image'].value.trim(); 
+            scene.imagePrompt = App.elements['scene-image-prompt'].value.trim(); 
+            scene.ambienceSound = App.elements['scene-sound'].value.trim(); 
+            scene.text = App.elements['scene-text'].value; 
+            scene.choices = Array.from(App.elements['choices-container'].querySelectorAll('.choice-group')).map(div => ({ text: div.querySelector('input[type=text]').value, target: div.querySelector('select').value })).filter(c => c.text && c.target); 
+            App.setDirty(true); 
+            App.tree.render(); 
+            if(showAlert) { console.log(`Scene '${id}' changes saved to memory.`); }
+         },
+        addChoiceToDOM(choice = { text: '', target: '' }) { 
+            const choiceDiv = document.createElement('div'); 
+            choiceDiv.className = 'form-group inline choice-group'; 
+            const textInput = document.createElement('input'); 
+            textInput.type = 'text'; 
+            textInput.placeholder = 'Choice text'; 
+            textInput.value = choice.text; 
+            const targetSelect = document.createElement('select'); 
+            const defaultOption = document.createElement('option'); 
+            defaultOption.value = ''; 
+            defaultOption.textContent = '-- Select Target --'; 
+            targetSelect.appendChild(defaultOption); 
+            Object.keys(App.state.storyData.scenes || {}).sort().forEach(id => { const option = document.createElement('option'); option.value = id; option.textContent = id; if (id === choice.target) option.selected = true; targetSelect.appendChild(option); }); 
+            const goToBtn = document.createElement('button');
+            goToBtn.textContent = 'Go To';
+            goToBtn.className = 'btn-secondary';
+            goToBtn.style.padding = '5px 8px';
+            goToBtn.style.fontSize = '0.8em';
+            goToBtn.onclick = () => { const targetScene = targetSelect.value; if (targetScene) App.tree.selectScene(targetScene); };
+            const deleteBtn = document.createElement('button'); 
+            deleteBtn.textContent = 'X'; 
+            deleteBtn.className = 'btn-danger'; 
+            deleteBtn.style.flexShrink = '0'; 
+            deleteBtn.onclick = () => choiceDiv.remove(); 
+            choiceDiv.appendChild(textInput); 
+            choiceDiv.appendChild(targetSelect); 
+            choiceDiv.appendChild(goToBtn);
+            choiceDiv.appendChild(deleteBtn); 
+            App.elements['choices-container'].appendChild(choiceDiv); 
+        }
+    },
+    
+    assets: {
+        selectFile(assetType, targetInputId) {
+            const fileInputId = assetType === 'images' ? 'image-file-input' : 'sound-file-input';
+            const fileInput = document.getElementById(fileInputId);
+            fileInput.onchange = (e) => this.handleLocalFileSelect(e, assetType, targetInputId);
+            fileInput.click();
+        },
+        handleLocalFileSelect(event, assetTypeFolder, targetInputId) {
+            const file = event.target.files[0]; if (!file) return;
+            const destinationPath = `${assetTypeFolder}/${file.name}`;
+            App.state.pendingAssetCopies.set(destinationPath, file);
+            const inputElement = document.getElementById(targetInputId);
+            if (inputElement) {
+                inputElement.value = destinationPath;
+                inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+                if (targetInputId === 'scene-image') App.ui.updateImageThumbnail(destinationPath);
+            }
+            App.setDirty(true);
+            event.target.value = '';
+        },
+        renderPollinationImage() { const promptText = App.elements['scene-image-prompt'].value.trim(); if (!promptText) { alert("Please enter a prompt first."); return; } const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}`; App.state.aiImageUrl = url; App.ui.updateAiImagePreview(null, 'Rendering...'); const tempImg = new Image(); tempImg.onload = () => App.ui.updateAiImagePreview(url); tempImg.onerror = () => { App.ui.updateAiImagePreview(null, 'Render failed.'); App.state.aiImageUrl = null; }; tempImg.src = url; },
+        async addPollinationImageToScene() { if (!App.state.aiImageUrl) { alert("Please render an image first."); return; } App.ui.updateAiImagePreview(null, 'Downloading...'); try { const response = await fetch(App.state.aiImageUrl); if (!response.ok) throw new Error(`Fetch failed: ${response.statusText}`); const imageBlob = await response.blob(); const filename = `${App.state.currentSceneId || 'image'}_${Date.now()}.jpg`; const destinationPath = `images/${filename}`; App.state.pendingAssetCopies.set(destinationPath, imageBlob); App.elements['scene-image'].value = destinationPath; App.ui.updateImageThumbnail(destinationPath); App.setDirty(true); console.log(`Image added to scene. Remember to 'Save Project' to copy the file.`); } catch (err) { console.error("Error adding AI image:", err); alert("Could not download or save the image."); App.ui.updateAiImagePreview(App.state.aiImageUrl); } }
+    },
+
+    player: {
+        async play(sceneId) {
+            if (!sceneId || !App.state.storyData.scenes[sceneId]) { alert("Cannot play scene. Please select a valid scene to start from."); return; }
+            App.elements['editor-container'].style.display = 'none';
+            App.elements['player-container'].style.display = 'flex';
+            await App.styles.applyToPlayer();
+            await this.renderScene(sceneId);
+        },
+        async renderScene(sceneId) {
+            App.state.currentSceneId = sceneId;
+            App.tree.render();
+            const activeNode = App.elements['tree-view'].querySelector('.scene-node.active');
+            if (activeNode) { activeNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+
+            const scene = App.state.storyData.scenes[sceneId];
+            const { 'player-image': img, 'player-text': text, 'player-choices': choices, 'ambience-player': audio } = App.elements;
+            if (!scene) { text.textContent = `Error: Scene "${sceneId}" not found.`; return; }
+            
+            text.textContent = scene.text;
+            const imageUrl = await App.io.getAssetDataUrl(scene.image);
+            const imageContainer = document.getElementById('player-image-container');
+            if(imageUrl) { img.src = imageUrl; imageContainer.style.display = 'block'; } else { imageContainer.style.display = 'none'; }
+            const soundUrl = await App.io.getAssetDataUrl(scene.ambienceSound);
+            if (soundUrl) { if(audio.src !== soundUrl) audio.src = soundUrl; audio.play().catch(e => console.warn("Audio autoplay was blocked by the browser.")); } else { audio.pause(); }
+            choices.innerHTML = '';
+            (scene.choices || []).forEach(choice => { const button = document.createElement('button'); button.className = 'choice-btn'; button.textContent = choice.text; button.onclick = () => this.renderScene(choice.target); choices.appendChild(button); });
+        },
+        stop() {
+            App.elements['editor-container'].style.display = 'block';
+            App.elements['player-container'].style.display = 'none';
+            App.elements['ambience-player'].pause();
+            App.elements['music-player'].pause();
+            App.elements['ambience-player'].src = '';
+            App.elements['music-player'].src = '';
+        }
+    },
+    
+    styles: {
+        open() {
+            App.modals.hide(document.getElementById('project-menu-modal'));
+            const grid = document.getElementById('style-editor-grid');
+            const styles = App.state.storyData.meta.styles;
+            const layout = App.state.storyData.meta.layout;
+            grid.innerHTML = `
+                <label>Layout <select id="style-layout"><option value="layout-top-down">Image on Top</option><option value="layout-side-by-side">Image on Side</option></select></label>
+                <label>Font Family <select id="style-font-family"><option value="sans-serif">Sans-Serif</option><option value="serif">Serif</option><option value="monospace">Monospace</option></select></label>
+                <label>Font Size (px) <input type="number" id="style-font-size" min="8" max="48" step="1"></label>
+                <label>Background Color <input type="color" id="style-bg-color"></label>
+                <label>Text Color <input type="color" id="style-text-color"></label>
+                <label>Button Color <input type="color" id="style-btn-color"></label>
+                <label>Button Hover Color <input type="color" id="style-btn-hover-color"></label>
+                <label>Button Text Color <input type="color" id="style-btn-text-color"></label>
+                <label>Game Padding (px) <input type="number" id="style-padding" min="0"></label>
+                <label>Background Music <div class="form-group inline" style="margin:0;"><input type="text" id="style-music-path" class="path-input" data-asset-type="sounds" placeholder="sounds/music.mp3"><button class="btn-secondary file-icon-btn">📁</button></div></label>
+                <label>Screen BG Image <div class="form-group inline" style="margin:0;"><input type="text" id="style-screen-bg-image" class="path-input" data-asset-type="images" placeholder="images/bg.jpg"><button class="btn-secondary file-icon-btn">📁</button></div></label>
+                <label>Container BG Image <div class="form-group inline" style="margin:0;"><input type="text" id="style-container-bg-image" class="path-input" data-asset-type="images" placeholder="images/container-bg.png"><button class="btn-secondary file-icon-btn">📁</button></div></label>
+            `;
+            
+            Object.keys(this.getDefaults()).forEach(key => { 
+                const el = grid.querySelector(`#style-${key.replace(/--/g, '')}`); 
+                if(el) {
+                    if (el.type === 'number') {
+                        el.value = parseInt(styles[key]);
+                    } else {
+                        el.value = styles[key];
+                    }
+                }
+            });
+            grid.querySelector('#style-layout').value = layout;
+            
+            grid.oninput = (e) => this.handleUpdate(e);
+
+            grid.querySelectorAll('.file-icon-btn').forEach(btn => {
+                const input = btn.previousElementSibling;
+                btn.onclick = () => App.assets.selectFile(input.dataset.assetType, input.id);
+            });
+            App.modals.show('style-editor-modal'); 
+        },
+        handleUpdate(event) {
+            const target = event.target;
+            const id = target.id.replace('style-', '');
+            let value = target.value;
+
+            if (id === 'layout') {
+                App.state.storyData.meta.layout = value;
+            } else {
+                if (target.type === 'number') value += 'px';
+                App.state.storyData.meta.styles[`--${id}`] = value;
+            }
+            App.setDirty(true);
+            if (App.elements['player-container'].style.display === 'flex') {
+                this.applyToPlayer();
+            }
+        },
+        async applyToPlayer() {
+            const meta = App.state.storyData.meta;
+            const styles = meta.styles;
+            const defaults = this.getDefaults();
+            const pc = App.elements['player-container'];
+            const pic = App.elements['player-inner-container'];
+            const musicPlayer = App.elements['music-player'];
+
+            Object.keys(defaults).forEach(key => {
+                if (key.startsWith('--') && !key.includes('path') && !key.includes('image')) {
+                    const value = styles[key] || defaults[key];
+                    pc.style.setProperty(key, value);
+                }
+            });
+
+            pic.className = meta.layout;
+
+            const screenBgUrl = await App.io.getAssetDataUrl(styles['--screen-bg-image']);
+            pc.style.backgroundImage = screenBgUrl ? `url("${screenBgUrl}")` : 'none';
+
+            const containerBgUrl = await App.io.getAssetDataUrl(styles['--container-bg-image']);
+            pic.style.backgroundImage = containerBgUrl ? `url("${containerBgUrl}")` : 'none';
+            
+            const musicUrl = await App.io.getAssetDataUrl(styles['--music-path']);
+            if (musicUrl) {
+                const currentUrl = new URL(musicPlayer.src || window.location.href);
+                const newUrl = new URL(musicUrl, window.location.href);
+                if (currentUrl.href !== newUrl.href) {
+                    musicPlayer.src = musicUrl;
+                }
+                if (musicPlayer.paused) {
+                   musicPlayer.play().catch(e => console.warn("Music autoplay blocked by browser."));
+                }
+            } else {
+                musicPlayer.pause();
+                musicPlayer.src = '';
+            }
+        },
+        generateCSS(stylesOverride = null) { 
+            const styles = stylesOverride || App.state.storyData.meta.styles;
+            const defaults = this.getDefaults();
+            let rootVars = '';
+
+            Object.keys(defaults).forEach(key => {
+                if (key.startsWith('--') && !key.includes('path') && !key.includes('image')) {
+                    const value = styles[key] || defaults[key];
+                    rootVars += `    ${key}: ${value};\n`;
+                }
+            });
+
+            let css = `
+:root {\n${rootVars}}
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-family, sans-serif);
+}
+#game-container {
+    padding: var(--padding);
+    background-color: rgba(0, 0, 0, 0.15);
+    font-size: var(--font-size);
+}
+.choice-btn {
+    background-color: var(--btn-color);
+    color: var(--btn-text-color);
+    border: 1px solid var(--btn-color);
+}
+.choice-btn:hover {
+    background-color: var(--btn-hover-color);
+    border-color: var(--btn-hover-color);
+}
+`;
+            if (styles['--screen-bg-image']) {
+                css += `body { background-image: url('${styles['--screen-bg-image']}'); }\n`;
+            }
+            if (styles['--container-bg-image']) {
+                css += `#game-container { background-image: url('${styles['--container-bg-image']}'); }\n`;
+            }
+            return css;
+        },
+        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': '#6c757d', '--btn-text-color': '#ffffff', '--btn-hover-color': '#5a6268', '--font-family': 'sans-serif', '--font-size': '16px', '--padding': '30px', '--music-path': '', '--screen-bg-image': '', '--container-bg-image': '' }; }
+    },
+    
+    modals: {
+        show(modalId) { document.getElementById(modalId).classList.add('visible'); },
+        hide(modal) { if(modal) modal.classList.remove('visible'); },
+        hideAll() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('visible')); }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => App.init());
+</script>
 </body>
 </html>

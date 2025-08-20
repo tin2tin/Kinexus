@@ -51,7 +51,7 @@ Creating your first game is a straightforward process. The app handles all the f
 
 ### 1. Create or Open a Project
 
-First, open the `cyoa-studio.html` file in your browser. From the **Menu**, you have two options:
+First, open the `index.html` file in your browser. From the **Menu**, you have two options:
 
 *   **A. New Project:**
     1.  Click **"New Project"**.

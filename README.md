@@ -39,17 +39,11 @@ CYOA Studio is a powerful, single-file, zero-installation tool for creating, sty
 
 *   **Local-First Project Management:** Works directly with folders on your computer via the File System Access API. Your project, including the story file and all assets, is saved locally, not in the cloud. The app tracks unsaved changes to prevent data loss.
 
-Of course! Here is the updated "How to Get Started" guide, rewritten to accurately reflect the app's modern, streamlined workflow.
-
-***
-
 ## Screenshots
 
 <img width="1919" height="957" alt="image" src="https://github.com/user-attachments/assets/5e5bf8e6-bc71-4394-9cdb-ab7e2129b19c" />
 <img width="1919" height="960" alt="image" src="https://github.com/user-attachments/assets/981509d8-acf2-4e0b-9c41-eb0676853fb9" />
 <img width="1919" height="958" alt="image" src="https://github.com/user-attachments/assets/3b60724b-92e2-49ab-b864-64edc3830c5e" />
-
-***
 
 ## How to Get Started
 
@@ -105,17 +99,15 @@ It's crucial to understand the difference between saving and exporting:
 
 *   **Export Standalone Game:** When your game is complete, click **"Menu"** -> **"Export Standalone Game"**. This packages your story, all required assets, and your custom theme into a single `.zip` file that you can share or upload anywhere. This is the final, playable product.
 
-  
 ---
-
 
 ## The Story File Format
 
-To generate stories for this editor, you must produce a valid JSON file adhering to the following structure.
+To programmatically generate stories for this application, you must produce a valid JSON file adhering to the precise schema detailed below. The application strictly parses this format.
 
 ### Root Object Structure
 
-The root element **MUST** be a single JSON object with two top-level keys: `meta` and `scenes`.
+The root element **MUST** be a single JSON object with two required, top-level keys: `meta` and `scenes`.
 
 ```json
 {
@@ -126,110 +118,148 @@ The root element **MUST** be a single JSON object with two top-level keys: `meta
 
 ### The `meta` Object
 
-The `meta` object contains global information about the story and its presentation.
+The `meta` object contains global metadata and configuration for the entire story.
 
-| Key            | Type   | Description                                                                                                   | Example                                 |
-| -------------- | ------ | ------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `title`        | String | The title of your story. Used for the browser tab and exported project name.                                  | `"The Grey Uniform"`                      |
-| `startSceneId` | String | The ID of the scene where the story begins. This ID **MUST** exist as a key in the `scenes` object.             | `"conscription_notice"`                 |
-| `layout`       | String | The visual layout of the game screen. **MUST** be either `"layout-top-down"` or `"layout-side-by-side"`.        | `"layout-side-by-side"`                 |
-| `styles`       | Object | An object containing key-value pairs for CSS styling. See the `styles` object details below.                  | `{ "--bg-color": "#3d2b1f", ... }`       |
+| Key | Type | Required | Description | Example |
+| :--- | :--- | :--- | :--- | :--- |
+| `title` | String | Yes | The title of your story. Used for the browser tab and exported project name. | `"The Last Broadcast"` |
+| `creatorName` | String | No | The name or alias of the author, displayed in the game's "About" section. | `"A. N. Author"` |
+| `aboutText` | String | No | A brief description of the project, displayed in the game's "About" section. | `"A short interactive story of suspense."` |
+| `startSceneId` | String | Yes | The ID of the scene where the story begins. This ID **MUST** exist as a key in the `scenes` object. | `"radio_room"` |
+| `layout` | String | Yes | The visual layout of the game screen. **MUST** be either `"layout-top-down"` or `"layout-side-by-side"`. | `"layout-side-by-side"` |
+| `styles` | Object | Yes | An object containing key-value pairs for CSS styling. See the `styles` object details below. | `{ "--bg-color": "#1a1a1a", ... }` |
 
 #### The `styles` Object
 
-This object contains key-value pairs that directly map to CSS custom properties.
+This object contains CSS custom properties to theme the player. All keys and values **MUST** be strings.
 
-| Key                 | Type   | Description                                     | Example         |
-| ------------------- | ------ | ----------------------------------------------- | --------------- |
-| `--bg-color`        | String | Background color of the game. (Hex code)        | `"#3d2b1f"`      |
-| `--text-color`      | String | Main text color. (Hex code)                     | `"#f5f5dc"`      |
-| `--btn-color`       | String | Background color of choice buttons. (Hex code)  | `"#8a6d3b"`      |
-| `--btn-text-color`  | String | Text color of choice buttons. (Hex code)        | `"#ffffff"`      |
-| `--btn-hover-color` | String | Background color of buttons on hover. (Hex code)| `"#ab884a"`      |
-| `--font-family`     | String | Font style. **MUST** be `sans-serif`, `serif`, or `monospace`. | `"serif"`       |
-| `--padding`         | String | Padding inside the game container, in pixels. **MUST** be a string of a number. | `"35"`          |
+| Key | Type | Description | Example |
+| :--- | :--- | :--- | :--- |
+| `--bg-color` | String | Background color of the game screen. (Hex code) | `"#1a1a1a"` |
+| `--text-color` | String | Main narrative text color. (Hex code) | `"#e0e0e0"` |
+| `--btn-color` | String | Background color of choice buttons. (Hex code) | `"#4a78ad"` |
+| `--btn-text-color` | String | Text color of choice buttons. (Hex code) | `"#ffffff"` |
+| `--btn-hover-color` | String | Background color of choice buttons on hover. (Hex code) | `"#6c757d"` |
+| `--font-family` | String | Font style. **MUST** be `sans-serif`, `serif`, or `monospace`. | `"monospace"` |
+| `--font-size` | String | The base font size. **MUST** be a string including the `px` unit. | `"18px"` |
+| `--padding` | String | Padding inside the game container. **MUST** be a string including the `px` unit. | `"40px"` |
+| `--music-path` | String | **OPTIONAL.** Relative path to a global background music file. | `"sounds/bg_music.mp3"` |
+| `--screen-bg-image` | String | **OPTIONAL.** Relative path to a background image for the entire screen. | `"images/static_bg.png"` |
+| `--container-bg-image` | String | **OPTIONAL.** Relative path to a background image for the game's content box. | `"images/paper_texture.jpg"` |
 
 ### The `scenes` Object
 
-The `scenes` object is a dictionary where each key is a unique `sceneId` (String) and each value is a Scene Object.
+The `scenes` object is a dictionary where each key is a unique `sceneId` (String) and each value is a corresponding Scene Object.
 
 ```json
 "scenes": {
   "sceneId_1": { ... Scene Object 1 ... },
-  "sceneId_2": { ... Scene Object 2 ... }
+  "sceneId_2": { ... Scene Object 2 ... },
+  ...
 }
 ```
 
 ### Scene Object Structure
 
-Each Scene Object describes a single moment or page in the story.
+Each Scene Object represents a single page or moment in the story.
 
-| Key             | Type   | Description                                                                                                   | Example                                                                                             |
-| --------------- | ------ | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `id`            | String | The unique identifier for this scene. **MUST** be identical to its key in the `scenes` object.                  | `"conscription_notice"`                                                                             |
-| `text`          | String | The main narrative text for the scene. Can include newline characters (`\n`) for formatting.                      | `"The letter arrives, cold and official.\nYou have been conscripted."`                               |
-| `image`         | String | *Optional.* The relative path to the image file for this scene. Omit or leave empty (`""`) for no image.          | `"images/letter.jpg"`                                                                               |
-| `imagePrompt`   | String | *Optional.* The descriptive prompt used to generate the image with an AI.                                       | `"A WW1 German conscription letter on a rustic wooden table, photorealistic, somber lighting."`       |
-| `ambienceSound` | String | *Optional.* The relative path to the looping background sound file. Omit or leave empty for silence.            | `"sounds/paper_rustle.mp3"`                                                                         |
-| `choices`       | Array  | An array of Choice Objects. If empty, the story ends at this scene.                                           | `[ { "text": "...", "target": "..." } ]`                                                            |
+| Key | Type | Required | Description | Example |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | String | Yes | The unique identifier for the scene. **MUST** be identical to its key in the `scenes` object. | `"radio_room"` |
+| `text` | String | Yes | The main narrative text for the scene. Use `\n` for line breaks. | `"The only light comes from the vacuum tubes...\nThe static hisses."` |
+| `image` | String | No | **OPTIONAL.** The relative path to the image file for this scene. | `"images/radio.jpg"` |
+| `imagePrompt` | String | No | **OPTIONAL.** The descriptive prompt used to generate the image with an AI. | `"A vintage 1940s radio console in a dark room, glowing tubes, dramatic lighting, photorealistic."` |
+| `ambienceSound` | String | No | **OPTIONAL.** The relative path to a looping background audio file for this scene. | `"sounds/radio_static.ogg"` |
+| `choices` | Array | Yes | An array of Choice Objects. An empty array (`[]`) signifies an ending scene. | `[ { "text": "...", "target": "..." } ]` |
 
 ### Choice Object Structure
 
-Each Choice Object, located inside a scene's `choices` array, defines a player option.
+Each Choice Object, located inside a scene's `choices` array, defines a single player action.
 
-| Key      | Type   | Description                                                                             | Example                   |
-| -------- | ------ | --------------------------------------------------------------------------------------- | ------------------------- |
-| `text`   | String | The text that appears on the button for the player to click.                            | `"Accept your fate."`       |
-| `target` | String | The `id` of the scene this choice leads to. This ID **MUST** exist as a key in the `scenes` object. | `"train_station"` |
+| Key | Type | Required | Description | Example |
+| :--- | :--- | :--- | :--- | :--- |
+| `text` | String | Yes | The text that appears on the button for the player to click. | `"Turn the dial."` |
+| `target` | String | Yes | The `id` of the scene this choice leads to. This ID **MUST** exist as a key in the `scenes` object. | `"faint_signal"` |
 
 ### Complete JSON Example
 
 ```json
 {
   "meta": {
-    "title": "The Grey Uniform",
-    "startSceneId": "conscription_notice",
+    "title": "The Last Broadcast",
+    "creatorName": "A. N. Author",
+    "aboutText": "A short interactive story of suspense set in a remote listening post.",
+    "startSceneId": "radio_room",
     "layout": "layout-side-by-side",
     "styles": {
-      "--bg-color": "#3d2b1f",
-      "--text-color": "#f5f5dc",
-      "--btn-color": "#8a6d3b",
+      "--bg-color": "#1a1a1a",
+      "--text-color": "#e0e0e0",
+      "--btn-color": "#4a78ad",
       "--btn-text-color": "#ffffff",
-      "--btn-hover-color": "#ab884a",
-      "--font-family": "serif",
-      "--padding": "35"
+      "--btn-hover-color": "#6c757d",
+      "--font-family": "monospace",
+      "--font-size": "18px",
+      "--padding": "40px",
+      "--music-path": "",
+      "--screen-bg-image": "images/static_bg.png",
+      "--container-bg-image": ""
     }
   },
   "scenes": {
-    "conscription_notice": {
-      "id": "conscription_notice",
-      "text": "The letter arrives on a Tuesday, cold and official. The Imperial German eagle stares from the masthead, its gaze impersonal. You have been conscripted.\n\nYour mother weeps quietly in the kitchen. Your father claps you on the shoulder, his face a mask of grim pride. There is no choice.",
-      "image": "images/letter.jpg",
-      "imagePrompt": "A WW1 German conscription letter on a rustic wooden table, photorealistic, somber lighting, ink pen and a half-empty glass nearby.",
-      "ambienceSound": "sounds/paper_rustle.mp3",
+    "radio_room": {
+      "id": "radio_room",
+      "text": "The only light in the shack comes from the warm, orange glow of the radio's vacuum tubes.\nOutside, the blizzard howls.\nThe constant hiss of static is your only companion.",
+      "image": "images/radio.jpg",
+      "imagePrompt": "A vintage 1940s radio console in a dark, rustic wooden shack, glowing tubes casting long shadows, snow visible through a window, dramatic lighting, photorealistic.",
+      "ambienceSound": "sounds/radio_static.ogg",
       "choices": [
         {
-          "text": "Accept your fate and pack your bag.",
-          "target": "train_station"
+          "text": "Try to tune the main frequency dial.",
+          "target": "faint_signal"
+        },
+        {
+          "text": "Make a cup of coffee and wait.",
+          "target": "ending_nothing"
         }
       ]
     },
-    "train_station": {
-      "id": "train_station",
-      "text": "The platform is a chaotic sea of grey uniforms, steam, and tearful goodbyes. The air is thick with the smell of coal smoke and anxiety. A sergeant barks orders, his voice raw.\n\nThe train, a monstrous iron beast, waits impatiently.",
-      "image": "images/steam_train.jpg",
-      "imagePrompt": "Thousands of German soldiers in Pickelhaube helmets boarding a steam train, WW1, platform is crowded with families, cinematic, sepia tone, emotional.",
-      "ambienceSound": "sounds/train_station.mp3",
+    "faint_signal": {
+      "id": "faint_signal",
+      "text": "You slowly turn the heavy bakelite dial. The static crackles and shifts.\nSuddenly, through the noise, you hear something... a voice? It's faint, distorted by distance and the storm.",
+      "image": "",
+      "imagePrompt": "",
+      "ambienceSound": "sounds/faint_voice.mp3",
       "choices": [
         {
-          "text": "Find a quiet corner in a railcar.",
-          "target": "western_front"
+          "text": "Fine-tune the signal.",
+          "target": "clear_message"
         },
         {
-          "text": "Try to start a conversation with another recruit.",
-          "target": "western_front"
+          "text": "Dismiss it as interference and go back.",
+          "target": "radio_room"
         }
       ]
+    },
+    "clear_message": {
+      "id": "clear_message",
+      "text": "With delicate adjustments, the voice becomes clearer, cutting through the static. It's speaking a sequence of numbers, repeating them over and over.\n'...seven... four... one... zero...'\nIt's a code you don't recognize. Then, the signal dies, replaced by the familiar hiss.",
+      "image": "images/headphones.jpg",
+      "imagePrompt": "Close-up on a pair of vintage 1940s military headphones lying on a wooden desk next to a code book, shallow depth of field, moody lighting.",
+      "ambienceSound": "",
+      "choices": [
+        {
+          "text": "The numbers mean nothing. The storm is getting worse.",
+          "target": "ending_nothing"
+        }
+      ]
+    },
+    "ending_nothing": {
+      "id": "ending_nothing",
+      "text": "You decide against chasing phantoms in the static. The storm rages on, and the night passes in quiet solitude.\nNothing happens. Perhaps that's for the best.",
+      "image": "images/snow_window.jpg",
+      "imagePrompt": "Looking out a frosted window from a dark cabin into a fierce blizzard at night.",
+      "ambienceSound": "sounds/blizzard.mp3",
+      "choices": []
     }
   }
 }

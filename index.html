@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -39,7 +38,7 @@
         #player-container { display: none; flex-grow: 1; overflow-y: auto; position: relative; justify-content: center; align-items: center; }
         /* Headers */
         h1, h2, h3 { border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; margin-top: 0; }
-        .header { display: flex; justify-content: space-between; align-items: baseline; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
         .header h1 { white-space: nowrap; }
         .header h3 { border-bottom: none; } /* Specificity for choice header */
         #main-title-dirty-indicator { color: var(--danger-color); font-size: 0.7em; margin-left: 5px; display: none; }
@@ -70,8 +69,25 @@
         .scene-node-icons .icon-deadend { fill: var(--danger-color); }
         .scene-node-icons .icon-orphan { fill: var(--warning-color); }
         .scene-node.active .scene-node-icons svg { fill: white; }
-        .choice-node { list-style-type: none; position: relative; padding: 3px 0 3px 25px; color: #a0a0a0; font-style: italic; font-size: 0.9em; }
-        .choice-node::before { content: ''; position: absolute; top: -10px; left: 5px; width: 15px; height: 18px; border-bottom: 1px solid #444; border-left: 1px solid #444; border-radius: 0 0 0 5px; }
+        .choice-node { 
+            list-style-type: none; 
+            position: relative; 
+            padding: 3px 0 3px 25px; 
+            color: var(--choice-color, #a0a0a0); /* Use variable, fallback to original */
+            font-style: normal; /* Changed from italic for better readability */
+            font-size: 0.9em; 
+        }
+        .choice-node::before { 
+            content: ''; 
+            position: absolute; 
+            top: -10px; 
+            left: 5px; 
+            width: 15px; 
+            height: 18px; 
+            border-bottom: 1px solid var(--choice-color, #444); /* Use variable */
+            border-left: 1px solid var(--choice-color, #444); /* Use variable */
+            border-radius: 0 0 0 5px; 
+        }
         .choice-node-text { white-space: nowrap; }
         .tree-toggle { font-family: monospace; width: 20px; text-align: center; border-radius: 4px; background: #333333; user-select: none; color: var(--dark-text); flex-shrink: 0; }
         .scene-node.active .tree-toggle { background: #ffffff; color: var(--primary-color); }
@@ -100,8 +116,8 @@
         input[type="text"], input[type="search"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #444444; border-radius: 4px; font-size: 1em; background-color: #1e1e1e; color: var(--dark-text); }
         input[type="text"]:disabled { background-color: #333333; cursor: not-allowed; }
         textarea { height: 100px; resize: vertical; }
-        .media-row { display: flex; gap: 20px; align-items: stretch; }
-        .media-row > .form-group { flex: 1; }
+        .media-row { }
+        .media-row > .form-group { }
         /* AI Image Generator */
         #ai-image-generator { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
         #ai-image-preview { width: 128px; height: 128px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; position: relative; }
@@ -153,6 +169,7 @@
         #image-preview:hover .thumbnail-fullscreen-icon,
         #ai-image-preview:hover .thumbnail-fullscreen-icon { opacity: 1; }
         .thumbnail-fullscreen-icon svg { width: 16px; height: 16px; }
+        .play-pause-icon.hidden { display: none; }
     </style>
 </head>
 <body>
@@ -179,7 +196,7 @@
     <fieldset id="editor-fieldset">
         <div class="header">
             <h1>Scene Editor <span id="main-title-dirty-indicator">(unsaved)</span></h1>
-            <div style="flex-grow: 1; display: flex; justify-content: center;">
+            <div style="flex-grow: 1; display: flex; justify-content: center; align-items: center;">
                 <div class="form-group inline" id="scene-id-group" style="margin-bottom: 0; min-width: 250px;">
                     <label for="scene-id" style="margin-bottom: 0; white-space: nowrap;">Scene ID</label>
                     <input type="text" id="scene-id" disabled style="padding-top: 10px; padding-bottom: 10px;">
@@ -189,17 +206,17 @@
                 </div>
             </div>
             <div class="btn-group">
-                <button id="preview-btn" class="btn-success" title="Preview Project in New Tab">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445z"/></svg>
-                </button>
                 <button id="play-from-start-btn" class="btn-success" title="Play from Start Scene">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                </button>
+                 <button id="preview-btn" class="btn-success" title="Preview Project in New Tab">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445z"/></svg>
                 </button>
                 <button id="play-from-current-btn" class="btn-success" title="Play from Current Scene">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="transform: scaleX(1.2);"><path d="M10.804 8 5 4.633v6.734L10.804 8zM4 4v8h-1V4h1zm8 0v8h-1V4h1z"/></svg>
                 </button>
                 <button id="save-scene-btn" class="btn-warning" title="Save Changes to Memory">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.5 0h-2A1.5 1.5 0 0 0 1 1.5V15a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2.5A1.5 1.5 0 0 0 13.5 1h-2a.5.5 0 0 1 0-1h-2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H4.5zM3 14V2.5A.5.5 0 0 1 3.5 2H5v1.5A1.5 1.5 0 0 0 6.5 5h3A1.5 1.5 0 0 0 11 3.5V2h1.5a.5.5 0 0 1 .5.5V14a.5.5 0 0 1-.5.5H3.5a.5.5 0 0 1-.5-.5z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.5 0h-2A1.5 1.5 0 0 0 1 1.5V15a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2.5A1.5 1.5 0 0 0 13.5 1h-2a.5.5 0 0 1 0-1h-2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H4.5zM3 14V2.5A.5.5 0 0 1 3.5 2H5v1.5A1.5 1.5 0 0 0 6.5 5h3A1.5 1.5 0 0 0 11 3.5V2h1.5a.5.5 0 0 1 .5.5V14a.5.5 0 0 1-.5-.5H3.5a.5.5 0 0 1-.5-.5z"/></svg>
                 </button>
                 <button id="delete-scene-btn" class="btn-danger" title="Delete Current Scene">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
@@ -238,15 +255,17 @@
                     </div>
                 </div>
 
-                <div class="form-group" style="display: flex; flex-direction: column;">
+                <div class="form-group">
                     <label for="scene-sound">Audio</label>
-                    <div style="display: flex; align-items: center; flex-grow: 1;">
-                         <div class="form-group inline" style="margin:0; width: 100%;">
-                            <input type="text" id="scene-sound" placeholder="e.g., sounds/wind.mp3">
-                            <button id="select-sound-btn" class="btn-warning file-icon-btn" title="Select Sound File">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
-                            </button>
-                        </div>
+                    <div class="form-group inline" style="margin:0; width: 100%;">
+                        <input type="text" id="scene-sound" placeholder="e.g., sounds/wind.mp3">
+                         <button id="toggle-ambience-btn" class="btn-secondary file-icon-btn" title="Play/Pause Ambience">
+                            <svg class="play-pause-icon" id="ambience-play-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734L10.804 8z"/></svg>
+                            <svg class="play-pause-icon hidden" id="ambience-pause-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z"/></svg>
+                        </button>
+                        <button id="select-sound-btn" class="btn-warning file-icon-btn" title="Select Sound File">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -293,6 +312,12 @@
 <div id="export-data-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Export Specific Data</h2><p>Select data to export as a JSON file.</p><button data-export-type="imagePrompts">Export All Image Prompts</button></div></div>
 <div id="style-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Style Template Editor</h2><div id="style-editor-grid" class="modal-grid"></div></div></div>
 <div id="fullscreen-viewer" class="modal"><img id="fullscreen-image" src=""><button id="fullscreen-minimize" class="btn-secondary">Minimize</button></div>
+<div id="notification-modal" class="modal">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <p id="notification-message" style="margin-top: 0;"></p>
+        <button id="notification-close-btn" class="btn-secondary" style="min-width: 80px;">OK</button>
+    </div>
+</div>
 
 <!-- JSZip Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -406,6 +431,7 @@ const App = {
         this.bindEvents();
         this.ui.enableEditor(false);
         this.ui.displayWelcomeMessage();
+        this.modals.show('project-menu-modal');
     },
 
     getNewStoryObject() {
@@ -430,7 +456,9 @@ const App = {
             'tree-context-menu', 'main-title-dirty-indicator',
             'save-story-btn', 'player-image', 'player-text', 'player-choices', 'player-inner-container',
             'editor-fieldset', 'ai-image-preview', 'render-ai-image-btn', 'add-ai-image-btn', 'image-preview',
-            'story-title', 'creator-name', 'about-text'
+            'story-title', 'creator-name', 'about-text',
+            'notification-modal', 'notification-message', 'notification-close-btn',
+            'toggle-ambience-btn', 'ambience-play-icon', 'ambience-pause-icon'
         ];
         ids.forEach(id => this.elements[id] = document.getElementById(id));
     },
@@ -449,6 +477,10 @@ const App = {
         document.getElementById('select-image-btn').addEventListener('click', () => App.assets.selectFile('images', 'scene-image'));
         document.getElementById('select-sound-btn').addEventListener('click', () => App.assets.selectFile('sounds', 'scene-sound'));
         this.elements['scene-image'].addEventListener('change', (e) => this.ui.updateImageThumbnail(e.target.value));
+        this.elements['toggle-ambience-btn'].addEventListener('click', () => this.player.toggleAmbienceSound());
+        this.elements['ambience-player'].addEventListener('play', () => this.player.updateAmbienceButton(true));
+        this.elements['ambience-player'].addEventListener('pause', () => this.player.updateAmbienceButton(false));
+
 
         ['story-title', 'creator-name', 'about-text'].forEach(id => {
             this.elements[id].addEventListener('input', (e) => {
@@ -478,6 +510,8 @@ const App = {
         document.addEventListener('click', (e) => { if (!e.target.closest('.scene-node')) this.elements['tree-context-menu'].style.display = 'none'; });
         window.addEventListener('click', (e) => { if (e.target.classList.contains('modal')) this.modals.hide(e.target); });
         document.getElementById('project-menu-btn').addEventListener('click', () => this.modals.show('project-menu-modal'));
+        this.elements['notification-close-btn'].addEventListener('click', () => this.modals.hide(this.elements['notification-modal']));
+
 
         window.addEventListener('beforeunload', (e) => { if (this.state.isDirty) { e.preventDefault(); e.returnValue = ''; } });
         
@@ -562,15 +596,17 @@ const App = {
             try {
                 const url = await App.io.getAssetDataUrl(path);
                 if (url) {
-                    preview.innerHTML = `<img src="${url}" alt="Asset thumbnail">`;
+                    preview.innerHTML = '';
+                    if(icon) preview.appendChild(icon);
+                    const img = document.createElement('img');
+                    img.src = url;
+                    preview.appendChild(img);
                 } else {
                      defaultSpan.textContent = 'Invalid Path';
                 }
             } catch (e) {
                 defaultSpan.textContent = 'Invalid Path';
                 console.warn('Thumbnail load failed:', e);
-            } finally {
-                if(icon) preview.appendChild(icon);
             }
         },
         updateMetaInputs() {
@@ -583,28 +619,43 @@ const App = {
             document.getElementById('fullscreen-image').src = src;
             App.modals.show('fullscreen-viewer');
         },
+        showNotification(message) {
+            App.elements['notification-message'].textContent = message;
+            App.modals.show('notification-modal');
+        },
     },
 
     io: {
         async newProject() {
-            const projectName = prompt("Enter a name for your new project:", "My CYOA Story");
-            if (!projectName) return;
-
             try {
                 const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                
+                let projectName = prompt("Enter a name for your new project:", "My CYOA Story");
+                if (!projectName) return;
+                projectName = projectName.trim().replace(/\s+/g, '_');
+
                 let projectHandle;
                 try {
                     projectHandle = await dirHandle.getDirectoryHandle(projectName);
-                    if (confirm(`A folder named "${projectName}" already exists. Do you want to open it as a project?`)) {
-                         await App.io.openProject(projectHandle);
-                         return;
+                    const storyFileHandle = await projectHandle.getFileHandle('story.json').catch(() => null);
+                    if (storyFileHandle) {
+                        if (confirm(`A project named "${projectName}" already exists. Do you want to open it?`)) {
+                            await App.io.openProject(projectHandle);
+                            return;
+                        }
                     } else {
-                        return;
+                        if (confirm(`A folder named "${projectName}" exists but is not a valid project. Do you want to initialize it as a new project?`)) {
+                            // Proceed to initialize
+                        } else {
+                            return;
+                        }
                     }
                 } catch (e) {
-                     if (e.name === 'NotFoundError') {
+                    if (e.name === 'NotFoundError') {
                         projectHandle = await dirHandle.getDirectoryHandle(projectName, { create: true });
-                     } else { throw e; }
+                    } else {
+                        throw e;
+                    }
                 }
 
                 await projectHandle.getDirectoryHandle('images', { create: true });
@@ -620,49 +671,73 @@ const App = {
                 App.state.projectDirectoryHandle = projectHandle;
                 App.state.storyData = newStory;
                 App.state.pendingAssetCopies.clear();
+                App.modals.hideAll(); 
                 App.tree.selectScene('start');
                 App.ui.enableEditor(true);
                 App.setDirty(false);
                 App.ui.updateMetaInputs();
-                alert(`Project '${projectName}' created successfully!`);
+                App.ui.showNotification(`Project '${projectName}' created successfully!`);
 
-            } catch (err) { if (err.name !== 'AbortError') { console.error(err); alert('Could not create the project.'); } }
+            } catch (err) { 
+                if (err.name !== 'AbortError') { 
+                    console.error(err); 
+                    App.ui.showNotification('Could not create the project.'); 
+                } 
+            }
         },
 
         async openProject(dirHandle = null) {
             try {
+                App.player.stop();
+                document.getElementById('scene-search-input').value = '';
+                
                 if (!dirHandle) {
                     dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
                 }
-                const storyFileHandle = await dirHandle.getFileHandle('story.json').catch(() => null);
-                if (!storyFileHandle) { alert("Error: 'story.json' not found. Is this a valid project folder?"); return; }
-                
-                const file = await storyFileHandle.getFile();
-                const storyData = JSON.parse(await file.text());
-                
-                const defaultStory = App.getNewStoryObject();
-                storyData.meta = { ...defaultStory.meta, ...storyData.meta };
-                storyData.meta.styles = { ...defaultStory.meta.styles, ...storyData.meta.styles };
+                let storyFileHandle = await dirHandle.getFileHandle('story.json').catch(() => null);
+                if (!storyFileHandle) {
+                    if (confirm("No 'story.json' found in this folder. Do you want to create a new project here?")) {
+                        await dirHandle.getDirectoryHandle('images', { create: true });
+                        await dirHandle.getDirectoryHandle('sounds', { create: true });
+                        storyFileHandle = await dirHandle.getFileHandle('story.json', { create: true });
+                        const writable = await storyFileHandle.createWritable();
+                        const newStory = App.getNewStoryObject();
+                        newStory.meta.title = dirHandle.name;
+                        await writable.write(JSON.stringify(newStory, null, 2));
+                        await writable.close();
+                        App.state.storyData = newStory;
+                    } else {
+                        App.ui.showNotification("Operation cancelled.");
+                        return;
+                    }
+                } else {
+                    const file = await storyFileHandle.getFile();
+                    const storyData = JSON.parse(await file.text());
+                    
+                    const defaultStory = App.getNewStoryObject();
+                    storyData.meta = { ...defaultStory.meta, ...storyData.meta };
+                    storyData.meta.styles = { ...defaultStory.meta.styles, ...storyData.meta.styles };
 
+                    App.state.storyData = storyData;
+                }
 
                 await dirHandle.getDirectoryHandle('images', { create: true });
                 await dirHandle.getDirectoryHandle('sounds', { create: true });
 
                 App.state.projectDirectoryHandle = dirHandle;
-                App.state.storyData = storyData;
                 App.state.pendingAssetCopies.clear();
-                App.tree.selectScene(storyData.meta.startSceneId || 'start');
+                App.modals.hideAll();
+                App.tree.selectScene(App.state.storyData.meta.startSceneId || 'start');
                 App.ui.enableEditor(true);
                 App.setDirty(false);
                 App.ui.updateMetaInputs();
-                alert(`Project '${storyData.meta.title}' loaded successfully!`);
-                App.modals.hide(document.getElementById('project-menu-modal'));
+                App.ui.showNotification(`Project '${App.state.storyData.meta.title}' loaded successfully!`);
 
-            } catch (err) { if (err.name !== 'AbortError') { console.error(err); alert('Could not open the project.'); } }
+            } catch (err) { if (err.name !== 'AbortError') { console.error(err); App.ui.showNotification('Could not open the project.'); } }
         },
         
         async saveProject() {
-            if (!App.state.projectDirectoryHandle) { alert("No project is open."); return; }
+            if (!App.state.projectDirectoryHandle) { App.ui.showNotification("No project is open."); return; }
             App.editor.saveCurrentScene(false);
             
             try {
@@ -690,9 +765,9 @@ const App = {
                 
                 App.setDirty(false);
                 console.log("Project saved successfully!");
-                alert("Project saved successfully!");
+                App.ui.showNotification("Project saved successfully!");
 
-            } catch (err) { console.error(err); alert("Failed to save project. Check the console for errors."); }
+            } catch (err) { console.error(err); App.ui.showNotification("Failed to save project. Check the console for errors."); }
         },
         
         async getFormattedPlayerHTML(isForExport = false) {
@@ -858,9 +933,9 @@ const App = {
         },
 
         async exportProjectZip() {
-            if (!App.state.projectDirectoryHandle) { alert("Please open a project to export."); return; }
+            if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to export."); return; }
             App.editor.saveCurrentScene(false);
-            alert("Preparing project for export. This may take a moment...");
+            App.ui.showNotification("Preparing project for export. This may take a moment...");
             
             const zip = new window.JSZip();
             
@@ -891,18 +966,18 @@ const App = {
                     a.click();
                     URL.revokeObjectURL(a.href);
                 });
-            } catch (err) { console.error("ZIP Export failed:", err); alert("Could not export project. Check console for details."); }
+            } catch (err) { console.error("ZIP Export failed:", err); App.ui.showNotification("Could not export project. Check console for details."); }
         },
         
         async previewProject() {
-            if (!App.state.projectDirectoryHandle) { alert("Please open a project to preview."); return; }
+            if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to preview."); return; }
             App.editor.saveCurrentScene(false);
             try {
                 const playerHtml = await this.getFormattedPlayerHTML(false);
                 const blob = new Blob([playerHtml], { type: 'text/html' });
                 const url = URL.createObjectURL(blob);
                 window.open(url, '_blank');
-            } catch (err) { console.error("Preview failed:", err); alert("Could not generate preview. Check console for details."); }
+            } catch (err) { console.error("Preview failed:", err); App.ui.showNotification("Could not generate preview. Check console for details."); }
         },
         
         async getAssetDataUrl(path) {
@@ -945,7 +1020,7 @@ const App = {
                     });
                     break;
                 default:
-                    alert(`Unknown data export type: ${type}`);
+                    App.ui.showNotification(`Unknown data export type: ${type}`);
                     return;
             }
             const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
@@ -958,6 +1033,22 @@ const App = {
     },
 
     tree: {
+        colorCache: new Map(),
+        nextHue: Math.random() * 360,
+        getColorForScene(sceneId) {
+            if (this.colorCache.has(sceneId)) {
+                return this.colorCache.get(sceneId);
+            }
+            const goldenRatioConjugate = 0.61803398875;
+            this.nextHue += goldenRatioConjugate;
+            this.nextHue %= 1;
+            const hue = this.nextHue * 360;
+            const saturation = 45; // Desaturated
+            const lightness = 60; // Bright enough for dark background
+            const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            this.colorCache.set(sceneId, color);
+            return color;
+        },
         ICONS: {
             start: `<svg class="icon-start" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>`,
             image: `<svg class="icon-image" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>`,
@@ -980,7 +1071,7 @@ const App = {
                     const scene = scenes[current];
                     if (scene && scene.choices) {
                         scene.choices.forEach(choice => {
-                            if (choice.target && !reachableSceneIds.has(choice.target)) {
+                            if (choice.target && allSceneIds.has(choice.target) && !reachableSceneIds.has(choice.target)) {
                                 queue.push(choice.target);
                             }
                         });
@@ -1036,11 +1127,42 @@ const App = {
             const collapsedState = {};
             treeView.querySelectorAll('li[data-scene-id]').forEach(li => { if (li.dataset.collapsed === 'true') collapsedState[li.dataset.sceneId] = true; });
 
+            const scenes = App.state.storyData.scenes;
             const { startSceneId } = App.state.storyData.meta;
-            if (startSceneId && App.state.storyData.scenes[startSceneId]) {
+            if (!startSceneId || !scenes[startSceneId]) {
+                treeView.innerHTML = `<li>No start scene set. Set a start scene to view the main story map.</li>`;
+            } else {
                 const rootUl = document.createElement('ul');
                 this.buildNode(startSceneId, rootUl, [], collapsedState);
                 treeView.appendChild(rootUl);
+            }
+
+            if (App.state.orphanSceneIds.size > 0) {
+                const orphanHeader = document.createElement('h3');
+                orphanHeader.textContent = 'Orphan Scenes';
+                orphanHeader.style.marginTop = '20px';
+                orphanHeader.style.borderBottom = 'none';
+                treeView.appendChild(orphanHeader);
+
+                const orphanTargets = new Set();
+                App.state.orphanSceneIds.forEach(id => {
+                    const scene = scenes[id];
+                    if (scene && scene.choices) {
+                        scene.choices.forEach(choice => {
+                            if (choice.target && App.state.orphanSceneIds.has(choice.target)) {
+                                orphanTargets.add(choice.target);
+                            }
+                        });
+                    }
+                });
+
+                const orphanRoots = Array.from(App.state.orphanSceneIds).filter(id => !orphanTargets.has(id)).sort();
+
+                const orphanUl = document.createElement('ul');
+                orphanRoots.forEach(rootId => {
+                    this.buildNode(rootId, orphanUl, [], collapsedState);
+                });
+                treeView.appendChild(orphanUl);
             }
         },
         buildNode(sceneId, parentElement, path, collapsedState) {
@@ -1059,7 +1181,7 @@ const App = {
             const hasChoices = scene.choices && scene.choices.length > 0;
             if (hasChoices) {
                 toggle.textContent = li.dataset.collapsed === 'true' ? '[+]' : '[-]';
-                toggle.onclick = (e) => { e.stopPropagation(); li.dataset.collapsed = !(li.dataset.collapsed === 'true'); this.render(); };
+                toggle.onclick = (e) => { e.stopPropagation(); li.dataset.collapsed = (li.dataset.collapsed === 'true' ? 'false' : 'true'); this.render(); };
             } else { toggle.classList.add('empty'); }
 
             const iconsDiv = document.createElement('div');
@@ -1092,9 +1214,14 @@ const App = {
             }
             if (hasChoices && li.dataset.collapsed !== 'true') {
                 const childUl = document.createElement('ul');
+                const choiceColor = this.getColorForScene(sceneId);
+                childUl.style.borderLeftColor = choiceColor;
+
                 scene.choices.forEach(choice => {
                     const choiceLi = document.createElement('li');
                     choiceLi.className = 'choice-node';
+                    choiceLi.style.setProperty('--choice-color', choiceColor);
+
                     const choiceTextSpan = document.createElement('span');
                     choiceTextSpan.className = 'choice-node-text';
                     choiceTextSpan.textContent = `"${choice.text}"`;
@@ -1111,10 +1238,18 @@ const App = {
                 console.error(`Attempted to select non-existent scene: ${sceneId}`);
                 return;
             }
+
+            // If in play mode, just switch the player scene.
+            if (App.elements['player-container'].style.display === 'flex') {
+                App.player.renderScene(sceneId);
+                return;
+            }
+
             App.editor.saveCurrentScene(false);
             const needsSelectionChange = App.state.currentSceneId !== sceneId;
             if (needsSelectionChange) {
                 App.state.currentSceneId = sceneId;
+                 App.elements['ambience-player'].pause();
             }
             
             this.render(); // Always re-render to clear search and show the full tree.
@@ -1138,9 +1273,13 @@ const App = {
         createNewScene() {
             let newId = prompt("Enter a unique ID for the new scene:");
             if (!newId) return;
+            newId = newId.trim().replace(/\s+/g, '_');
+            if (!newId.length) return;
             while (App.state.storyData.scenes[newId]) {
                 newId = prompt(`Scene ID "${newId}" already exists. Please enter a different one:`);
                 if (!newId) return;
+                newId = newId.trim().replace(/\s+/g, '_');
+                if (!newId.length) return;
             }
             App.state.storyData.scenes[newId] = { id: newId, text: `This is the new scene '${newId}'.`, choices: [] };
             App.setDirty(true);
@@ -1149,10 +1288,12 @@ const App = {
         },
         renameScene() {
             const oldId = App.state.currentSceneId;
-            if (!oldId) { alert("No scene selected to rename."); return; }
+            if (!oldId) { App.ui.showNotification("No scene selected to rename."); return; }
             let newId = prompt("Enter the new ID for this scene:", oldId);
             if (!newId || newId === oldId) return;
-            if (App.state.storyData.scenes[newId]) { alert(`Scene ID "${newId}" already exists.`); return; }
+            newId = newId.trim().replace(/\s+/g, '_');
+            if (!newId.length) return;
+            if (App.state.storyData.scenes[newId]) { App.ui.showNotification(`Scene ID "${newId}" already exists.`); return; }
 
             const sceneData = App.state.storyData.scenes[oldId];
             sceneData.id = newId;
@@ -1176,25 +1317,30 @@ const App = {
             this.render();
             App.editor.render();
         },
-        deleteCurrentScene() {
-            const sceneId = App.state.currentSceneId;
-            if (!sceneId) { alert("No scene selected to delete."); return; }
-            if (sceneId === App.state.storyData.meta.startSceneId) { alert("Cannot delete the start scene. Set another scene as the start scene first."); return; }
-            if (!confirm(`Are you sure you want to permanently delete scene "${sceneId}"? This cannot be undone.`)) return;
+		deleteCurrentScene() {
+			const sceneId = App.state.currentSceneId;
+			if (!sceneId) { App.ui.showNotification("No scene selected to delete."); return; }
+			if (sceneId === App.state.storyData.meta.startSceneId) { App.ui.showNotification("Cannot delete the start scene. Set another scene as the start scene first."); return; }
+			if (!confirm(`Are you sure you want to permanently delete scene "${sceneId}"? This cannot be undone.`)) return;
 
-            delete App.state.storyData.scenes[sceneId];
-            Object.values(App.state.storyData.scenes).forEach(scene => {
-                if(scene.choices) {
-                     scene.choices.forEach(choice => {
-                        if (choice.target === sceneId) choice.target = ''; // Mark as broken link
-                    });
-                }
-            });
-            
-            App.state.currentSceneId = null;
-            App.setDirty(true);
-            this.selectScene(App.state.storyData.meta.startSceneId);
-        },
+			// OPTIONAL: Warn if there are incoming links (search for choices pointing to it)
+			let incomingCount = 0;
+			Object.values(App.state.storyData.scenes).forEach(scene => {
+				if (scene.choices) {
+					incomingCount += scene.choices.filter(choice => choice.target === sceneId).length;
+				}
+			});
+			if (incomingCount > 0 && !confirm(`This scene has ${incomingCount} incoming choice(s). Deleting it will create broken links. Continue?`)) return;
+
+			// Delete the scene
+			delete App.state.storyData.scenes[sceneId];
+
+			// NO LONGER SET TARGETS TO '' — let them remain as broken references
+
+			App.state.currentSceneId = null;
+			App.setDirty(true);
+			this.selectScene(App.state.storyData.meta.startSceneId);
+		},
         setAsStartScene() {
             if (App.state.contextSceneId) {
                 App.state.storyData.meta.startSceneId = App.state.contextSceneId;
@@ -1241,40 +1387,59 @@ const App = {
             }
             if(showAlert) { console.log(`Scene '${id}' changes saved to memory.`); }
          },
-        addChoiceToDOM(choice = { text: '', target: '' }) { 
-            const choiceDiv = document.createElement('div'); 
-            choiceDiv.className = 'form-group inline choice-group'; 
-            const textInput = document.createElement('input'); 
-            textInput.type = 'text'; 
-            textInput.placeholder = 'Choice text'; 
-            textInput.value = choice.text; 
-            const targetSelect = document.createElement('select'); 
-            const defaultOption = document.createElement('option'); 
-            defaultOption.value = ''; 
-            defaultOption.textContent = '-- Select Target --'; 
-            targetSelect.appendChild(defaultOption); 
-            Object.keys(App.state.storyData.scenes || {}).sort().forEach(id => { const option = document.createElement('option'); option.value = id; option.textContent = id; if (id === choice.target) option.selected = true; targetSelect.appendChild(option); }); 
-            const goToBtn = document.createElement('button');
-            goToBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>`;
-            goToBtn.className = 'btn-success';
-            goToBtn.title = "Go to selected scene";
-            goToBtn.style.padding = '8px';
-            goToBtn.style.lineHeight = 1;
-            goToBtn.onclick = () => { const targetScene = targetSelect.value; if (targetScene) App.tree.selectScene(targetScene); };
-            const deleteBtn = document.createElement('button'); 
-            deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>`;
-            deleteBtn.className = 'btn-danger'; 
-            deleteBtn.title = "Delete Choice";
-            deleteBtn.style.flexShrink = '0';
-            deleteBtn.style.padding = '8px';
-            deleteBtn.style.lineHeight = 1;
-            deleteBtn.onclick = () => choiceDiv.remove(); 
-            choiceDiv.appendChild(textInput); 
-            choiceDiv.appendChild(targetSelect); 
-            choiceDiv.appendChild(goToBtn);
-            choiceDiv.appendChild(deleteBtn); 
-            App.elements['choices-container'].appendChild(choiceDiv); 
-        }
+		addChoiceToDOM(choice = { text: '', target: '' }) { 
+			const choiceDiv = document.createElement('div'); 
+			choiceDiv.className = 'form-group inline choice-group'; 
+			const textInput = document.createElement('input'); 
+			textInput.type = 'text'; 
+			textInput.placeholder = 'Choice text'; 
+			textInput.value = choice.text; 
+			const targetSelect = document.createElement('select'); 
+			const defaultOption = document.createElement('option'); 
+			defaultOption.value = ''; 
+			defaultOption.textContent = '-- Select Target --'; 
+			targetSelect.appendChild(defaultOption); 
+
+			const sceneIds = Object.keys(App.state.storyData.scenes || {}).sort();
+			sceneIds.forEach(id => { 
+				const option = document.createElement('option'); 
+				option.value = id; 
+				option.textContent = id; 
+				if (id === choice.target) option.selected = true; 
+				targetSelect.appendChild(option); 
+			});
+
+			// Add option for missing/broken target
+			if (choice.target && !sceneIds.includes(choice.target)) {
+				const brokenOption = document.createElement('option');
+				brokenOption.value = choice.target;
+				brokenOption.textContent = `${choice.target} (Missing)`;
+				brokenOption.selected = true;
+				brokenOption.style.color = 'red';  // Highlight as broken
+				targetSelect.appendChild(brokenOption);
+			}
+
+			const goToBtn = document.createElement('button');
+			goToBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>`;
+			goToBtn.className = 'btn-success';
+			goToBtn.title = "Go to selected scene";
+			goToBtn.style.padding = '8px';
+			goToBtn.style.lineHeight = 1;
+			goToBtn.onclick = () => { const targetScene = targetSelect.value; if (targetScene) App.tree.selectScene(targetScene); };
+			const deleteBtn = document.createElement('button'); 
+			deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>`;
+			deleteBtn.className = 'btn-danger'; 
+			deleteBtn.title = "Delete Choice";
+			deleteBtn.style.flexShrink = '0';
+			deleteBtn.style.padding = '8px';
+			deleteBtn.style.lineHeight = 1;
+			deleteBtn.onclick = () => choiceDiv.remove(); 
+			choiceDiv.appendChild(textInput); 
+			choiceDiv.appendChild(targetSelect); 
+			choiceDiv.appendChild(goToBtn);
+			choiceDiv.appendChild(deleteBtn); 
+			App.elements['choices-container'].appendChild(choiceDiv); 
+		}
     },
     
     assets: {
@@ -1297,13 +1462,36 @@ const App = {
             App.setDirty(true);
             event.target.value = '';
         },
-        renderPollinationImage() { const promptText = App.elements['scene-image-prompt'].value.trim(); if (!promptText) { alert("Please enter a prompt first."); return; } const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + "?model=flux&nologo=true"; App.state.aiImageUrl = url; App.ui.updateAiImagePreview(null, 'Rendering...'); const tempImg = new Image(); tempImg.onload = () => App.ui.updateAiImagePreview(url); tempImg.onerror = () => { App.ui.updateAiImagePreview(null, 'Render failed.'); App.state.aiImageUrl = null; }; tempImg.src = url; },
-        async addPollinationImageToScene() { if (!App.state.aiImageUrl) { alert("Please render an image first."); return; } App.ui.updateAiImagePreview(null, 'Downloading...'); try { const response = await fetch(App.state.aiImageUrl); if (!response.ok) throw new Error(`Fetch failed: ${response.statusText}`); const imageBlob = await response.blob(); const filename = `${App.state.currentSceneId || 'image'}_${Date.now()}.jpg`; const destinationPath = `images/${filename}`; App.state.pendingAssetCopies.set(destinationPath, imageBlob); App.elements['scene-image'].value = destinationPath; App.ui.updateImageThumbnail(destinationPath); App.setDirty(true); console.log(`Image added to scene. Remember to 'Save Project' to copy the file.`); } catch (err) { console.error("Error adding AI image:", err); alert("Could not download or save the image."); App.ui.updateAiImagePreview(App.state.aiImageUrl); } }
+        renderPollinationImage() { const promptText = App.elements['scene-image-prompt'].value.trim(); if (!promptText) { App.ui.showNotification("Please enter a prompt first."); return; } const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + "?model=flux&nologo=true"; App.state.aiImageUrl = url; App.ui.updateAiImagePreview(null, 'Rendering...'); const tempImg = new Image(); tempImg.onload = () => App.ui.updateAiImagePreview(url); tempImg.onerror = () => { App.ui.updateAiImagePreview(null, 'Render failed.'); App.state.aiImageUrl = null; }; tempImg.src = url; },
+        async addPollinationImageToScene() {
+            if (!App.state.aiImageUrl) {
+                App.ui.showNotification("Please render an image first.");
+                return;
+            }
+            App.ui.updateAiImagePreview(null, 'Downloading...');
+            try {
+                const response = await fetch(App.state.aiImageUrl);
+                if (!response.ok) throw new Error(`Fetch failed: ${response.statusText}`);
+                const imageBlob = await response.blob();
+                const filename = `${App.state.currentSceneId || 'image'}_${Date.now()}.jpg`;
+                const destinationPath = `images/${filename}`;
+                App.state.pendingAssetCopies.set(destinationPath, imageBlob);
+                App.elements['scene-image'].value = destinationPath;
+                App.ui.updateImageThumbnail(destinationPath);
+                App.setDirty(true);
+                App.editor.saveCurrentScene(false); // Auto-save the scene change
+                console.log(`Image added to scene and changes saved to memory. Remember to 'Save Project' to copy the file to disk.`);
+            } catch (err) {
+                console.error("Error adding AI image:", err);
+                App.ui.showNotification("Could not download or save the image.");
+                App.ui.updateAiImagePreview(App.state.aiImageUrl);
+            }
+        }
     },
 
     player: {
         async play(sceneId) {
-            if (!sceneId || !App.state.storyData.scenes[sceneId]) { alert("Cannot play scene. Please select a valid scene to start from."); return; }
+            if (!sceneId || !App.state.storyData.scenes[sceneId]) { App.ui.showNotification("Cannot play scene. Please select a valid scene to start from."); return; }
             App.elements['player-inner-container'].style.height = 'auto'; // Reset height
             App.elements['editor-container'].style.display = 'none';
             App.elements['player-container'].style.display = 'flex';
@@ -1325,7 +1513,10 @@ const App = {
             const imageContainer = document.getElementById('player-image-container');
             if(imageUrl) { img.src = imageUrl; imageContainer.style.display = 'block'; } else { imageContainer.style.display = 'none'; }
             const soundUrl = await App.io.getAssetDataUrl(scene.ambienceSound);
-            if (soundUrl) { if(audio.src !== soundUrl) audio.src = soundUrl; audio.play().catch(e => console.warn("Audio autoplay was blocked by the browser.")); } else { audio.pause(); }
+            if (soundUrl) {
+                if(audio.src !== soundUrl) audio.src = soundUrl;
+                audio.play().catch(e => console.warn("Audio autoplay was blocked."));
+            } else { audio.pause(); }
             choices.innerHTML = '';
             (scene.choices || []).forEach(choice => { const button = document.createElement('button'); button.className = 'choice-btn'; button.textContent = choice.text; button.onclick = () => this.renderScene(choice.target); choices.appendChild(button); });
             
@@ -1341,6 +1532,32 @@ const App = {
             App.elements['music-player'].pause();
             App.elements['ambience-player'].src = '';
             App.elements['music-player'].src = '';
+        },
+        async toggleAmbienceSound() {
+            const audio = App.elements['ambience-player'];
+            const soundPath = App.elements['scene-sound'].value;
+
+            if (!soundPath) return;
+
+            const soundUrl = await App.io.getAssetDataUrl(soundPath);
+
+            if (!soundUrl) {
+                App.ui.showNotification("Audio file not found in project.");
+                return;
+            }
+
+            const isPlayingThisSound = !audio.paused && audio.currentSrc.endsWith(soundUrl);
+
+            if (isPlayingThisSound) {
+                audio.pause();
+            } else {
+                audio.src = soundUrl;
+                audio.play().catch(e => console.warn("Audio playback failed.", e));
+            }
+        },
+        updateAmbienceButton(isPlaying) {
+            App.elements['ambience-play-icon'].classList.toggle('hidden', isPlaying);
+            App.elements['ambience-pause-icon'].classList.toggle('hidden', !isPlaying);
         }
     },
     
@@ -1488,7 +1705,17 @@ body {
     
     modals: {
         show(modalId) { document.getElementById(modalId).classList.add('visible'); },
-        hide(modal) { if(modal) modal.classList.remove('visible'); },
+        hide(modal) {
+            if (modal) {
+                // When closing specific editors, auto-save the project.
+                if (modal.id === 'style-editor-modal' || modal.id === 'about-editor-modal') {
+                    if (App.state.isDirty) {
+                       App.io.saveProject().catch(err => console.error("Auto-save on modal close failed", err));
+                    }
+                }
+                modal.classList.remove('visible');
+            }
+        },
         hideAll() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('visible')); }
     }
 };

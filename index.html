@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYOA Studio Pro</title>
+    <title>CYOA Studio</title>
     <style>
         :root {
             /* Desaturated colors as requested */
@@ -298,7 +297,7 @@
                         <textarea id="scene-image-prompt" placeholder="A stunning vista of a fantasy castle at sunset, digital art" style="flex-grow: 1; height: 128px; resize: none; margin-top:0;"></textarea>
                         <div class="btn-group" style="flex-direction: column; flex-shrink: 0; gap: 5px; margin-top: 0; align-self: stretch; justify-content: center;">
                             <button id="render-ai-image-btn" class="btn-purple" style="margin-top:0;" title="Render AI Image">
-                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937-.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg>
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg>
                             </button>
                             <button id="add-ai-image-btn" class="btn-success" style="margin-top:0;" title="Add Rendered Image to Scene">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
@@ -345,9 +344,36 @@
         <title>__STORY_TITLE__</title>
         <style>
             :root { --primary-color: #4a78ad; --secondary-color: #6c757d; }
-            body { margin: 0; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; transition: background-color .3s; background-size: cover; background-position: center; background-attachment: fixed; }
+            body { 
+                margin: 0; 
+                font-family: sans-serif; 
+                display: flex; 
+                justify-content: center; 
+                min-height: 100vh; 
+                transition: background-color .3s; 
+                background-size: cover; 
+                background-position: center; 
+                background-attachment: fixed; 
+                padding: 20px; 
+                box-sizing: border-box;
+            }
+            /* ALIGNMENT FIX: Apply alignment based on layout class */
+            body:not(.layout-image-as-bg) { align-items: center; }
             body.layout-image-as-bg { align-items: flex-end; }
-            #game-container { width: 100%; max-width: 800px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,.5); display: flex; gap: 20px; position: relative; background-size: cover; background-position: center; }
+
+            #game-container { 
+                width: 100%; 
+                max-width: 800px; 
+                border-radius: 12px; 
+                box-shadow: 0 5px 20px rgba(0,0,0,.5); 
+                display: flex; 
+                gap: 20px; 
+                position: relative; 
+                background-size: cover; 
+                background-position: center; 
+                padding: var(--padding); 
+                box-sizing: border-box;
+            }
             #image-container { flex-shrink: 0; }
             #scene-image { display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
             #scene-text { white-space: pre-wrap; margin-bottom: 20px; }
@@ -356,14 +382,16 @@
             .choice-btn:hover { transform: translateY(-2px); }
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
             .choice-btn.fade-in { animation: fadeIn 0.5s forwards; opacity: 0; }
-            .layout-top-down { flex-direction: column; }
-            .layout-top-down #image-container { width: 100%; margin-bottom: 20px; }
-            .layout-top-down #scene-image { width: 100%; height: auto; max-height: 50vh; }
-            .layout-side-by-side { flex-direction: row; align-items: flex-start; }
-            .layout-side-by-side #image-container { width: 40%; }
-            .layout-side-by-side #scene-image { width: 100%; height: auto; }
-            .layout-side-by-side #content-container { width: 60%; }
-            .layout-image-as-bg #image-container { display: none; }
+            /* Flex rules are now applied directly to the container which gets the class */
+            #game-container.layout-top-down { flex-direction: column; }
+            #game-container.layout-top-down #image-container { width: 100%; margin-bottom: 20px; }
+            #game-container.layout-top-down #scene-image { width: 100%; height: auto; max-height: 50vh; }
+            #game-container.layout-side-by-side { flex-direction: row; align-items: flex-start; }
+            #game-container.layout-side-by-side #image-container { width: 40%; }
+            #game-container.layout-side-by-side #scene-image { width: 100%; height: auto; }
+            #game-container.layout-side-by-side #content-container { width: 60%; }
+            #game-container.layout-image-as-bg #image-container { display: none; }
+
             #player-menu-btn { position: fixed; top: 15px; right: 15px; z-index: 100; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.5); border-radius: 50%; width: 40px; height: 40px; padding: 0; font-size: 24px; line-height: 40px; text-align: center; cursor: pointer; }
             .player-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
             .player-modal-content { background-color: #2c2c2c; color: #e0e0e0; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; }
@@ -383,7 +411,7 @@
         </style>
     </head>
     <body class="__LAYOUT_CLASS__">
-        <div id="game-container">
+        <div id="game-container" class="__LAYOUT_CLASS__">
             <div id="image-container"><img id="scene-image" src=""></div>
             <div id="content-container">
                 <div id="scene-text"></div>
@@ -969,6 +997,7 @@ const App = {
                     if (storyData.meta.styles['--typewriter-effect'] === 'on') {
                         typeWriter(scene.text, scene.choices);
                     } else {
+                        contentContainer.style.minHeight = '';
                         sceneText.textContent = scene.text;
                         choicesContainer.innerHTML = '';
                         (scene.choices || []).forEach(choice => { 
@@ -984,6 +1013,10 @@ const App = {
                     const imageContainer = document.getElementById('image-container');
                     const imageUrl = scene.image;
                     const globalScreenBgUrl = storyData.meta.styles['--screen-bg-image'];
+                    
+                    // Update classes on both body and game container
+                    document.body.className = layout;
+                    gameContainer.className = layout;
 
                     if (layout === 'layout-image-as-bg') {
                         imageContainer.style.display = 'none';
@@ -1282,7 +1315,7 @@ const App = {
             if (sceneId === App.state.currentSceneId) sceneNode.classList.add('active');
             
             const sceneText = scene.text || 'Empty scene';
-            sceneNode.title = sceneText.split('\\n')[0].substring(0, 150);
+            sceneNode.title = sceneText.split('\\n')[0].substring(0, 150); // Get first line, truncate.
 
             const toggle = document.createElement('span');
             toggle.className = 'tree-toggle';
@@ -1482,7 +1515,7 @@ const App = {
             scene.imagePrompt = App.elements['scene-image-prompt'].value.trim(); 
             scene.ambienceSound = App.elements['scene-sound'].value.trim(); 
             scene.text = App.elements['scene-text'].value; 
-            scene.choices = Array.from(App.elements['choices-container'].querySelectorAll('.choice-group')).map(div => ({ text: div.querySelector('input[type=text]').value, target: div.querySelector('select').value })).filter(c => c.text && c.target); 
+            scene.choices = Array.from(App.elements['choices-container'].querySelectorAll('.choice-group')).map(div => ({ text: div.querySelector('input[type=text]').value, target: div.querySelector('select').value })); 
             App.setDirty(true); 
             // Only re-render the tree if the search is not active
             if (!document.getElementById('scene-search-input').value) {
@@ -1588,7 +1621,6 @@ const App = {
             App.elements['player-inner-container'].style.height = 'auto'; // Reset height
             App.elements['editor-container'].style.display = 'none';
             App.elements['player-container'].style.display = 'flex';
-            await App.styles.applyToPlayer();
             await this.renderScene(sceneId);
         },
         typeWriter(textEl, choicesEl, contentEl, text, choices, onChoiceClick) {
@@ -1652,10 +1684,13 @@ const App = {
             if (activeNode) { activeNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
 
             const scene = App.state.storyData.scenes[sceneId];
-            const { 'player-container': pc, 'player-image': img, 'player-text': text, 'player-choices': choices, 'ambience-player': audio, 'player-inner-container': innerContainer } = App.elements;
+            const { 'player-text': text, 'player-choices': choices, 'ambience-player': audio, 'player-inner-container': innerContainer } = App.elements;
             const contentContainer = document.getElementById('player-content-container');
             if (!scene) { text.textContent = `Error: Scene "${sceneId}" not found.`; return; }
             
+            // Apply styles before rendering content to ensure layout is correct
+            await App.styles.applyToPlayer();
+
             if (App.state.storyData.meta.styles['--typewriter-effect'] === 'on') {
                 this.typeWriter(text, choices, contentContainer, scene.text, scene.choices, (target) => this.renderScene(target));
             } else {
@@ -1670,29 +1705,7 @@ const App = {
                     choices.appendChild(button); 
                 });
             }
-
-            const layout = App.state.storyData.meta.layout;
-            const imageContainer = document.getElementById('player-image-container');
-            const imageUrl = await App.io.getAssetDataUrl(scene.image);
-            const globalScreenBgUrl = await App.io.getAssetDataUrl(App.state.storyData.meta.styles['--screen-bg-image']);
-
-            if (layout === 'layout-image-as-bg') {
-                imageContainer.style.display = 'none';
-                if (imageUrl) {
-                    pc.style.backgroundImage = `url("${imageUrl}")`;
-                } else {
-                    pc.style.backgroundImage = globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none';
-                }
-            } else {
-                pc.style.backgroundImage = globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none';
-                if (imageUrl) {
-                    img.src = imageUrl;
-                    imageContainer.style.display = 'block';
-                } else {
-                    imageContainer.style.display = 'none';
-                }
-            }
-
+            
             const soundUrl = await App.io.getAssetDataUrl(scene.ambienceSound);
             if (soundUrl) {
                 if(audio.src !== soundUrl) audio.src = soundUrl;
@@ -1824,29 +1837,31 @@ const App = {
         },
         handleUpdate(event) {
             const target = event.target;
+            const id = target.id.replace('style-', '');
+            let value = target.value;
 
+            // Handle combined RGBA color for container background
             if (target.id === 'style-container-bg-color' || target.id === 'style-container-bg-opacity') {
                 const hex = document.getElementById('style-container-bg-color').value;
                 const opacity = document.getElementById('style-container-bg-opacity').value;
                 const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
                 App.state.storyData.meta.styles['--container-bg-color'] = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-                App.setDirty(true);
-                if (App.elements['player-container'].style.display === 'flex') { this.applyToPlayer(); }
-                return;
-            }
-            
-            const id = target.id.replace('style-', '');
-            let value = target.value;
-
-            if (id === 'layout') {
+            } 
+            // Handle layout change
+            else if (id === 'layout') {
                 App.state.storyData.meta.layout = value;
-            } else {
+            } 
+            // Handle all other style properties
+            else {
                 if (target.type === 'number') value += 'px';
                 App.state.storyData.meta.styles[`--${id}`] = value;
             }
+            
             App.setDirty(true);
+
+            // Apply styles to the live player if it's active
             if (App.elements['player-container'].style.display === 'flex') {
-                this.applyToPlayer();
+                App.player.renderScene(App.state.currentSceneId);
             }
         },
         async applyToPlayer() {
@@ -1856,45 +1871,48 @@ const App = {
             const pc = App.elements['player-container'];
             const pic = App.elements['player-inner-container'];
             const musicPlayer = App.elements['music-player'];
+            const imageContainer = document.getElementById('player-image-container');
+            const playerImage = App.elements['player-image'];
+            const scene = App.state.storyData.scenes[App.state.currentSceneId];
 
+            // Apply all CSS variables
             Object.keys(defaults).forEach(key => {
-                if (key.startsWith('--') && !key.includes('path') && !key.includes('image')) {
+                if (key.startsWith('--')) {
                     const value = styles[key] || defaults[key];
                     pc.style.setProperty(key, value);
-                    pic.style.setProperty(key, value);
                 }
             });
 
-            pc.className = 'layout-' + meta.layout.split('-')[1]; // Ensure base class is there
-            pc.classList.toggle('layout-image-as-bg', meta.layout === 'layout-image-as-bg');
+            // Update layout classes
+            pc.className = meta.layout;
             pic.className = meta.layout;
 
-            // This logic needs to run on style change for live update
-            const scene = App.state.storyData.scenes[App.state.currentSceneId];
-            if(scene) {
-                const imageUrl = await App.io.getAssetDataUrl(scene.image);
-                const globalScreenBgUrl = await App.io.getAssetDataUrl(styles['--screen-bg-image']);
+            // Handle image visibility and sources based on layout
+            const imageUrl = await App.io.getAssetDataUrl(scene?.image);
+            const globalScreenBgUrl = await App.io.getAssetDataUrl(styles['--screen-bg-image']);
 
-                if (meta.layout === 'layout-image-as-bg') {
-                    pc.style.backgroundImage = imageUrl ? `url("${imageUrl}")` : (globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none');
+            if (meta.layout === 'layout-image-as-bg') {
+                imageContainer.style.display = 'none';
+                pc.style.backgroundImage = imageUrl ? `url("${imageUrl}")` : (globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none');
+            } else {
+                pc.style.backgroundImage = globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none';
+                if (imageUrl) {
+                    playerImage.src = imageUrl;
+                    imageContainer.style.display = 'block';
                 } else {
-                    pc.style.backgroundImage = globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none';
+                    imageContainer.style.display = 'none';
                 }
             }
             
+            // Update container background image
             const containerBgUrl = await App.io.getAssetDataUrl(styles['--container-bg-image']);
             pic.style.backgroundImage = containerBgUrl ? `url("${containerBgUrl}")` : 'none';
             
+            // Update music
             const musicUrl = await App.io.getAssetDataUrl(styles['--music-path']);
             if (musicUrl) {
-                const currentUrl = new URL(musicPlayer.src || window.location.href);
-                const newUrl = new URL(musicUrl, window.location.href);
-                if (currentUrl.href !== newUrl.href) {
-                    musicPlayer.src = musicUrl;
-                }
-                if (musicPlayer.paused) {
-                   musicPlayer.play().catch(e => console.warn("Music autoplay blocked by browser."));
-                }
+                if (!musicPlayer.src.endsWith(musicUrl)) { musicPlayer.src = musicUrl; }
+                if (musicPlayer.paused) { musicPlayer.play().catch(e => console.warn("Music autoplay blocked by browser."));}
             } else {
                 musicPlayer.pause();
                 musicPlayer.src = '';
@@ -1920,7 +1938,6 @@ body {
     font-family: var(--font-family, sans-serif);
 }
 #game-container {
-    padding: var(--padding);
     background-color: var(--container-bg-color);
     font-size: var(--font-size);
 }

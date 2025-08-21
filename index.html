@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYOA Studio</title>
+    <title>CYOA Studio Pro</title>
     <style>
         :root {
             /* Desaturated colors as requested */
@@ -159,6 +159,7 @@
         .layout-top-down { flex-direction: column; } .layout-top-down #player-image-container { width: 100%; margin-bottom: 20px; } .layout-top-down #player-image { width: 100%; height: auto; }
         .layout-side-by-side { flex-direction: row; align-items: flex-start; } .layout-side-by-side #player-image-container { width: 40%; flex-shrink: 0; } .layout-side-by-side #player-content-container { width: 60%; }
         .layout-image-as-bg #player-image-container { display: none !important; }
+        .layout-image-as-bg #player-content-container { width: 100%; } /* BUG FIX: Ensure content fills width */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         #player-choices .choice-btn.fade-in { animation: fadeIn 0.5s forwards; opacity: 0; }
 
@@ -357,7 +358,6 @@
                 padding: 20px; 
                 box-sizing: border-box;
             }
-            /* ALIGNMENT FIX: Apply alignment based on layout class */
             body:not(.layout-image-as-bg) { align-items: center; }
             body.layout-image-as-bg { align-items: flex-end; }
 
@@ -382,7 +382,7 @@
             .choice-btn:hover { transform: translateY(-2px); }
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
             .choice-btn.fade-in { animation: fadeIn 0.5s forwards; opacity: 0; }
-            /* Flex rules are now applied directly to the container which gets the class */
+
             #game-container.layout-top-down { flex-direction: column; }
             #game-container.layout-top-down #image-container { width: 100%; margin-bottom: 20px; }
             #game-container.layout-top-down #scene-image { width: 100%; height: auto; max-height: 50vh; }
@@ -391,6 +391,7 @@
             #game-container.layout-side-by-side #scene-image { width: 100%; height: auto; }
             #game-container.layout-side-by-side #content-container { width: 60%; }
             #game-container.layout-image-as-bg #image-container { display: none; }
+            #game-container.layout-image-as-bg #content-container { width: 100%; }
 
             #player-menu-btn { position: fixed; top: 15px; right: 15px; z-index: 100; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.5); border-radius: 50%; width: 40px; height: 40px; padding: 0; font-size: 24px; line-height: 40px; text-align: center; cursor: pointer; }
             .player-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
@@ -1019,7 +1020,6 @@ const App = {
                     gameContainer.className = layout;
 
                     if (layout === 'layout-image-as-bg') {
-                        imageContainer.style.display = 'none';
                         if (imageUrl) {
                             document.body.style.backgroundImage = \`url('\${imageUrl}')\`;
                         } else {

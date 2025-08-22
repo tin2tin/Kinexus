@@ -7,10 +7,14 @@ CYOA Studio is a powerful tool for creating, styling, and exporting choice-based
 ## Try It
 
 <div align="left">
-  <a href="https://tin2tin.github.io/CYOA_Studio/">CLICK HERE!</a><br><br>
+  <a href="https://tin2tin.github.io/CYOA_Studio/">Open CYOA Studio</a><br><br>
 </div>
 
-An example project can be downloaded here, unzip and open with CYOA Studio: [example_the_last_broadcast](https://github.com/tin2tin/CYOA_Studio/raw/refs/heads/main/example_the_last_broadcast.zip)
+<div align="left">
+  <a href="https://tintwotin.itch.io/cyoa-test?secret=G3dumLNBVgg2migNyde3jOYm8">Try the example game</a><br><br>
+</div>
+
+An example project. Unzip and open with CYOA Studio: [Example_The_Last_Broadcast](https://github.com/tin2tin/CYOA_Studio/raw/refs/heads/main/example_the_last_broadcast.zip)
 
 ## Features
 

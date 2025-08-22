@@ -1,0 +1,487 @@
+
+    
+    
+    
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>The Last Broadcast</title>
+        <style>
+            :root { --primary-color: #4a78ad; --secondary-color: #6c757d; }
+            body { 
+                margin: 0; 
+                font-family: sans-serif; 
+                display: flex; 
+                justify-content: center; 
+                min-height: 100vh; 
+                transition: background-color .3s; 
+                background-size: cover; 
+                background-position: center; 
+                background-attachment: fixed; 
+                padding: 20px; 
+                box-sizing: border-box;
+            }
+            body:not(.layout-image-as-bg) { align-items: center; }
+            body.layout-image-as-bg { align-items: flex-end; }
+
+            #game-container { 
+                width: 100%; 
+                max-width: 800px; 
+                border-radius: 12px; 
+                box-shadow: 0 5px 20px rgba(0,0,0,.5); 
+                display: flex; 
+                gap: 20px; 
+                position: relative; 
+                background-size: cover; 
+                background-position: center; 
+                padding: var(--padding); 
+                box-sizing: border-box;
+            }
+            #image-container { flex-shrink: 0; }
+            #scene-image { display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
+            #scene-text { white-space: pre-wrap; margin-bottom: 20px; }
+            #choices-container { display: flex; flex-direction: column; gap: 12px; }
+            .choice-btn { padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; text-align: left; transition: background-color .2s,transform .1s, border-color .2s; }
+            .choice-btn:hover { transform: translateY(-2px); }
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            .choice-btn.fade-in { animation: fadeIn 0.5s forwards; opacity: 0; }
+
+            #game-container.layout-top-down { flex-direction: column; }
+            #game-container.layout-top-down #image-container { width: 100%; margin-bottom: 20px; }
+            #game-container.layout-top-down #scene-image { width: 100%; height: auto; max-height: 50vh; }
+            #game-container.layout-side-by-side { flex-direction: row; align-items: flex-start; }
+            #game-container.layout-side-by-side #image-container { width: 40%; }
+            #game-container.layout-side-by-side #scene-image { width: 100%; height: auto; }
+            #game-container.layout-side-by-side #content-container { width: 60%; }
+            #game-container.layout-image-as-bg #image-container { display: none; }
+            #game-container.layout-image-as-bg #content-container { width: 100%; }
+
+            #player-menu-btn { position: fixed; top: 15px; right: 15px; z-index: 100; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.5); border-radius: 50%; width: 40px; height: 40px; padding: 0; font-size: 24px; line-height: 40px; text-align: center; cursor: pointer; }
+            .player-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+            .player-modal-content { background-color: #2c2c2c; color: #e0e0e0; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; }
+            .player-modal-close { position: absolute; top: 10px; right: 15px; font-size: 1.5em; font-weight: bold; cursor: pointer; color: #aaa; }
+            .player-modal-close:hover { color: #fff; }
+            .menu-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 15px; }
+            .menu-item button { flex-grow: 1; margin: 0; background-color: var(--secondary-color); padding: 8px 12px; }
+            .menu-item button:disabled { background-color: #444; color: #888; cursor: not-allowed; }
+            .menu-item span { flex-shrink: 0; }
+            .menu-item hr { flex-grow: 1; border: none; border-top: 1px solid #444; }
+            #about-title { text-align: center; }
+            #about-creator { text-align: center; font-style: italic; margin-top: -10px; }
+            #about-text { text-align: left; }
+            .about-footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #444; font-size: 0.8em; text-align: center; white-space: pre-wrap; }
+            .about-footer a { color: #8af; text-decoration: none; }
+            
+:root {
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --btn-color: #23282e;
+    --btn-text-color: #ffffff;
+    --btn-hover-color: #353e45;
+    --font-family: monospace;
+    --font-size: 18px;
+    --padding: 40px;
+    --container-bg-color: rgba(0, 0, 0, 0.36);
+    --typewriter-effect: on;
+}
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-family, sans-serif);
+}
+#game-container {
+    background-color: var(--container-bg-color);
+    font-size: var(--font-size);
+}
+.choice-btn {
+    background-color: var(--btn-color);
+    color: var(--btn-text-color);
+    border: 1px solid var(--btn-color);
+}
+.choice-btn:hover {
+    background-color: var(--btn-hover-color);
+    border-color: var(--btn-hover-color);
+}
+body { background-image: url('images/static_bg.png'); }
+
+        </style>
+    
+    
+        <div id="game-container" class="layout-image-as-bg">
+            <div id="image-container"><img id="scene-image" src=""></div>
+            <div id="content-container">
+                <div id="scene-text"></div>
+                <div id="choices-container"></div>
+            </div>
+            <audio id="ambience-player" loop=""></audio>
+            <audio id="music-player" loop=""></audio>
+        </div>
+        <button id="player-menu-btn">☰</button>
+
+        <div id="player-menu-modal" class="player-modal">
+            <div class="player-modal-content">
+                <span class="player-modal-close">×</span>
+                <h2>Menu</h2>
+                <div class="menu-item"><button id="restart-btn">Restart Game</button></div>
+                <hr style="border-color: #444;">
+                <div class="menu-item"><button id="save-btn">Save Progress</button><button id="load-btn">Load Progress</button></div>
+                <hr style="border-color: #444;">
+                <div class="menu-item"><span>Music</span><input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.4"></div>
+                <div class="menu-item"><span>Ambience</span><input type="range" id="ambience-volume-slider" min="0" max="1" step="0.05" value="0.8"></div>
+                 <div class="menu-item"><span>Font Size</span><input type="range" id="font-size-slider" min="12" max="28" step="1" value="16"></div>
+                <div class="menu-item"><button id="music-toggle-btn">Music On</button><button id="sound-toggle-btn">Sound On</button></div>
+                <div class="menu-item"><button id="fullscreen-btn">Toggle Fullscreen</button></div>
+                <hr style="border-color: #444;">
+                <div class="menu-item"><button id="about-btn">About</button></div>
+            </div>
+        </div>
+
+        <div id="about-modal" class="player-modal">
+            <div class="player-modal-content">
+                <span class="player-modal-close">×</span>
+                <h2 id="about-title"></h2>
+                <p id="about-creator"></p>
+                <p id="about-text"></p>
+                <div class="about-footer">Created in
+CYOA Studio
+<a href="https://github.com/tin2tin/CYOA_Studio" target="_blank">https://github.com/tin2tin/CYOA_Studio</a></div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const storyData = {
+  "meta": {
+    "title": "The Last Broadcast",
+    "startSceneId": "Welcome",
+    "creatorName": "A. N. Author",
+    "aboutText": "A short interactive story of suspense set in a remote listening post.\n\nFile attributions:\nwind draft loop 2 by nsstudios -- https://freesound.org/s/651540/ -- License: Attribution 4.0\nWeak ham radio 14237kHz 170726.wav by klankbeeld -- https://freesound.org/s/398610/ -- License: Creative Commons 0\nWalkie_Talkie_Static.aif by crcavol -- https://freesound.org/s/154654/ -- License: Creative Commons 0\nhowling wind inside 01 131230_01.wav by klankbeeld -- https://freesound.org/s/212443/ -- License: Attribution 4.0",
+    "styles": {
+      "--bg-color": "#1a1a1a",
+      "--text-color": "#e0e0e0",
+      "--btn-color": "#23282e",
+      "--btn-text-color": "#ffffff",
+      "--btn-hover-color": "#353e45",
+      "--font-family": "monospace",
+      "--font-size": "18px",
+      "--padding": "40px",
+      "--screen-bg-image": "images/static_bg.png",
+      "--container-bg-image": "",
+      "--container-bg-color": "rgba(0, 0, 0, 0.36)",
+      "--music-path": "sounds/212443__klankbeeld__howling-wind-inside-01-131230_01.mp3",
+      "--typewriter-effect": "on",
+      "--btn-border": "1px solid #333",
+      "--border-radius": "4px"
+    },
+    "layout": "layout-image-as-bg",
+    "variables": {
+      "knows_code": false
+    }
+  },
+  "scenes": {
+    "radio_room": {
+      "id": "radio_room",
+      "text": "The only light in the shack comes from the warm, orange glow of the radio's vacuum tubes. Outside, the blizzard howls. The constant hiss of static is your only companion.",
+      "image": "images/radio_room_1755855589431.jpg",
+      "imagePrompt": "A vintage 1940s radio console in a dark, rustic wooden shack, glowing tubes casting long shadows, snow visible through a window, dramatic lighting, photorealistic.",
+      "ambienceSound": "sounds/154654__crcavol__walkie_talkie_static.mp3",
+      "choices": [
+        {
+          "text": "Try to tune the main frequency dial.",
+          "target": "faint_signal"
+        },
+        {
+          "text": "Make a cup of coffee and wait.",
+          "target": "ending_nothing"
+        }
+      ]
+    },
+    "faint_signal": {
+      "id": "faint_signal",
+      "text": "You slowly turn the heavy bakelite dial. The static crackles and shifts.\nSuddenly, through the noise, you hear something... a voice? It's faint, distorted by distance and the storm.",
+      "image": "images/faint_signal_1755856114964.jpg",
+      "imagePrompt": "",
+      "soundEffect": "sounds/faint_voice.mp3",
+      "choices": [
+        {
+          "text": "Fine-tune the signal.",
+          "target": "clear_message"
+        },
+        {
+          "text": "Dismiss it as interference and go back.",
+          "target": "radio_room"
+        }
+      ],
+      "ambienceSound": "sounds/398610__klankbeeld__weak-ham-radio-14237khz-170726.mp3"
+    },
+    "clear_message": {
+      "id": "clear_message",
+      "text": "With delicate adjustments, the voice becomes clearer. It's speaking a sequence of numbers, repeating them over and over.\n'...seven... four... one... zero...'\nIt's a code. Then, the signal dies.",
+      "image": "images/clear_message_1755855680867.jpg",
+      "imagePrompt": "Close-up on a pair of vintage 1940s military headphones lying on a wooden desk next to a code book, shallow depth of field, moody lighting.",
+      "setVariables": {
+        "knows_code": true
+      },
+      "choices": [
+        {
+          "text": "Write down the numbers and ponder their meaning.",
+          "target": "secret_ending"
+        },
+        {
+          "text": "The numbers mean nothing. The storm is getting worse.",
+          "target": "ending_nothing"
+        }
+      ],
+      "ambienceSound": "sounds/398610__klankbeeld__weak-ham-radio-14237khz-170726.mp3"
+    },
+    "ending_nothing": {
+      "id": "ending_nothing",
+      "text": "You decide against chasing phantoms in the static. The storm rages on, and the night passes in quiet solitude.\nNothing happens. Perhaps that's for the best.",
+      "image": "images/ending_nothing_1755855733367.jpg",
+      "imagePrompt": "Looking out a frosted window from a dark cabin into a fierce blizzard at night.",
+      "ambienceSound": "sounds/651540__nsstudios__wind-draft-loop-2.wav",
+      "choices": [
+        {
+          "text": "Return to the radio. ",
+          "target": "radio_room"
+        }
+      ]
+    },
+    "secret_ending": {
+      "id": "secret_ending",
+      "text": "The numbers... it's the access code for the emergency bunker hidden beneath the floorboards. You never thought you'd use it. As the storm worsens, you realize the broadcast wasn't a phantom, but a warning.",
+      "image": "images/secret_ending_1755855718216.jpg",
+      "imagePrompt": "A heavy steel hatch set into a dark wooden floor, a wheel lock in the center.",
+      "choices": [],
+      "ambienceSound": "sounds/651540__nsstudios__wind-draft-loop-2.wav"
+    },
+    "Welcome": {
+      "text": "Welcome to interactive fiction: \"The Last Broadcast\".",
+      "choices": [
+        {
+          "text": "Let's go!",
+          "target": "radio_room"
+        }
+      ],
+      "image": "images/radio_room_1755855589431.jpg",
+      "imagePrompt": "",
+      "ambienceSound": ""
+    }
+  }
+};
+                const sceneImage = document.getElementById('scene-image'), sceneText = document.getElementById('scene-text'), choicesContainer = document.getElementById('choices-container'), ambiencePlayer = document.getElementById('ambience-player'), musicPlayer = document.getElementById('music-player'), playerMenuBtn = document.getElementById('player-menu-btn'), playerMenuModal = document.getElementById('player-menu-modal'), aboutModal = document.getElementById('about-modal'), gameContainer = document.getElementById('game-container'), contentContainer = document.getElementById('content-container');
+                let currentSceneId, currentAmbienceSrc = '', currentMusicSrc = '';
+                let typewriterState = { intervalId: null, skipListener: null };
+
+                function isStorageAvailable() {
+                    try {
+                        const storage = window.localStorage;
+                        const x = '__storage_test__';
+                        storage.setItem(x, x);
+                        storage.removeItem(x);
+                        return true;
+                    } catch (e) {
+                        return false;
+                    }
+                }
+
+                const storageAvailable = isStorageAvailable();
+
+                function setupMenu() {
+                    const saveBtn = document.getElementById('save-btn');
+                    const loadBtn = document.getElementById('load-btn');
+                    const fontSizeSlider = document.getElementById('font-size-slider');
+
+                    playerMenuBtn.onclick = () => playerMenuModal.style.display = 'flex';
+                    [playerMenuModal, aboutModal].forEach(m => m.querySelector('.player-modal-close').onclick = () => m.style.display = 'none');
+                    document.getElementById('about-btn').onclick = () => { playerMenuModal.style.display = 'none'; aboutModal.style.display = 'flex'; };
+                    document.getElementById('restart-btn').onclick = () => { if (storageAvailable) { localStorage.removeItem('cyoa-save-' + storyData.meta.title); } renderScene(storyData.meta.startSceneId); playerMenuModal.style.display = 'none'; };
+                    document.getElementById('fullscreen-btn').onclick = () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(e => console.warn(e)); } else { document.exitFullscreen(); } };
+                    
+                    if (!storageAvailable) {
+                        saveBtn.disabled = true;
+                        loadBtn.disabled = true;
+                        saveBtn.title = "Saving/Loading is disabled when running from a local file.";
+                        loadBtn.title = "Saving/Loading is disabled when running from a local file.";
+                    } else {
+                        saveBtn.onclick = () => { localStorage.setItem('cyoa-save-' + storyData.meta.title, currentSceneId); alert('Progress saved!'); playerMenuModal.style.display = 'none'; };
+                        loadBtn.onclick = () => { const savedId = localStorage.getItem('cyoa-save-' + storyData.meta.title); if (savedId && storyData.scenes[savedId]) { renderScene(savedId); } else { alert('No save data found.'); } playerMenuModal.style.display = 'none'; };
+                    }
+
+                    document.getElementById('music-toggle-btn').onclick = function() { musicPlayer.muted = !musicPlayer.muted; this.textContent = musicPlayer.muted ? 'Music Off' : 'Music On'; };
+                    document.getElementById('sound-toggle-btn').onclick = function() { ambiencePlayer.muted = !ambiencePlayer.muted; this.textContent = ambiencePlayer.muted ? 'Sound Off' : 'Sound On'; };
+                    document.getElementById('volume-slider').oninput = function() { musicPlayer.volume = this.value; };
+                    document.getElementById('ambience-volume-slider').oninput = function() { ambiencePlayer.volume = this.value; };
+                    
+                    musicPlayer.volume = document.getElementById('volume-slider').value;
+                    ambiencePlayer.volume = document.getElementById('ambience-volume-slider').value;
+                    
+                    function applyFontSize(size) {
+                        gameContainer.style.fontSize = size + 'px';
+                        fontSizeSlider.value = size;
+                    }
+
+                    if (storageAvailable) {
+                        const savedSize = localStorage.getItem('cyoa-fontsize-' + storyData.meta.title);
+                        if (savedSize) { applyFontSize(savedSize); }
+                    }
+
+                    fontSizeSlider.oninput = function() {
+                        applyFontSize(this.value);
+                        if (storageAvailable) { localStorage.setItem('cyoa-fontsize-' + storyData.meta.title, this.value); }
+                    };
+
+                    document.getElementById('about-title').textContent = storyData.meta.title;
+                    document.getElementById('about-creator').textContent = storyData.meta.creatorName ? 'By ' + storyData.meta.creatorName : '';
+                    document.getElementById('about-text').textContent = storyData.meta.aboutText;
+                }
+
+                function setupGlobalStyles() {
+                    const musicPath = storyData.meta.styles['--music-path'] || '';
+                    if (musicPath !== currentMusicSrc) {
+                        currentMusicSrc = musicPath;
+                        musicPlayer.src = musicPath;
+                        if (musicPath) {
+                            musicPlayer.play().catch(e=>console.log("Music autoplay blocked by browser."));
+                        } else {
+                            musicPlayer.pause();
+                        }
+                    }
+                    
+                    document.body.addEventListener('click', () => {
+                        if(musicPlayer.src && musicPlayer.paused) {
+                            musicPlayer.play().catch(e => console.warn("Could not start music even after interaction."));
+                        }
+                    }, { once: true });
+                }
+                
+                function typeWriter(text, choices) {
+                    let i = 0;
+                    choicesContainer.innerHTML = '';
+                    
+                    const tempChoices = document.createElement('div');
+                    (choices || []).forEach(choice => {
+                        const button = document.createElement('button');
+                        button.className = 'choice-btn';
+                        button.textContent = choice.text;
+                        tempChoices.appendChild(button);
+                    });
+                    choicesContainer.appendChild(tempChoices);
+                    sceneText.textContent = text;
+                    const containerHeight = contentContainer.offsetHeight;
+                    choicesContainer.innerHTML = '';
+                    sceneText.innerHTML = '';
+                    contentContainer.style.minHeight = containerHeight + 'px';
+
+                    function showChoices() {
+                        (choices || []).forEach((choice, index) => {
+                            const button = document.createElement('button');
+                            button.textContent = choice.text;
+                            button.className = 'choice-btn fade-in';
+                            button.style.animationDelay = `${index * 0.2}s`;
+                            button.onclick = (e) => { e.stopPropagation(); renderScene(choice.target); };
+                            choicesContainer.appendChild(button);
+                        });
+                    }
+                    
+                    if (typewriterState.intervalId) clearInterval(typewriterState.intervalId);
+                    if (typewriterState.skipListener) gameContainer.removeEventListener('click', typewriterState.skipListener);
+                    
+                    const skipTyping = () => {
+                        clearInterval(typewriterState.intervalId);
+                        typewriterState.intervalId = null;
+                        sceneText.innerHTML = text;
+                        contentContainer.style.minHeight = '';
+                        showChoices();
+                        gameContainer.removeEventListener('click', typewriterState.skipListener);
+                        typewriterState.skipListener = null;
+                    };
+                    typewriterState.skipListener = skipTyping;
+                    gameContainer.addEventListener('click', skipTyping);
+                    
+                    typewriterState.intervalId = setInterval(() => {
+                        if (i < text.length) {
+                            sceneText.innerHTML += text.charAt(i);
+                            i++;
+                        } else {
+                           skipTyping();
+                        }
+                    }, 30);
+                }
+
+                function renderScene(sceneId) {
+                    try {
+                        currentSceneId = sceneId;
+                        const scene = storyData.scenes[sceneId];
+                        if (!scene) { sceneText.textContent = 'Error: Scene "' + sceneId + '" not found.'; return; }
+                        
+                        if (storyData.meta.styles['--typewriter-effect'] === 'on') {
+                            typeWriter(scene.text, scene.choices);
+                        } else {
+                            contentContainer.style.minHeight = '';
+                            sceneText.textContent = scene.text;
+                            choicesContainer.innerHTML = '';
+                            (scene.choices || []).forEach(choice => { 
+                                const button = document.createElement('button'); 
+                                button.textContent = choice.text; 
+                                button.className = 'choice-btn'; 
+                                button.onclick = () => renderScene(choice.target); 
+                                choicesContainer.appendChild(button); 
+                            });
+                        }
+                        
+                        const layout = storyData.meta.layout;
+                        const imageContainer = document.getElementById('image-container');
+                        const imageUrl = scene.image;
+                        const globalScreenBgUrl = storyData.meta.styles['--screen-bg-image'];
+                        
+                        document.body.className = layout;
+                        gameContainer.className = layout;
+
+                        if (layout === 'layout-image-as-bg') {
+                            if (imageUrl) {
+                                document.body.style.backgroundImage = `url('${imageUrl}')`;
+                            } else {
+                                document.body.style.backgroundImage = globalScreenBgUrl ? `url('${globalScreenBgUrl}')` : 'none';
+                            }
+                        } else {
+                            document.body.style.backgroundImage = globalScreenBgUrl ? `url('${globalScreenBgUrl}')` : 'none';
+                            if (imageUrl) {
+                                sceneImage.src = imageUrl;
+                                imageContainer.style.display = 'block';
+                            } else {
+                                imageContainer.style.display = 'none';
+                            }
+                        }
+
+                        const soundUrl = scene.ambienceSound || '';
+                        if (soundUrl !== currentAmbienceSrc) {
+                            currentAmbienceSrc = soundUrl;
+                            ambiencePlayer.src = soundUrl;
+                        }
+                        
+                        if (soundUrl && ambiencePlayer.paused) {
+                            ambiencePlayer.play().catch(e => console.warn("Ambience autoplay blocked."));
+                        } else if (!soundUrl) {
+                            ambiencePlayer.pause();
+                        }
+                    } catch(e) {
+                        console.error("Error rendering scene:", e);
+                        sceneText.textContent = "An error occurred. Check the console for details.";
+                    }
+                }
+
+                setupMenu();
+                setupGlobalStyles();
+                document.title = storyData.meta.title || 'Choose Your Own Adventure';
+                let startingScene = storyData.meta.startSceneId;
+                if(storageAvailable) {
+                    const savedSceneId = localStorage.getItem('cyoa-save-' + storyData.meta.title);
+                     if(savedSceneId && storyData.scenes[savedSceneId]) {
+                        startingScene = savedSceneId;
+                    }
+                }
+                renderScene(startingScene);
+            });
+        </script>
+    
+    

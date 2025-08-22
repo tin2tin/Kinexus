@@ -1792,7 +1792,7 @@ const App = {
                 urlSuffix = '&width=1280&height=720';
             }
 
-            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + "?model=flux&nologo=true" + urlSuffix;
+            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + "?model=flux&nologo=true&enhance=true" + urlSuffix;
             App.state.aiImageUrl = url;
             App.ui.updateAiImagePreview(null, 'Rendering...');
             const tempImg = new Image();

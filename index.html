@@ -6,33 +6,31 @@
     <title>CYOA Studio Pro</title>
     <style>
         :root {
-            /* Desaturated colors as requested */
             --primary-color: #4a78ad; --secondary-color: #6c757d; --light-bg: #121212;
             --dark-text: #e0e0e0; --border-color: #333333; --success-color: #5a8f66;
-            --danger-color: #b85a66; --warning-color: #c7921a; --warning-text: #ffffff; /* Darker yellow, white text */
+            --danger-color: #b85a66; --warning-color: #c7921a; --warning-text: #ffffff;
             --purple-color: #8e63a9;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; height: 100vh; margin: 0; background-color: var(--light-bg); color: var(--dark-text); font-size: 16px; }
-        /* Dark Scrollbars */
         ::-webkit-scrollbar { width: 12px; height: 12px; }
         ::-webkit-scrollbar-track { background: #1e1e1e; }
         ::-webkit-scrollbar-thumb { background-color: #444; border-radius: 6px; border: 2px solid #1e1e1e; }
         ::-webkit-scrollbar-thumb:hover { background-color: #555; }
         html { scrollbar-color: #444 #1e1e1e; }
-        /* Layout */
+
         #tree-view-container { 
             width: 350px; 
-            min-width: 250px; /* Prevent from becoming too small */
-            max-width: 800px; /* Prevent from becoming too large */
+            min-width: 250px;
+            max-width: 800px;
             background-color: #1e1e1e; 
             border-right: 1px solid var(--border-color); 
             padding: 15px; 
             display: flex; 
             flex-direction: column; 
-            resize: horizontal; /* Enable user resizing */
-            overflow: hidden; /* Hide the default browser resize handle overflow */
+            resize: horizontal;
+            overflow: hidden;
         }
-        #editor-container { flex-grow: 1; padding: 20px; overflow-y: auto; background-color: var(--light-bg); }
+        #editor-container { flex-grow: 1; padding: 0 20px 20px; overflow-y: auto; background-color: var(--light-bg); }
         #editor-container fieldset { border: none; padding: 0; margin: 0; }
         #editor-container fieldset:disabled { opacity: 0.5; pointer-events: none; }
         #player-container { display: none; flex-grow: 1; overflow-y: auto; position: relative; justify-content: center; align-items: center; }
@@ -41,13 +39,14 @@
             padding: 20px;
             box-sizing: border-box;
         }
-        /* Headers */
+
         h1, h2, h3 { border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; margin-top: 0; }
+        #editor-container h1 { margin-top: 20px; }
         .header { display: flex; justify-content: space-between; align-items: center; }
         .header h1 { white-space: nowrap; }
-        .header h3 { border-bottom: none; } /* Specificity for choice header */
+        .header h3 { border-bottom: none; }
         #main-title-dirty-indicator { color: var(--danger-color); font-size: 0.7em; margin-left: 5px; display: none; }
-        /* Tree View */
+        
         hr { border: none; border-top: 1px solid var(--border-color); margin: 15px 0; }
         #tree-view { list-style-type: none; padding-left: 0; flex-grow: 1; overflow: auto; min-height: 100px; }
         #tree-view > ul { display: table; width: 100%; list-style-type: none; padding-left: 0; }
@@ -69,8 +68,8 @@
         .scene-node-icons { display: flex; gap: 4px; align-items: center; }
         .scene-node-icons svg { width: 14px; height: 14px; flex-shrink: 0; }
         .scene-node-icons .icon-start { fill: var(--success-color); }
-        .scene-node-icons .icon-image { fill: #8ab4f8; } /* Light blue */
-        .scene-node-icons .icon-sound { fill: #fdd663; } /* Yellow */
+        .scene-node-icons .icon-image { fill: #8ab4f8; }
+        .scene-node-icons .icon-sound { fill: #fdd663; }
         .scene-node-icons .icon-deadend { fill: var(--danger-color); }
         .scene-node-icons .icon-orphan { fill: var(--warning-color); }
         .scene-node.active .scene-node-icons svg { fill: white; }
@@ -78,8 +77,8 @@
             list-style-type: none; 
             position: relative; 
             padding: 3px 0 3px 25px; 
-            color: var(--choice-color, #a0a0a0); /* Use variable, fallback to original */
-            font-style: normal; /* Changed from italic for better readability */
+            color: var(--choice-color, #a0a0a0);
+            font-style: normal;
             font-size: 0.9em; 
         }
         .choice-node::before { 
@@ -89,17 +88,17 @@
             left: 5px; 
             width: 15px; 
             height: 18px; 
-            border-bottom: 1px solid var(--choice-color, #444); /* Use variable */
-            border-left: 1px solid var(--choice-color, #444); /* Use variable */
+            border-bottom: 1px solid var(--choice-color, #444);
+            border-left: 1px solid var(--choice-color, #444);
             border-radius: 0 0 0 5px; 
         }
         .choice-node-text { white-space: nowrap; }
         .tree-toggle { font-family: monospace; width: 20px; text-align: center; border-radius: 4px; background: #333333; user-select: none; color: var(--dark-text); flex-shrink: 0; }
         .scene-node.active .tree-toggle { background: #ffffff; color: var(--primary-color); }
         .tree-toggle.empty { opacity: 0; cursor: default; }
-        /* Buttons */
+        
         button { padding: 10px 15px; background-color: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; transition: background-color 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-        .form-group.inline button { margin-top: 0; } /* Alignment fix */
+        .form-group.inline button { margin-top: 0; }
         button:disabled { background-color: var(--secondary-color); cursor: not-allowed; }
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
         .btn-group button { margin-top: 0; }
@@ -111,24 +110,112 @@
         .btn-secondary { background-color: var(--secondary-color); }
         .btn-purple { background-color: var(--purple-color); }
         .file-icon-btn { padding: 8px; min-width: 40px; }
-        .btn-round { border-radius: 50%; width: 36px; height: 36px; padding: 0; font-size: 1.5em; line-height: 36px; flex-shrink: 0; }
+        .btn-round { border-radius: 50%; width: 30px; height: 30px; padding: 0; font-size: 1.2em; line-height: 30px; flex-shrink: 0; }
         #image-file-input, #sound-file-input { display: none; }
-        /* Editor Panel */
-        .form-group { margin-bottom: 15px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group.choice-group { margin-bottom: 8px; }
         .form-group.inline { display: flex; align-items: center; gap: 10px; }
         .form-group.inline input, .form-group.inline select { flex-grow: 1; }
         label { display: block; font-weight: bold; margin-bottom: 5px; }
         input[type="text"], input[type="search"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #444444; border-radius: 4px; font-size: 1em; background-color: #1e1e1e; color: var(--dark-text); }
         input[type="text"]:disabled { background-color: #333333; cursor: not-allowed; }
-        textarea { height: 100px; resize: vertical; }
-        .media-row { }
-        .media-row > .form-group { }
-        /* AI Image Generator */
+        textarea { height: 120px; resize: vertical; }
+       
+        #media-hub { display: flex; gap: 15px; align-items: center; }
+        #media-paths-container { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
+        #media-paths-container .form-group.inline { margin: 0; }
+        #media-paths-container .media-icon-label {
+            margin-bottom: 0;
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            color: var(--secondary-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #scene-editor-preview-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto 25px auto;
+            aspect-ratio: 16 / 9;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #000;
+        }
+        #scene-editor-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            transform: scale(0.5);
+            transform-origin: top left;
+            overflow: auto;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            font-size: var(--font-size);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #scene-editor-preview.layout-image-as-bg { align-items: flex-end; }
+        #scene-editor-preview, #scene-editor-preview #preview-player-inner-container {
+             background-size: cover; background-position: center;
+        }
+        #scene-editor-preview #preview-player-inner-container {
+             width: 100%;
+             max-width: 800px;
+             margin: 20px;
+             box-shadow: 0 5px 20px rgba(0,0,0,.5);
+             gap: 20px;
+             padding: var(--padding);
+             border-radius: 12px;
+             box-sizing: border-box;
+             background-color: var(--container-bg-color);
+             display: flex;
+        }
+        #scene-editor-preview .choice-btn {
+            padding: 15px 20px;
+            pointer-events: none;
+            background-color: var(--btn-color);
+            color: var(--btn-text-color);
+            border: 1px solid var(--btn-color);
+            text-align: left;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+        #scene-editor-preview #preview-player-image {
+            max-width: 100%;
+            max-height: 50vh;
+            display: block;
+            margin: 0 auto;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        #scene-editor-preview #preview-player-text {
+            white-space: pre-wrap;
+            margin-bottom: 20px;
+        }
+        #scene-editor-preview #preview-player-choices {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .layout-top-down { flex-direction: column; } .layout-top-down #player-image-container, .layout-top-down #preview-player-image-container { width: 100%; margin-bottom: 20px; } .layout-top-down #player-image, .layout-top-down #preview-player-image { width: 100%; height: auto; }
+        .layout-side-by-side { flex-direction: row; align-items: flex-start; } .layout-side-by-side #player-image-container, .layout-side-by-side #preview-player-image-container { width: 40%; flex-shrink: 0; } .layout-side-by-side #player-content-container, .layout-side-by-side #preview-player-content-container { width: 60%; }
+        .layout-image-as-bg #player-image-container, .layout-image-as-bg #preview-player-image-container { display: none !important; }
+        .layout-image-as-bg #player-content-container, .layout-image-as-bg #preview-player-content-container { width: 100%; }
+
         #ai-image-generator { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
         #ai-image-preview { width: 128px; height: 128px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; position: relative; }
         #ai-image-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
         #ai-image-controls { display: flex; gap: 10px; align-items: center; flex-grow: 1; }
-        /* Modal Styles */
         .modal { display: none; opacity: 0; visibility: hidden; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; transition: opacity 0.2s, visibility 0.2s; }
         .modal.visible { display: flex; opacity: 1; visibility: visible; }
         .modal-content { position: relative; background-color: #1e1e1e; padding: 20px; border-radius: 8px; width: 80%; max-width: 600px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); color: var(--dark-text); }
@@ -139,16 +226,29 @@
         .modal-grid .grid-span-2 { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .modal-grid .grid-full-width { grid-column: 1 / -1; }
         .modal-grid .grid-separator { grid-column: 1 / -1; margin: 5px 0; border: none; border-top: 1px solid var(--border-color); }
-
         input[type="color"] { width: 100%; height: 40px; padding: 0; border: none; cursor: pointer; }
-        /* Style Editor Modal Specific Override */
-        #style-editor-modal.visible { background-color: transparent; justify-content: flex-start; align-items: flex-start; pointer-events: none; }
-        #style-editor-modal .modal-content { pointer-events: auto; margin: 20px; max-width: 450px; max-height: 85vh; overflow-y: auto;}
-        /* Tree Context Menu */
+        
+        #style-editor-modal.visible {
+            background-color: transparent;
+            pointer-events: none;
+            justify-content: flex-start; 
+            align-items: flex-start;
+        }
+        #style-editor-modal .modal-content {
+            pointer-events: auto;
+            margin: 0;
+            border-radius: 0;
+            max-height: none;
+            max-width: none;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+            position: absolute;
+            box-sizing: border-box;
+        }
+
         #tree-context-menu { display: none; position: absolute; background-color: #1e1e1e; border: 1px solid #333333; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); border-radius: 4px; padding: 5px 0; z-index: 1001; }
         #tree-context-menu button { width: 100%; text-align: left; background: none; color: var(--dark-text); margin: 0; padding: 8px 15px; border-radius: 0; }
         #tree-context-menu button:hover { background-color: var(--primary-color); color: white; }
-        /* Player Styles */
         #player-container { background-size: cover; background-position: center; background-attachment: fixed; background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); font-size: var(--font-size); }
         #player-inner-container { width: 100%; max-width: 800px; padding: var(--padding); border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); display:flex; gap: 20px; margin: 20px; background-size: cover; background-position: center; background-color: var(--container-bg-color);}
         #player-image { max-width: 100%; max-height: 50vh; display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
@@ -156,18 +256,13 @@
         #player-choices { display: flex; flex-direction: column; gap: 12px; }
         #player-choices .choice-btn { width: 100%; text-align: left; padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; transition: background-color .2s, transform .1s, border-color .2s; background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid var(--btn-color); }
         #player-choices .choice-btn:hover { transform: translateY(-2px); background-color: var(--btn-hover-color); border-color: var(--btn-hover-color); }
-        .layout-top-down { flex-direction: column; } .layout-top-down #player-image-container { width: 100%; margin-bottom: 20px; } .layout-top-down #player-image { width: 100%; height: auto; }
-        .layout-side-by-side { flex-direction: row; align-items: flex-start; } .layout-side-by-side #player-image-container { width: 40%; flex-shrink: 0; } .layout-side-by-side #player-content-container { width: 60%; }
-        .layout-image-as-bg #player-image-container { display: none !important; }
-        .layout-image-as-bg #player-content-container { width: 100%; } /* BUG FIX: Ensure content fills width */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         #player-choices .choice-btn.fade-in { animation: fadeIn 0.5s forwards; opacity: 0; }
 
         #stop-play-x { position: absolute; top: 10px; right: 10px; background: var(--danger-color); color: white; border: none; font-size: 1.5em; padding: 5px 10px; cursor: pointer; z-index: 10; }
         #restart-play { position: absolute; top: 10px; right: 60px; z-index: 10; }
-        #image-preview { width: 128px; height: 128px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; position: relative; }
+        #image-preview { width: 150px; height: 150px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; position: relative; }
         #image-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        /* Fullscreen Viewer */
         #fullscreen-viewer { flex-direction: column; }
         #fullscreen-image { max-width: 90vw; max-height: 80vh; object-fit: contain; }
         #fullscreen-minimize { margin-top: 15px; }
@@ -187,17 +282,19 @@
 </head>
 <body>
 
-<!-- Main Editor UI -->
 <div id="tree-view-container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <button id="project-menu-btn" class="btn-primary" title="Open Project Menu">
+        <button id="project-menu-btn" title="Open Project Menu">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
             Menu
         </button>
+        <button id="style-editor-btn" class="btn-primary file-icon-btn" title="Style Template Editor">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm-8 8A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm8 0A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3z"/></svg>
+        </button>
     </div>
-    <div class="header"><h2>Story Map</h2><button id="new-scene-btn" class="btn-round" title="Create New Scene">+</button></div>
+    <div class="header"><h2>Story Map</h2></div>
     <ul id="tree-view"></ul>
-    <div class="form-group inline" style="margin-top: 10px; margin-bottom: 0;">
+    <div class="form-group inline" style="margin-top: 15px; margin-bottom: 0;">
         <input type="search" id="scene-search-input" placeholder="Filter scenes...">
         <button id="scene-search-btn" class="file-icon-btn" title="Search Scenes">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
@@ -213,9 +310,10 @@
                 <div class="form-group inline" id="scene-id-group" style="margin-bottom: 0; min-width: 250px;">
                     <label for="scene-id" style="margin-bottom: 0; white-space: nowrap;">Scene ID</label>
                     <input type="text" id="scene-id" disabled style="padding-top: 10px; padding-bottom: 10px;">
-                    <button id="rename-scene-btn" title="Rename Scene ID" style="padding: 10px;">
+                    <button id="rename-scene-btn" title="Rename Scene ID" class="file-icon-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
                     </button>
+                    <button id="new-scene-btn" class="btn-success file-icon-btn" title="Create New Scene">+</button>
                 </div>
             </div>
             <div class="btn-group">
@@ -238,39 +336,52 @@
         </div>
         <div id="editor-panel">
             
-            <div class="form-group"><label>Story Text</label><textarea id="scene-text"></textarea></div>
+            <div id="scene-editor-preview-wrapper">
+                <div id="scene-editor-preview">
+                    <div id="preview-player-inner-container" class="layout-top-down">
+                        <div id="preview-player-image-container"><img id="preview-player-image" src=""></div>
+                        <div id="preview-player-content-container">
+                            <div id="preview-player-text"></div>
+                            <div id="preview-player-choices"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
-            <label>Choices</label>
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <textarea id="scene-text" placeholder="Story text goes here..." style="flex-grow: 1;"></textarea>
+                <button id="process-text-ai-btn" class="btn-purple" title="Process Text with AI">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg>
+                </button>
+            </div>
+
             <div id="choices-container"></div>
-            <div style="display: flex; justify-content: flex-end;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
                 <button id="add-choice-btn" class="btn-round" title="Add New Choice">+</button>
             </div>
             <hr>
 
-            <div class="media-row">
-                <div class="form-group">
-                    <label for="scene-image">Image</label>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
-                        <div id="image-preview">
-                            <span>Thumbnail</span>
-                            <div class="thumbnail-fullscreen-icon" title="View Fullscreen">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/></svg>
-                            </div>
-                        </div>
-                        <div style="flex-grow: 1;">
-                            <div class="form-group inline" style="margin:0;">
-                                <input type="text" id="scene-image" placeholder="e.g., images/trench.jpg">
-                                <button id="select-image-btn" class="btn-warning file-icon-btn" title="Select Image File">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
-                                </button>
-                            </div>
-                        </div>
+            <div class="form-group" id="media-hub">
+                <div id="image-preview">
+                    <span>Thumbnail</span>
+                    <div class="thumbnail-fullscreen-icon" title="View Fullscreen">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/></svg>
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="scene-sound">Audio</label>
-                    <div class="form-group inline" style="margin:0; width: 100%;">
+                <div id="media-paths-container">
+                    <div class="form-group inline">
+                        <span class="media-icon-label" title="Image Path">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
+                        </span>
+                        <input type="text" id="scene-image" placeholder="e.g., images/trench.jpg">
+                        <button id="select-image-btn" class="btn-warning file-icon-btn" title="Select Image File">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
+                        </button>
+                    </div>
+                    <div class="form-group inline">
+                         <span class="media-icon-label" title="Sound Path">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 3zm-2 2a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 1 .5-.5zm-6 1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zm8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zm-10 1a.5.5 0 0 1 .5.5v0a.5.5 0 0 1-1 0v0a.5.5 0 0 1 .5-.5zm12 0a.5.5 0 0 1 .5.5v0a.5.5 0 0 1-1 0v0a.5.5 0 0 1 .5-.5z"/></svg>
+                        </span>
                         <input type="text" id="scene-sound" placeholder="e.g., sounds/wind.mp3">
                          <button id="toggle-ambience-btn" class="btn-secondary file-icon-btn" title="Play/Pause Ambience">
                             <svg class="play-pause-icon" id="ambience-play-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734L10.804 8z"/></svg>
@@ -282,11 +393,11 @@
                     </div>
                 </div>
             </div>
-            
+
             <hr>
 
             <div class="form-group">
-                <label for="scene-image-prompt">Generative AI Image (via Pollinations.ai)</label>
+                <label for="scene-image-prompt">AI Image</label>
                 <div id="ai-image-generator">
                     <div id="ai-image-preview">
                         <span>Preview</span>
@@ -320,7 +431,7 @@
 <div id="tree-context-menu"><button id="set-start-scene-btn">Set as Start Scene</button></div>
 
 <!-- Modals -->
-<div id="project-menu-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Menu</h2><div class="btn-group" style="flex-direction: column; gap: 15px; align-items: stretch;"><button id="new-project-btn" class="btn-secondary">New Project</button><button id="open-project-btn" class="btn-secondary">Open Project</button><button id="save-story-btn" class="btn-success">Save Project</button><hr style="border-color: #444;"><button id="style-editor-btn">Style Template Editor</button><button id="about-editor-btn">Project Text Editor</button><hr style="border-color: #444;"><button id="export-data-btn" class="btn-warning">Export Data</button><button id="export-project-btn" class="btn-warning">Export Standalone Game</button></div></div></div>
+<div id="project-menu-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Menu</h2><div class="btn-group" style="flex-direction: column; gap: 15px; align-items: stretch;"><button id="new-project-btn" class="btn-secondary">New Project</button><button id="open-project-btn" class="btn-secondary">Open Project</button><button id="save-story-btn" class="btn-success">Save Project</button><button id="about-editor-btn">Project Text Editor</button><button id="export-data-btn" class="btn-warning">Export Data</button><button id="export-project-btn" class="btn-warning">Export Standalone Game</button></div></div></div>
 <div id="about-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Text Editor</h2><p>This information will be displayed in the player's "About" section.</p><div class="form-group"><label for="story-title">Story Title</label><input type="text" id="story-title" placeholder="Your story title"></div><div class="form-group"><label for="creator-name">Creator Name</label><input type="text" id="creator-name" placeholder="Your name or alias"></div><div class="form-group"><label for="about-text">About Text</label><textarea id="about-text" placeholder="A brief description of your project."></textarea></div></div></div>
 <div id="export-data-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Export Specific Data</h2><p>Select data to export as a JSON file.</p><button data-export-type="imagePrompts">Export All Image Prompts</button></div></div>
 <div id="style-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Style Template Editor</h2><div id="style-editor-grid" class="modal-grid"></div></div></div>
@@ -331,6 +442,20 @@
         <button id="notification-close-btn" class="btn-secondary" style="min-width: 80px;">OK</button>
     </div>
 </div>
+<div id="pollinations-text-modal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <span class="modal-close">&times;</span>
+        <h2>Process Text with AI</h2>
+        <div class="form-group">
+            <label for="pollinations-instruction">Instruction</label>
+            <textarea id="pollinations-instruction" placeholder="e.g., Rewrite this text in the style of Edgar Allan Poe"></textarea>
+        </div>
+        <div class="btn-group" style="justify-content: flex-end;">
+            <button id="pollinations-submit-btn" class="btn-purple">Process Text</button>
+        </div>
+    </div>
+</div>
+
 
 <!-- JSZip Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -505,7 +630,10 @@ const App = {
             'editor-fieldset', 'ai-image-preview', 'render-ai-image-btn', 'add-ai-image-btn', 'image-preview',
             'story-title', 'creator-name', 'about-text',
             'notification-modal', 'notification-message', 'notification-close-btn',
-            'toggle-ambience-btn', 'ambience-play-icon', 'ambience-pause-icon'
+            'toggle-ambience-btn', 'ambience-play-icon', 'ambience-pause-icon', 
+            'scene-editor-preview', 'scene-editor-preview-wrapper',
+            'pollinations-text-modal', 'pollinations-instruction', 'pollinations-submit-btn', 'process-text-ai-btn',
+            'style-editor-btn'
         ];
         ids.forEach(id => this.elements[id] = document.getElementById(id));
     },
@@ -528,6 +656,11 @@ const App = {
         this.elements['ambience-player'].addEventListener('play', () => this.player.updateAmbienceButton(true));
         this.elements['ambience-player'].addEventListener('pause', () => this.player.updateAmbienceButton(false));
 
+        ['scene-text', 'scene-image'].forEach(id => {
+            this.elements[id].addEventListener('input', () => this.editor.renderPreview());
+        });
+        this.elements['choices-container'].addEventListener('input', () => this.editor.renderPreview());
+
 
         ['story-title', 'creator-name', 'about-text'].forEach(id => {
             this.elements[id].addEventListener('input', (e) => {
@@ -540,6 +673,10 @@ const App = {
         this.elements['render-ai-image-btn'].addEventListener('click', () => this.assets.renderPollinationImage());
         this.elements['add-ai-image-btn'].addEventListener('click', () => this.assets.addPollinationImageToScene());
 
+        this.elements['process-text-ai-btn'].addEventListener('click', () => this.modals.show('pollinations-text-modal'));
+        this.elements['pollinations-submit-btn'].addEventListener('click', () => this.assets.processTextWithPollinations());
+
+
         document.getElementById('play-from-start-btn').addEventListener('click', () => { this.editor.saveCurrentScene(false); this.player.play(this.state.storyData.meta.startSceneId); });
         document.getElementById('play-from-current-btn').addEventListener('click', () => { this.editor.saveCurrentScene(false); this.player.play(this.state.currentSceneId); });
         document.getElementById('stop-play-x')?.addEventListener('click', () => this.player.stop());
@@ -548,7 +685,7 @@ const App = {
         document.getElementById('export-project-btn').addEventListener('click', () => this.io.exportProjectZip());
         document.getElementById('preview-btn').addEventListener('click', () => this.io.previewProject());
         document.getElementById('export-data-btn').addEventListener('click', () => this.modals.show('export-data-modal'));
-        document.getElementById('style-editor-btn').addEventListener('click', () => this.styles.open());
+        this.elements['style-editor-btn'].addEventListener('click', () => this.styles.open());
         document.getElementById('about-editor-btn').addEventListener('click', () => this.modals.show('about-editor-modal'));
         
         document.querySelectorAll('.modal-close').forEach(el => el.addEventListener('click', (e) => this.modals.hide(e.target.closest('.modal'))));
@@ -562,7 +699,6 @@ const App = {
 
         window.addEventListener('beforeunload', (e) => { if (this.state.isDirty) { e.preventDefault(); e.returnValue = ''; } });
         
-        // Scene Search/Filter Functionality
         const searchInput = document.getElementById('scene-search-input');
         searchInput.addEventListener('input', () => {
             this.tree.render(searchInput.value);
@@ -571,7 +707,6 @@ const App = {
              this.tree.render(searchInput.value);
         });
 
-        // Fullscreen Viewer Logic
         document.querySelectorAll('.thumbnail-fullscreen-icon').forEach(icon => {
             icon.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -605,7 +740,7 @@ const App = {
             App.elements['save-story-btn'].disabled = !isEnabled;
             document.getElementById('export-project-btn').disabled = !isEnabled;
             document.getElementById('export-data-btn').disabled = !isEnabled;
-            document.getElementById('style-editor-btn').disabled = !isEnabled;
+            App.elements['style-editor-btn'].disabled = !isEnabled;
             document.getElementById('about-editor-btn').disabled = !isEnabled;
         },
         displayWelcomeMessage() {
@@ -615,7 +750,6 @@ const App = {
         },
         updateAiImagePreview(url, message = '') {
             const preview = App.elements['ai-image-preview'];
-            // Keep the icon
             const icon = preview.querySelector('.thumbnail-fullscreen-icon');
             preview.innerHTML = '';
             if (icon) preview.appendChild(icon);
@@ -686,16 +820,8 @@ const App = {
                     projectHandle = await dirHandle.getDirectoryHandle(projectName);
                     const storyFileHandle = await projectHandle.getFileHandle('story.json').catch(() => null);
                     if (storyFileHandle) {
-                        if (confirm(`A project named "${projectName}" already exists. Do you want to open it?`)) {
-                            await App.io.openProject(projectHandle);
-                            return;
-                        }
-                    } else {
-                        if (confirm(`A folder named "${projectName}" exists but is not a valid project. Do you want to initialize it as a new project?`)) {
-                            // Proceed to initialize
-                        } else {
-                            return;
-                        }
+                        await App.io.openProject(projectHandle);
+                        return;
                     }
                 } catch (e) {
                     if (e.name === 'NotFoundError') {
@@ -742,21 +868,17 @@ const App = {
                     dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
                 }
                 let storyFileHandle = await dirHandle.getFileHandle('story.json').catch(() => null);
+                
                 if (!storyFileHandle) {
-                    if (confirm("No 'story.json' found in this folder. Do you want to create a new project here?")) {
-                        await dirHandle.getDirectoryHandle('images', { create: true });
-                        await dirHandle.getDirectoryHandle('sounds', { create: true });
-                        storyFileHandle = await dirHandle.getFileHandle('story.json', { create: true });
-                        const writable = await storyFileHandle.createWritable();
-                        const newStory = App.getNewStoryObject();
-                        newStory.meta.title = dirHandle.name;
-                        await writable.write(JSON.stringify(newStory, null, 2));
-                        await writable.close();
-                        App.state.storyData = newStory;
-                    } else {
-                        App.ui.showNotification("Operation cancelled.");
-                        return;
-                    }
+                    await dirHandle.getDirectoryHandle('images', { create: true });
+                    await dirHandle.getDirectoryHandle('sounds', { create: true });
+                    storyFileHandle = await dirHandle.getFileHandle('story.json', { create: true });
+                    const writable = await storyFileHandle.createWritable();
+                    const newStory = App.getNewStoryObject();
+                    newStory.meta.title = dirHandle.name;
+                    await writable.write(JSON.stringify(newStory, null, 2));
+                    await writable.close();
+                    App.state.storyData = newStory;
                 } else {
                     const file = await storyFileHandle.getFile();
                     const storyData = JSON.parse(await file.text());
@@ -823,7 +945,7 @@ const App = {
 
             if (isForExport) {
                 storyJsonString = JSON.stringify(storyData, null, 2);
-            } else { // For Preview
+            } else { 
                 const assetPaths = new Set();
                 Object.values(storyData.scenes).forEach(scene => {
                     if (scene.image) assetPaths.add(scene.image);
@@ -848,15 +970,14 @@ const App = {
                 
                 storyJsonString = JSON.stringify(storyData);
             }
-
+            
             const playerScript = `
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const storyData = ${storyJsonString};
                 const sceneImage = document.getElementById('scene-image'), sceneText = document.getElementById('scene-text'), choicesContainer = document.getElementById('choices-container'), ambiencePlayer = document.getElementById('ambience-player'), musicPlayer = document.getElementById('music-player'), playerMenuBtn = document.getElementById('player-menu-btn'), playerMenuModal = document.getElementById('player-menu-modal'), aboutModal = document.getElementById('about-modal'), gameContainer = document.getElementById('game-container'), contentContainer = document.getElementById('content-container');
-                let currentSceneId;
+                let currentSceneId, currentAmbienceSrc = '', currentMusicSrc = '';
                 let typewriterState = { intervalId: null, skipListener: null };
-
 
                 function isStorageAvailable() {
                     try {
@@ -886,8 +1007,8 @@ const App = {
                     if (!storageAvailable) {
                         saveBtn.disabled = true;
                         loadBtn.disabled = true;
-                        saveBtn.title = "Saving is disabled when running from a local file.";
-                        loadBtn.title = "Loading is disabled when running from a local file.";
+                        saveBtn.title = "Saving/Loading is disabled when running from a local file.";
+                        loadBtn.title = "Saving/Loading is disabled when running from a local file.";
                     } else {
                         saveBtn.onclick = () => { localStorage.setItem('cyoa-save-' + storyData.meta.title, currentSceneId); alert('Progress saved!'); playerMenuModal.style.display = 'none'; };
                         loadBtn.onclick = () => { const savedId = localStorage.getItem('cyoa-save-' + storyData.meta.title); if (savedId && storyData.scenes[savedId]) { renderScene(savedId); } else { alert('No save data found.'); } playerMenuModal.style.display = 'none'; };
@@ -922,12 +1043,17 @@ const App = {
                 }
 
                 function setupGlobalStyles() {
-                    const styles = storyData.meta.styles || {};
-                    if (styles['--music-path']) { 
-                        musicPlayer.src = styles['--music-path']; 
-                        musicPlayer.play().catch(e=>console.log("Music autoplay blocked by browser. This is normal. Will try again on first click."));
+                    const musicPath = storyData.meta.styles['--music-path'] || '';
+                    if (musicPath !== currentMusicSrc) {
+                        currentMusicSrc = musicPath;
+                        musicPlayer.src = musicPath;
+                        if (musicPath) {
+                            musicPlayer.play().catch(e=>console.log("Music autoplay blocked by browser."));
+                        } else {
+                            musicPlayer.pause();
+                        }
                     }
-                    // Try to play music on the first user interaction
+                    
                     document.body.addEventListener('click', () => {
                         if(musicPlayer.src && musicPlayer.paused) {
                             musicPlayer.play().catch(e => console.warn("Could not start music even after interaction."));
@@ -939,7 +1065,6 @@ const App = {
                     let i = 0;
                     choicesContainer.innerHTML = '';
                     
-                    // Pre-calculate height
                     const tempChoices = document.createElement('div');
                     (choices || []).forEach(choice => {
                         const button = document.createElement('button');
@@ -991,63 +1116,66 @@ const App = {
                 }
 
                 function renderScene(sceneId) {
-                    currentSceneId = sceneId;
-                    const scene = storyData.scenes[sceneId];
-                    if (!scene) { sceneText.textContent = 'Error: Scene "' + sceneId + '" not found.'; return; }
-                    
-                    if (storyData.meta.styles['--typewriter-effect'] === 'on') {
-                        typeWriter(scene.text, scene.choices);
-                    } else {
-                        contentContainer.style.minHeight = '';
-                        sceneText.textContent = scene.text;
-                        choicesContainer.innerHTML = '';
-                        (scene.choices || []).forEach(choice => { 
-                            const button = document.createElement('button'); 
-                            button.textContent = choice.text; 
-                            button.className = 'choice-btn'; 
-                            button.onclick = () => renderScene(choice.target); 
-                            choicesContainer.appendChild(button); 
-                        });
-                    }
-                    
-                    const layout = storyData.meta.layout;
-                    const imageContainer = document.getElementById('image-container');
-                    const imageUrl = scene.image;
-                    const globalScreenBgUrl = storyData.meta.styles['--screen-bg-image'];
-                    
-                    // Update classes on both body and game container
-                    document.body.className = layout;
-                    gameContainer.className = layout;
+                    try {
+                        currentSceneId = sceneId;
+                        const scene = storyData.scenes[sceneId];
+                        if (!scene) { sceneText.textContent = 'Error: Scene "' + sceneId + '" not found.'; return; }
+                        
+                        if (storyData.meta.styles['--typewriter-effect'] === 'on') {
+                            typeWriter(scene.text, scene.choices);
+                        } else {
+                            contentContainer.style.minHeight = '';
+                            sceneText.textContent = scene.text;
+                            choicesContainer.innerHTML = '';
+                            (scene.choices || []).forEach(choice => { 
+                                const button = document.createElement('button'); 
+                                button.textContent = choice.text; 
+                                button.className = 'choice-btn'; 
+                                button.onclick = () => renderScene(choice.target); 
+                                choicesContainer.appendChild(button); 
+                            });
+                        }
+                        
+                        const layout = storyData.meta.layout;
+                        const imageContainer = document.getElementById('image-container');
+                        const imageUrl = scene.image;
+                        const globalScreenBgUrl = storyData.meta.styles['--screen-bg-image'];
+                        
+                        document.body.className = layout;
+                        gameContainer.className = layout;
 
-                    if (layout === 'layout-image-as-bg') {
-                        if (imageUrl) {
-                            document.body.style.backgroundImage = \`url('\${imageUrl}')\`;
+                        if (layout === 'layout-image-as-bg') {
+                            if (imageUrl) {
+                                document.body.style.backgroundImage = \`url('\${imageUrl}')\`;
+                            } else {
+                                document.body.style.backgroundImage = globalScreenBgUrl ? \`url('\${globalScreenBgUrl}')\` : 'none';
+                            }
                         } else {
                             document.body.style.backgroundImage = globalScreenBgUrl ? \`url('\${globalScreenBgUrl}')\` : 'none';
+                            if (imageUrl) {
+                                sceneImage.src = imageUrl;
+                                imageContainer.style.display = 'block';
+                            } else {
+                                imageContainer.style.display = 'none';
+                            }
                         }
-                    } else {
-                        document.body.style.backgroundImage = globalScreenBgUrl ? \`url('\${globalScreenBgUrl}')\` : 'none';
-                        if (imageUrl) {
-                            sceneImage.src = imageUrl;
-                            imageContainer.style.display = 'block';
-                        } else {
-                            imageContainer.style.display = 'none';
-                        }
-                    }
 
-                    const soundUrl = scene.ambienceSound;
-                    if (soundUrl) {
-                        const currentUrl = new URL(ambiencePlayer.src || window.location.href);
-                        const newUrl = new URL(soundUrl, window.location.href);
-                        if (currentUrl.href !== newUrl.href) {
+                        const soundUrl = scene.ambienceSound || '';
+                        if (soundUrl !== currentAmbienceSrc) {
+                            currentAmbienceSrc = soundUrl;
                             ambiencePlayer.src = soundUrl;
                         }
-                        if(ambiencePlayer.paused) ambiencePlayer.play().catch(e => console.warn("Ambience autoplay blocked."));
-                    } else {
-                        ambiencePlayer.pause();
+                        
+                        if (soundUrl && ambiencePlayer.paused) {
+                            ambiencePlayer.play().catch(e => console.warn("Ambience autoplay blocked."));
+                        } else if (!soundUrl) {
+                            ambiencePlayer.pause();
+                        }
+                    } catch(e) {
+                        console.error("Error rendering scene:", e);
+                        sceneText.textContent = "An error occurred. Check the console for details.";
                     }
                 }
-
 
                 setupMenu();
                 setupGlobalStyles();
@@ -1181,8 +1309,8 @@ const App = {
             this.nextHue += goldenRatioConjugate;
             this.nextHue %= 1;
             const hue = this.nextHue * 360;
-            const saturation = 45; // Desaturated
-            const lightness = 60; // Bright enough for dark background
+            const saturation = 45;
+            const lightness = 60;
             const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
             this.colorCache.set(sceneId, color);
             return color;
@@ -1231,7 +1359,6 @@ const App = {
             
             const searchTerm = filterTerm.trim().toLowerCase();
 
-            // --- Filtered View ---
             if (searchTerm) {
                 const matchingIds = Object.keys(App.state.storyData.scenes || {}).filter(id => id.toLowerCase().includes(searchTerm));
                 
@@ -1261,7 +1388,6 @@ const App = {
                 return;
             }
 
-            // --- Default Hierarchical Tree View ---
             const collapsedState = {};
             treeView.querySelectorAll('li[data-scene-id]').forEach(li => { if (li.dataset.collapsed === 'true') collapsedState[li.dataset.sceneId] = true; });
 
@@ -1315,7 +1441,7 @@ const App = {
             if (sceneId === App.state.currentSceneId) sceneNode.classList.add('active');
             
             const sceneText = scene.text || 'Empty scene';
-            sceneNode.title = sceneText.split('\\n')[0].substring(0, 150); // Get first line, truncate.
+            sceneNode.title = sceneText.split('\\n')[0].substring(0, 150);
 
             const toggle = document.createElement('span');
             toggle.className = 'tree-toggle';
@@ -1380,7 +1506,6 @@ const App = {
                 return;
             }
 
-            // If in play mode, just switch the player scene.
             if (App.elements['player-container'].style.display === 'flex') {
                 App.player.renderScene(sceneId);
                 return;
@@ -1393,13 +1518,12 @@ const App = {
                  App.elements['ambience-player'].pause();
             }
             
-            this.render(); // Always re-render to clear search and show the full tree.
+            this.render(); 
             
             if (needsSelectionChange) {
                 App.editor.render();
             }
 
-            // Use requestAnimationFrame to ensure the DOM has been updated before scrolling.
             requestAnimationFrame(() => {
                 const activeNode = App.elements['tree-view'].querySelector('.scene-node.active');
                 if (activeNode) {
@@ -1468,7 +1592,7 @@ const App = {
             Object.values(App.state.storyData.scenes).forEach(scene => {
                 if(scene.choices) {
                      scene.choices.forEach(choice => {
-                        if (choice.target === sceneId) choice.target = ''; // Mark as broken link
+                        if (choice.target === sceneId) choice.target = '';
                     });
                 }
             });
@@ -1491,8 +1615,16 @@ const App = {
             const scene = App.state.storyData.scenes[App.state.currentSceneId]; 
             const meta = App.state.storyData.meta;
             const editorPanel = document.getElementById('editor-panel'); 
-            if (!scene) { editorPanel.style.display = 'none'; return; } 
+            const previewWrapper = App.elements['scene-editor-preview-wrapper'];
+
+            if (!scene) { 
+                editorPanel.style.display = 'none'; 
+                if(previewWrapper) previewWrapper.style.display = 'none';
+                return; 
+            } 
             editorPanel.style.display = 'block'; 
+            if(previewWrapper) previewWrapper.style.display = 'block';
+
             App.elements['scene-id'].value = scene.id || ''; 
             App.elements['scene-text'].value = scene.text || ''; 
             App.elements['choices-container'].innerHTML = ''; 
@@ -1505,6 +1637,60 @@ const App = {
             App.state.aiImageUrl = null; 
             App.elements['creator-name'].value = meta.creatorName || '';
             App.elements['about-text'].value = meta.aboutText || '';
+
+            this.renderPreview();
+        },
+        async renderPreview() {
+            const previewContainer = App.elements['scene-editor-preview'];
+            const previewWrapper = App.elements['scene-editor-preview-wrapper'];
+            if (!previewContainer || !previewWrapper || previewWrapper.style.display === 'none') return;
+
+            const textEl = document.getElementById('preview-player-text');
+            const choicesEl = document.getElementById('preview-player-choices');
+            const imageEl = document.getElementById('preview-player-image');
+            const imageContainerEl = document.getElementById('preview-player-image-container');
+            const innerContainer = document.getElementById('preview-player-inner-container');
+
+            const sceneText = App.elements['scene-text'].value;
+            const sceneImage = App.elements['scene-image'].value;
+            const choices = Array.from(App.elements['choices-container'].querySelectorAll('.choice-group')).map(div => ({
+                text: div.querySelector('input[type=text]').value,
+                target: div.querySelector('select').value
+            }));
+
+            App.styles.applyToContainer(previewContainer);
+
+            textEl.textContent = sceneText;
+            choicesEl.innerHTML = '';
+            choices.forEach(choice => {
+                if (choice.text) {
+                    const button = document.createElement('button');
+                    button.className = 'choice-btn';
+                    button.textContent = choice.text;
+                    choicesEl.appendChild(button);
+                }
+            });
+            
+            const meta = App.state.storyData.meta;
+            const styles = meta.styles;
+            const sceneImageUrl = await App.io.getAssetDataUrl(sceneImage);
+            const globalScreenBgUrl = await App.io.getAssetDataUrl(styles['--screen-bg-image']);
+            const containerBgUrl = await App.io.getAssetDataUrl(styles['--container-bg-image']);
+
+            innerContainer.style.backgroundImage = containerBgUrl ? `url("${containerBgUrl}")` : 'none';
+
+            if (meta.layout === 'layout-image-as-bg') {
+                imageContainerEl.style.display = 'none';
+                previewContainer.style.backgroundImage = sceneImageUrl ? `url("${sceneImageUrl}")` : (globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none');
+            } else {
+                previewContainer.style.backgroundImage = globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none';
+                if (sceneImageUrl) {
+                    imageEl.src = sceneImageUrl;
+                    imageContainerEl.style.display = 'block';
+                } else {
+                    imageContainerEl.style.display = 'none';
+                }
+            }
         },
         saveCurrentScene(showAlert = false) { 
             if (!App.state.currentSceneId) return; 
@@ -1517,7 +1703,6 @@ const App = {
             scene.text = App.elements['scene-text'].value; 
             scene.choices = Array.from(App.elements['choices-container'].querySelectorAll('.choice-group')).map(div => ({ text: div.querySelector('input[type=text]').value, target: div.querySelector('select').value })); 
             App.setDirty(true); 
-            // Only re-render the tree if the search is not active
             if (!document.getElementById('scene-search-input').value) {
                 App.tree.render(); 
             }
@@ -1559,7 +1744,10 @@ const App = {
             deleteBtn.style.flexShrink = '0';
             deleteBtn.style.padding = '8px';
             deleteBtn.style.lineHeight = 1;
-            deleteBtn.onclick = () => choiceDiv.remove(); 
+            deleteBtn.onclick = () => {
+                choiceDiv.remove();
+                this.renderPreview();
+            }; 
             choiceDiv.appendChild(textInput); 
             choiceDiv.appendChild(targetSelect); 
             choiceDiv.appendChild(goToBtn);
@@ -1582,13 +1770,32 @@ const App = {
             const inputElement = document.getElementById(targetInputId);
             if (inputElement) {
                 inputElement.value = destinationPath;
-                inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+                inputElement.dispatchEvent(new Event('input', { bubbles: true })); 
                 if (targetInputId === 'scene-image') App.ui.updateImageThumbnail(destinationPath);
             }
             App.setDirty(true);
             event.target.value = '';
         },
-        renderPollinationImage() { const promptText = App.elements['scene-image-prompt'].value.trim(); if (!promptText) { App.ui.showNotification("Please enter a prompt first."); return; } const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + "?model=flux&nologo=true"; App.state.aiImageUrl = url; App.ui.updateAiImagePreview(null, 'Rendering...'); const tempImg = new Image(); tempImg.onload = () => App.ui.updateAiImagePreview(url); tempImg.onerror = () => { App.ui.updateAiImagePreview(null, 'Render failed.'); App.state.aiImageUrl = null; }; tempImg.src = url; },
+        renderPollinationImage() {
+            const promptText = App.elements['scene-image-prompt'].value.trim();
+            if (!promptText) { App.ui.showNotification("Please enter a prompt first."); return; }
+            
+            const layout = App.state.storyData.meta.layout;
+            let urlSuffix = '';
+            if (layout === 'layout-side-by-side') {
+                urlSuffix = '&width=1024&height=1024';
+            } else if (layout === 'layout-top-down' || layout === 'layout-image-as-bg') {
+                urlSuffix = '&width=1280&height=720';
+            }
+
+            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + "?model=flux&nologo=true" + urlSuffix;
+            App.state.aiImageUrl = url;
+            App.ui.updateAiImagePreview(null, 'Rendering...');
+            const tempImg = new Image();
+            tempImg.onload = () => App.ui.updateAiImagePreview(url);
+            tempImg.onerror = () => { App.ui.updateAiImagePreview(null, 'Render failed.'); App.state.aiImageUrl = null; };
+            tempImg.src = url;
+        },
         async addPollinationImageToScene() {
             if (!App.state.aiImageUrl) {
                 App.ui.showNotification("Please render an image first.");
@@ -1604,13 +1811,53 @@ const App = {
                 App.state.pendingAssetCopies.set(destinationPath, imageBlob);
                 App.elements['scene-image'].value = destinationPath;
                 App.ui.updateImageThumbnail(destinationPath);
+                App.elements['scene-image'].dispatchEvent(new Event('input', { bubbles: true }));
                 App.setDirty(true);
-                App.editor.saveCurrentScene(false); // Auto-save the scene change
-                console.log(`Image added to scene and changes saved to memory. Remember to 'Save Project' to copy the file to disk.`);
+                App.editor.saveCurrentScene(false);
             } catch (err) {
                 console.error("Error adding AI image:", err);
                 App.ui.showNotification("Could not download or save the image.");
                 App.ui.updateAiImagePreview(App.state.aiImageUrl);
+            }
+        },
+        async processTextWithPollinations() {
+            const instruction = App.elements['pollinations-instruction'].value.trim();
+            const sceneText = App.elements['scene-text'].value.trim();
+
+            if (!instruction || !sceneText) {
+                App.ui.showNotification("Both an instruction and scene text are required.");
+                return;
+            }
+
+            App.modals.hide(App.elements['pollinations-text-modal']);
+            App.ui.showNotification("Processing text with AI...");
+
+            const combinedText = `${instruction}: ${sceneText}`;
+            const url = "https://text.pollinations.ai/" + encodeURIComponent(combinedText);
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const htmlString = await response.text();
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlString, 'text/html');
+                const processedText = doc.body.innerText.trim();
+
+                if (processedText) {
+                    const originalText = App.elements['scene-text'].value;
+                    App.elements['scene-text'].value = originalText + '\n\n' + processedText;
+
+                    App.elements['scene-text'].dispatchEvent(new Event('input', { bubbles: true }));
+                    App.setDirty(true);
+                    App.ui.showNotification("Text processing complete!");
+                } else {
+                    throw new Error("No text found in the response from Pollinations AI.");
+                }
+
+            } catch (error) {
+                console.error("Error processing text with Pollinations AI:", error);
+                App.ui.showNotification("Failed to process text. Check the console for details.");
             }
         }
     },
@@ -1618,7 +1865,7 @@ const App = {
     player: {
         async play(sceneId) {
             if (!sceneId || !App.state.storyData.scenes[sceneId]) { App.ui.showNotification("Cannot play scene. Please select a valid scene to start from."); return; }
-            App.elements['player-inner-container'].style.height = 'auto'; // Reset height
+            App.elements['player-inner-container'].style.height = 'auto';
             App.elements['editor-container'].style.display = 'none';
             App.elements['player-container'].style.display = 'flex';
             await this.renderScene(sceneId);
@@ -1627,7 +1874,6 @@ const App = {
             let i = 0;
             choicesEl.innerHTML = '';
             
-            // Pre-calculate height
             const tempChoices = document.createElement('div');
             (choices || []).forEach(choice => {
                 const button = document.createElement('button');
@@ -1688,7 +1934,6 @@ const App = {
             const contentContainer = document.getElementById('player-content-container');
             if (!scene) { text.textContent = `Error: Scene "${sceneId}" not found.`; return; }
             
-            // Apply styles before rendering content to ensure layout is correct
             await App.styles.applyToPlayer();
 
             if (App.state.storyData.meta.styles['--typewriter-effect'] === 'on') {
@@ -1759,6 +2004,16 @@ const App = {
     styles: {
         open() {
             App.modals.hide(document.getElementById('project-menu-modal'));
+            
+            const sidebar = document.getElementById('tree-view-container');
+            const rect = sidebar.getBoundingClientRect();
+            const modalContent = document.querySelector('#style-editor-modal .modal-content');
+            
+            modalContent.style.top = `${rect.top}px`;
+            modalContent.style.left = `${rect.left}px`;
+            modalContent.style.width = `${rect.width}px`;
+            modalContent.style.height = `${rect.height}px`;
+
             const grid = document.getElementById('style-editor-grid');
             const styles = App.state.storyData.meta.styles;
             const defaults = this.getDefaults();
@@ -1840,54 +2095,49 @@ const App = {
             const id = target.id.replace('style-', '');
             let value = target.value;
 
-            // Handle combined RGBA color for container background
             if (target.id === 'style-container-bg-color' || target.id === 'style-container-bg-opacity') {
                 const hex = document.getElementById('style-container-bg-color').value;
                 const opacity = document.getElementById('style-container-bg-opacity').value;
                 const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
                 App.state.storyData.meta.styles['--container-bg-color'] = `rgba(${r}, ${g}, ${b}, ${opacity})`;
             } 
-            // Handle layout change
-            else if (id === 'layout') {
-                App.state.storyData.meta.layout = value;
-            } 
-            // Handle all other style properties
+            else if (id === 'layout') { App.state.storyData.meta.layout = value; } 
             else {
                 if (target.type === 'number') value += 'px';
                 App.state.storyData.meta.styles[`--${id}`] = value;
             }
             
             App.setDirty(true);
-
-            // Apply styles to the live player if it's active
-            if (App.elements['player-container'].style.display === 'flex') {
-                App.player.renderScene(App.state.currentSceneId);
-            }
+            if (App.elements['player-container'].style.display === 'flex') App.player.renderScene(App.state.currentSceneId);
+            if (App.elements['editor-fieldset'].disabled === false) App.editor.renderPreview();
         },
-        async applyToPlayer() {
+        applyToContainer(container) {
             const meta = App.state.storyData.meta;
             const styles = meta.styles;
             const defaults = this.getDefaults();
+            const innerContainer = container.querySelector('#preview-player-inner-container') || container.querySelector('#player-inner-container');
+
+            Object.keys(defaults).forEach(key => {
+                if (key.startsWith('--')) {
+                    const value = styles[key] || defaults[key];
+                    container.style.setProperty(key, value);
+                }
+            });
+            container.className = meta.layout;
+            if(innerContainer) innerContainer.className = meta.layout;
+        },
+        async applyToPlayer() {
             const pc = App.elements['player-container'];
             const pic = App.elements['player-inner-container'];
             const musicPlayer = App.elements['music-player'];
             const imageContainer = document.getElementById('player-image-container');
             const playerImage = App.elements['player-image'];
             const scene = App.state.storyData.scenes[App.state.currentSceneId];
+            const meta = App.state.storyData.meta;
+            const styles = meta.styles;
+            
+            this.applyToContainer(pc);
 
-            // Apply all CSS variables
-            Object.keys(defaults).forEach(key => {
-                if (key.startsWith('--')) {
-                    const value = styles[key] || defaults[key];
-                    pc.style.setProperty(key, value);
-                }
-            });
-
-            // Update layout classes
-            pc.className = meta.layout;
-            pic.className = meta.layout;
-
-            // Handle image visibility and sources based on layout
             const imageUrl = await App.io.getAssetDataUrl(scene?.image);
             const globalScreenBgUrl = await App.io.getAssetDataUrl(styles['--screen-bg-image']);
 
@@ -1904,11 +2154,9 @@ const App = {
                 }
             }
             
-            // Update container background image
             const containerBgUrl = await App.io.getAssetDataUrl(styles['--container-bg-image']);
             pic.style.backgroundImage = containerBgUrl ? `url("${containerBgUrl}")` : 'none';
             
-            // Update music
             const musicUrl = await App.io.getAssetDataUrl(styles['--music-path']);
             if (musicUrl) {
                 if (!musicPlayer.src.endsWith(musicUrl)) { musicPlayer.src = musicUrl; }

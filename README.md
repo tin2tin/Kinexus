@@ -7,7 +7,7 @@ CYOA Studio is a powerful, single-file, zero-installation tool for creating, sty
 ## Try It
 
 <div align="left">
-  <a href="https://htmlpreview.github.io/?https://raw.githubusercontent.com/tin2tin/CYOA_Studio_Pro/master/index.html">CLICK HERE!</a><br><br>
+  <a href="https://tin2tin.github.io/CYOA_Studio/">CLICK HERE!</a><br><br>
 </div>
 
 ## Features
@@ -77,7 +77,7 @@ You have two ways to add images, and one way to add audio:
 1.  **From Your Computer:**
     *   Click the **yellow folder icon** next to the "Image" or "Audio" field.
     *   Select any image or audio file from your computer.
-    *   Or you can drag & drop the files to the string widgets. 
+    *   Or you can drag & drop the files to the string widgets.
     *   The app automatically sets the correct path. The file will be copied into your project's `images/` or `sounds/` folder the next time you click **"Save Project"**.
 
 2.  **Using Generative AI (for Images):**

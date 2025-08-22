@@ -6,6 +6,7 @@
     <title>CYOA Studio Pro</title>
     <style>
         :root {
+            /* Desaturated colors as requested */
             --primary-color: #4a78ad; --secondary-color: #6c757d; --light-bg: #121212;
             --dark-text: #e0e0e0; --border-color: #333333; --success-color: #5a8f66;
             --danger-color: #b85a66; --warning-color: #c7921a; --warning-text: #ffffff;
@@ -213,7 +214,8 @@
         .layout-image-as-bg #player-content-container, .layout-image-as-bg #preview-player-content-container { width: 100%; }
 
         #ai-image-generator { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
-        #ai-image-preview { width: 128px; height: 128px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; position: relative; }
+        /* MODIFIED: Changed width and height to 150px */
+        #ai-image-preview { width: 150px; height: 150px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; position: relative; }
         #ai-image-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
         #ai-image-controls { display: flex; gap: 10px; align-items: center; flex-grow: 1; }
         .modal { display: none; opacity: 0; visibility: hidden; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; transition: opacity 0.2s, visibility 0.2s; }
@@ -284,7 +286,7 @@
 
 <div id="tree-view-container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <button id="project-menu-btn" title="Open Project Menu">
+        <button id="project-menu-btn" class="btn-secondary" title="Open Project Menu">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
             Menu
         </button>
@@ -313,7 +315,8 @@
                     <button id="rename-scene-btn" title="Rename Scene ID" class="file-icon-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
                     </button>
-                    <button id="new-scene-btn" class="btn-success file-icon-btn" title="Create New Scene">+</button>
+                    <!-- MODIFIED: "New Scene" button is now a round, blue + button -->
+                    <button id="new-scene-btn" class="btn-round" title="Create New Scene">+</button>
                 </div>
             </div>
             <div class="btn-group">
@@ -406,7 +409,8 @@
                         </div>
                     </div>
                     <div id="ai-image-controls">
-                        <textarea id="scene-image-prompt" placeholder="A stunning vista of a fantasy castle at sunset, digital art" style="flex-grow: 1; height: 128px; resize: none; margin-top:0;"></textarea>
+                        <!-- MODIFIED: Changed height to 150px -->
+                        <textarea id="scene-image-prompt" placeholder="A stunning vista of a fantasy castle at sunset, digital art" style="flex-grow: 1; height: 150px; resize: none; margin-top:0;"></textarea>
                         <div class="btn-group" style="flex-direction: column; flex-shrink: 0; gap: 5px; margin-top: 0; align-self: stretch; justify-content: center;">
                             <button id="render-ai-image-btn" class="btn-purple" style="margin-top:0;" title="Render AI Image">
                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg>
@@ -970,7 +974,7 @@ const App = {
                 
                 storyJsonString = JSON.stringify(storyData);
             }
-            
+
             const playerScript = `
         <script>
             document.addEventListener('DOMContentLoaded', () => {
@@ -2009,9 +2013,15 @@ const App = {
             const rect = sidebar.getBoundingClientRect();
             const modalContent = document.querySelector('#style-editor-modal .modal-content');
             
+            // Correctly calculate dimensions by subtracting padding
+            const style = getComputedStyle(sidebar);
+            const paddingHeight = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+            const paddingWidth = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+            const scrollbarWidth = sidebar.offsetWidth - sidebar.clientWidth;
+
             modalContent.style.top = `${rect.top}px`;
             modalContent.style.left = `${rect.left}px`;
-            modalContent.style.width = `${rect.width}px`;
+            modalContent.style.width = `${rect.width - scrollbarWidth}px`;
             modalContent.style.height = `${rect.height}px`;
 
             const grid = document.getElementById('style-editor-grid');

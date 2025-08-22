@@ -2,13 +2,15 @@
 
 CYOA Studio is a powerful tool for creating, styling, and exporting choice-based narrative games, interactive fiction, and interactive graphic novels. It runs entirely in your web browser, providing a complete workflow from writing your story to packaging a distributable ZIP file for platforms like itch.io. [itch.io](https://itch.io/).
 
-<img width="1919" height="959" alt="image" src="https://github.com/user-attachments/assets/29d32050-1668-4c53-8f1a-7f9ba144128c" />
+<img width="1905" height="959" alt="image" src="https://github.com/user-attachments/assets/8a7c3d51-4abd-4d48-8a15-cb728ec17401" />
 
 ## Try It
 
 <div align="left">
   <a href="https://tin2tin.github.io/CYOA_Studio/">CLICK HERE!</a><br><br>
 </div>
+
+An example project can be downloaded here, unzip and open with CYOA Studio: [example_the_last_broadcast](https://github.com/tin2tin/CYOA_Studio/raw/refs/heads/main/example_the_last_broadcast.zip)
 
 ## Features
 
@@ -41,9 +43,42 @@ CYOA Studio is a powerful tool for creating, styling, and exporting choice-based
 
 ## Screenshots
 
-<img width="1919" height="957" alt="image" src="https://github.com/user-attachments/assets/5e5bf8e6-bc71-4394-9cdb-ab7e2129b19c" />
-<img width="1919" height="960" alt="image" src="https://github.com/user-attachments/assets/981509d8-acf2-4e0b-9c41-eb0676853fb9" />
-<img width="1919" height="958" alt="image" src="https://github.com/user-attachments/assets/3b60724b-92e2-49ab-b864-64edc3830c5e" />
+Style Template Editor
+
+<img width="1909" height="958" alt="image" src="https://github.com/user-attachments/assets/4b6d1bee-a579-4ad4-91f5-fafbd41d960b" />
+
+Play Current
+
+<img width="1919" height="956" alt="image" src="https://github.com/user-attachments/assets/3fea42fc-b729-43d8-aa4f-f832d7a90d5b" />
+
+Preview in Browser/Export as Standalone
+
+<img width="1919" height="1040" alt="image" src="https://github.com/user-attachments/assets/4d73a9d1-35c6-4c93-9174-b546fe8f5126" />
+
+Standalone Menu
+
+<img width="1919" height="990" alt="image" src="https://github.com/user-attachments/assets/9efbb7b8-d471-4be1-8879-7bd51d8a3b7a" />
+
+Story Map Navigator
+
+<img width="602" height="740" alt="image" src="https://github.com/user-attachments/assets/95d27c3a-f76e-4f91-8477-587cdf92b8dd" />
+
+Generate AI Image
+
+<img width="1902" height="956" alt="image" src="https://github.com/user-attachments/assets/a9675323-7d5e-4180-919f-6de44f6719b1" />
+
+AI Rewrite
+
+<img width="1112" height="386" alt="image" src="https://github.com/user-attachments/assets/90ca296c-7d6e-4438-8eb8-c94dec5c84f5" />
+
+Project Menu
+
+<img width="641" height="400" alt="image" src="https://github.com/user-attachments/assets/5ec1328d-0501-4a6e-b8bb-751877a6a529" />
+
+Project Text Editor
+
+<img width="644" height="485" alt="image" src="https://github.com/user-attachments/assets/fd572ff7-0faf-44ab-905a-c15230054ec5" />
+
 
 ## How to Get Started
 

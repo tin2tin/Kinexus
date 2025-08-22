@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +7,7 @@
     <title>CYOA Studio Pro</title>
     <style>
         :root {
-            /* Desaturated colors as requested */
+            /* Desaturated colors */
             --primary-color: #4a78ad; --secondary-color: #6c757d; --light-bg: #121212;
             --dark-text: #e0e0e0; --border-color: #333333; --success-color: #5a8f66;
             --danger-color: #b85a66; --warning-color: #c7921a; --warning-text: #ffffff;
@@ -620,7 +621,7 @@ const App = {
                 styles: App.styles.getDefaults(), 
                 layout: 'layout-top-down' 
             },
-            scenes: { "start": { id: "start", text: "Start here.", image: "", imagePrompt: "", ambienceSound: "", choices: [] } } 
+            scenes: { "start": { text: "Start here.", image: "", imagePrompt: "", ambienceSound: "", choices: [] } } 
         };
     },
     
@@ -911,7 +912,9 @@ const App = {
         
         async saveProject() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("No project is open."); return; }
-            App.editor.saveCurrentScene(false);
+            if (App.elements['editor-container'].style.display !== 'none') {
+                App.editor.saveCurrentScene(false);
+            }
             
             try {
                 if (App.state.pendingAssetCopies.size > 0) {
@@ -1445,7 +1448,7 @@ const App = {
             if (sceneId === App.state.currentSceneId) sceneNode.classList.add('active');
             
             const sceneText = scene.text || 'Empty scene';
-            sceneNode.title = sceneText.split('\\n')[0].substring(0, 150);
+            sceneNode.title = sceneText.split('\n')[0].substring(0, 150);
 
             const toggle = document.createElement('span');
             toggle.className = 'tree-toggle';
@@ -1550,7 +1553,7 @@ const App = {
                 newId = newId.trim().replace(/\s+/g, '_');
                 if (!newId.length) return;
             }
-            App.state.storyData.scenes[newId] = { id: newId, text: `This is the new scene '${newId}'.`, choices: [] };
+            App.state.storyData.scenes[newId] = { text: `This is the new scene '${newId}'.`, choices: [] };
             App.setDirty(true);
             this.render();
             this.selectScene(newId);
@@ -1565,7 +1568,6 @@ const App = {
             if (App.state.storyData.scenes[newId]) { App.ui.showNotification(`Scene ID "${newId}" already exists.`); return; }
 
             const sceneData = App.state.storyData.scenes[oldId];
-            sceneData.id = newId;
             App.state.storyData.scenes[newId] = sceneData;
             delete App.state.storyData.scenes[oldId];
 
@@ -1629,7 +1631,7 @@ const App = {
             editorPanel.style.display = 'block'; 
             if(previewWrapper) previewWrapper.style.display = 'block';
 
-            App.elements['scene-id'].value = scene.id || ''; 
+            App.elements['scene-id'].value = App.state.currentSceneId; 
             App.elements['scene-text'].value = scene.text || ''; 
             App.elements['choices-container'].innerHTML = ''; 
             (scene.choices || []).forEach(choice => this.addChoiceToDOM(choice)); 
@@ -1728,7 +1730,7 @@ const App = {
                 const option = document.createElement('option');
                 const scene = App.state.storyData.scenes[id];
                 const sceneText = scene.text || 'Empty scene';
-                option.title = sceneText.split('\\n')[0].substring(0, 150);
+                option.title = sceneText.split('\n')[0].substring(0, 150);
                 option.value = id; 
                 option.textContent = id; 
                 if (id === choice.target) option.selected = true; 
@@ -1976,6 +1978,11 @@ const App = {
             App.elements['music-player'].pause();
             App.elements['ambience-player'].src = '';
             App.elements['music-player'].src = '';
+            
+            // BUG FIX: Resynchronize the editor with the current state when the player stops.
+            if (App.state.currentSceneId) {
+                App.editor.render();
+            }
         },
         async toggleAmbienceSound() {
             const audio = App.elements['ambience-player'];

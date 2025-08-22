@@ -1,6 +1,6 @@
 # CYOA Studio (Choose Your Own Adventure Editor)
 
-CYOA Studio is a powerful, single-file, zero-installation tool for creating, styling, and exporting choice-based narrative games. It runs entirely in your web browser, providing a complete workflow from writing your story to packaging a distributable ZIP file for platforms like [itch.io](https://itch.io/).
+CYOA Studio is a powerful tool for creating, styling, and exporting choice-based narrative games, interactive fiction, and interactive graphic novels. It runs entirely in your web browser, providing a complete workflow from writing your story to packaging a distributable ZIP file for platforms like itch.io. [itch.io](https://itch.io/).
 
 <img width="1919" height="959" alt="image" src="https://github.com/user-attachments/assets/29d32050-1668-4c53-8f1a-7f9ba144128c" />
 

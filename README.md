@@ -99,11 +99,11 @@ It's crucial to understand the difference between saving and exporting:
 
 *   **Export Standalone Game:** When your game is complete, click **"Menu"** -> **"Export Standalone Game"**. This packages your story, all required assets, and your custom theme into a single `.zip` file that you can share or upload anywhere. This is the final, playable product.
 
----
+***
 
 ## The Story File Format
 
-To programmatically generate stories for this application, you must produce a valid JSON file adhering to the precise schema detailed below. The application strictly parses this format.
+To programmatically generate stories for this application, you must produce a valid JSON file adhering to the precise schema detailed below. This format is ideal for any kind of interactive fiction, from simple stories to complex narratives with state management.
 
 ### Root Object Structure
 
@@ -122,12 +122,13 @@ The `meta` object contains global metadata and configuration for the entire stor
 
 | Key | Type | Required | Description | Example |
 | :--- | :--- | :--- | :--- | :--- |
-| `title` | String | Yes | The title of your story. Used for the browser tab and exported project name. | `"The Last Broadcast"` |
-| `creatorName` | String | No | The name or alias of the author, displayed in the game's "About" section. | `"A. N. Author"` |
-| `aboutText` | String | No | A brief description of the project, displayed in the game's "About" section. | `"A short interactive story of suspense."` |
-| `startSceneId` | String | Yes | The ID of the scene where the story begins. This ID **MUST** exist as a key in the `scenes` object. | `"radio_room"` |
-| `layout` | String | Yes | The visual layout of the game screen. **MUST** be either `"layout-top-down"` or `"layout-side-by-side"`. | `"layout-side-by-side"` |
-| `styles` | Object | Yes | An object containing key-value pairs for CSS styling. See the `styles` object details below. | `{ "--bg-color": "#1a1a1a", ... }` |
+| `title` | String | Yes | The title of your story. | `"The Last Broadcast"` |
+| `creatorName` | String | No | The name of the author. | `"A. N. Author"` |
+| `aboutText` | String | No | A brief description of the project. | `"A short interactive story of suspense."` |
+| `startSceneId` | String | Yes | The ID of the scene where the story begins. | `"radio_room"` |
+| `variables` | Object | No | **OPTIONAL.** An object defining the initial state of all story variables (e.g., inventory, character stats). | `{ "has_key": false, "power_on": true }` |
+| `layout` | String | Yes | The visual layout. **MUST** be either `"layout-top-down"` or `"layout-side-by-side"`. | `"layout-side-by-side"` |
+| `styles` | Object | Yes | An object containing key-value pairs for CSS styling. | `{ "--bg-color": "#1a1a1a", ... }` |
 
 #### The `styles` Object
 
@@ -135,29 +136,23 @@ This object contains CSS custom properties to theme the player. All keys and val
 
 | Key | Type | Description | Example |
 | :--- | :--- | :--- | :--- |
-| `--bg-color` | String | Background color of the game screen. (Hex code) | `"#1a1a1a"` |
-| `--text-color` | String | Main narrative text color. (Hex code) | `"#e0e0e0"` |
-| `--btn-color` | String | Background color of choice buttons. (Hex code) | `"#4a78ad"` |
-| `--btn-text-color` | String | Text color of choice buttons. (Hex code) | `"#ffffff"` |
-| `--btn-hover-color` | String | Background color of choice buttons on hover. (Hex code) | `"#6c757d"` |
+| `--bg-color` | String | Background color of the game screen. | `"#1a1a1a"` |
+| `--text-color` | String | Main narrative text color. | `"#e0e0e0"` |
+| `--btn-color` | String | Background color of choice buttons. | `"#4a78ad"` |
+| `--btn-text-color` | String | Text color of choice buttons. | `"#ffffff"` |
+| `--btn-hover-color`| String | Background color of choice buttons on hover. | `"#6c757d"` |
+| `--btn-border` | String | **OPTIONAL.** Border style for choice buttons. | `"1px solid #ffffff"` |
 | `--font-family` | String | Font style. **MUST** be `sans-serif`, `serif`, or `monospace`. | `"monospace"` |
-| `--font-size` | String | The base font size. **MUST** be a string including the `px` unit. | `"18px"` |
-| `--padding` | String | Padding inside the game container. **MUST** be a string including the `px` unit. | `"40px"` |
+| `--font-size` | String | The base font size, including the `px` unit. | `"18px"` |
+| `--padding` | String | Padding inside the game container, including the `px` unit. | `"40px"` |
+| `--border-radius` | String | **OPTIONAL.** Corner roundness for buttons and containers. | `"8px"` |
 | `--music-path` | String | **OPTIONAL.** Relative path to a global background music file. | `"sounds/bg_music.mp3"` |
-| `--screen-bg-image` | String | **OPTIONAL.** Relative path to a background image for the entire screen. | `"images/static_bg.png"` |
-| `--container-bg-image` | String | **OPTIONAL.** Relative path to a background image for the game's content box. | `"images/paper_texture.jpg"` |
+| `--screen-bg-image`| String | **OPTIONAL.** Relative path to a background image for the screen. | `"images/static_bg.png"` |
+| `--container-bg-image` | String | **OPTIONAL.** Relative path to a background image for the content box. | `"images/paper_texture.jpg"` |
 
 ### The `scenes` Object
 
 The `scenes` object is a dictionary where each key is a unique `sceneId` (String) and each value is a corresponding Scene Object.
-
-```json
-"scenes": {
-  "sceneId_1": { ... Scene Object 1 ... },
-  "sceneId_2": { ... Scene Object 2 ... },
-  ...
-}
-```
 
 ### Scene Object Structure
 
@@ -165,23 +160,39 @@ Each Scene Object represents a single page or moment in the story.
 
 | Key | Type | Required | Description | Example |
 | :--- | :--- | :--- | :--- | :--- |
-| `id` | String | Yes | The unique identifier for the scene. **MUST** be identical to its key in the `scenes` object. | `"radio_room"` |
-| `text` | String | Yes | The main narrative text for the scene. Use `\n` for line breaks. | `"The only light comes from the vacuum tubes...\nThe static hisses."` |
-| `image` | String | No | **OPTIONAL.** The relative path to the image file for this scene. | `"images/radio.jpg"` |
-| `imagePrompt` | String | No | **OPTIONAL.** The descriptive prompt used to generate the image with an AI. | `"A vintage 1940s radio console in a dark room, glowing tubes, dramatic lighting, photorealistic."` |
-| `ambienceSound` | String | No | **OPTIONAL.** The relative path to a looping background audio file for this scene. | `"sounds/radio_static.ogg"` |
-| `choices` | Array | Yes | An array of Choice Objects. An empty array (`[]`) signifies an ending scene. | `[ { "text": "...", "target": "..." } ]` |
+| `id` | String | Yes | The unique identifier for the scene. | `"radio_room"` |
+| `text` | String | Yes | The main narrative text for the scene. | `"The static hisses."` |
+| `image` | String | No | **OPTIONAL.** The relative path to the image file. | `"images/radio.jpg"` |
+| `imagePrompt` | String | No | **OPTIONAL.** The descriptive prompt used to generate the image. | `"A vintage 1940s radio..."` |
+| `ambienceSound` | String | No | **OPTIONAL.** The relative path to a looping background audio file. | `"sounds/radio_static.ogg"` |
+| `soundEffect` | String | No | **OPTIONAL.** The relative path to a one-shot sound effect that plays on scene entry. | `"sounds/power_up.wav"` |
+| `setVariables` | Object | No | **OPTIONAL.** An object defining variable changes that occur upon entering this scene. | `{ "power_on": true }` |
+| `choices` | Array | Yes | An array of Choice Objects. An empty array (`[]`) signifies an ending. | `[ { ... } ]` |
 
 ### Choice Object Structure
 
-Each Choice Object, located inside a scene's `choices` array, defines a single player action.
+Each Choice Object defines a single player action and its consequences.
 
 | Key | Type | Required | Description | Example |
 | :--- | :--- | :--- | :--- | :--- |
-| `text` | String | Yes | The text that appears on the button for the player to click. | `"Turn the dial."` |
-| `target` | String | Yes | The `id` of the scene this choice leads to. This ID **MUST** exist as a key in the `scenes` object. | `"faint_signal"` |
+| `text` | String | Yes | The text that appears on the button. | `"Turn the dial."` |
+| `target` | String | Yes | The `id` of the scene this choice leads to. | `"faint_signal"` |
+| `conditions` | Array | No | **OPTIONAL.** An array of conditions that **MUST** be met for this choice to be visible. | `[{"variable": "power_on", "operator": "equals", "value": true}]` |
+| `setVariables` | Object | No | **OPTIONAL.** An object defining variable changes that occur when this choice is selected. | `{ "heard_signal": true }` |
 
-### Complete JSON Example
+#### Condition Object Structure
+
+The `conditions` array contains one or more Condition Objects. All conditions must be met for the choice to appear.
+
+| Key | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `variable` | String | Yes | The name of the variable to check (must be defined in `meta.variables`). |
+| `operator` | String | Yes | The comparison to perform. **MUST** be `"equals"` or `"notEquals"`. |
+| `value` | Boolean, String, or Number | Yes | The value to compare against. |
+
+### Complete JSON Example (with new features)
+
+This example demonstrates the use of variables (`knows_code`) to unlock a new story path.
 
 ```json
 {
@@ -190,6 +201,9 @@ Each Choice Object, located inside a scene's `choices` array, defines a single p
     "creatorName": "A. N. Author",
     "aboutText": "A short interactive story of suspense set in a remote listening post.",
     "startSceneId": "radio_room",
+    "variables": {
+      "knows_code": false
+    },
     "layout": "layout-side-by-side",
     "styles": {
       "--bg-color": "#1a1a1a",
@@ -197,9 +211,11 @@ Each Choice Object, located inside a scene's `choices` array, defines a single p
       "--btn-color": "#4a78ad",
       "--btn-text-color": "#ffffff",
       "--btn-hover-color": "#6c757d",
+      "--btn-border": "1px solid #333",
       "--font-family": "monospace",
       "--font-size": "18px",
       "--padding": "40px",
+      "--border-radius": "4px",
       "--music-path": "",
       "--screen-bg-image": "images/static_bg.png",
       "--container-bg-image": ""
@@ -215,7 +231,8 @@ Each Choice Object, located inside a scene's `choices` array, defines a single p
       "choices": [
         {
           "text": "Try to tune the main frequency dial.",
-          "target": "faint_signal"
+          "target": "faint_signal",
+          "setVariables": {}
         },
         {
           "text": "Make a cup of coffee and wait.",
@@ -228,7 +245,7 @@ Each Choice Object, located inside a scene's `choices` array, defines a single p
       "text": "You slowly turn the heavy bakelite dial. The static crackles and shifts.\nSuddenly, through the noise, you hear something... a voice? It's faint, distorted by distance and the storm.",
       "image": "",
       "imagePrompt": "",
-      "ambienceSound": "sounds/faint_voice.mp3",
+      "soundEffect": "sounds/faint_voice.mp3",
       "choices": [
         {
           "text": "Fine-tune the signal.",
@@ -242,11 +259,17 @@ Each Choice Object, located inside a scene's `choices` array, defines a single p
     },
     "clear_message": {
       "id": "clear_message",
-      "text": "With delicate adjustments, the voice becomes clearer, cutting through the static. It's speaking a sequence of numbers, repeating them over and over.\n'...seven... four... one... zero...'\nIt's a code you don't recognize. Then, the signal dies, replaced by the familiar hiss.",
+      "text": "With delicate adjustments, the voice becomes clearer. It's speaking a sequence of numbers, repeating them over and over.\n'...seven... four... one... zero...'\nIt's a code. Then, the signal dies.",
       "image": "images/headphones.jpg",
       "imagePrompt": "Close-up on a pair of vintage 1940s military headphones lying on a wooden desk next to a code book, shallow depth of field, moody lighting.",
-      "ambienceSound": "",
+      "setVariables": {
+        "knows_code": true
+      },
       "choices": [
+        {
+          "text": "Write down the numbers and ponder their meaning.",
+          "target": "secret_ending"
+        },
         {
           "text": "The numbers mean nothing. The storm is getting worse.",
           "target": "ending_nothing"
@@ -260,7 +283,13 @@ Each Choice Object, located inside a scene's `choices` array, defines a single p
       "imagePrompt": "Looking out a frosted window from a dark cabin into a fierce blizzard at night.",
       "ambienceSound": "sounds/blizzard.mp3",
       "choices": []
+    },
+    "secret_ending": {
+      "id": "secret_ending",
+      "text": "The numbers... it's the access code for the emergency bunker hidden beneath the floorboards. You never thought you'd use it.\nAs the storm worsens, you realize the broadcast wasn't a phantom, but a warning.",
+      "image": "images/bunker_door.jpg",
+      "imagePrompt": "A heavy steel hatch set into a dark wooden floor, a wheel lock in the center.",
+      "choices": []
     }
   }
 }
-```

@@ -119,8 +119,10 @@
         .form-group.choice-group { margin-bottom: 8px; }
         .form-group.inline { display: flex; align-items: center; gap: 10px; }
         .form-group.inline input, .form-group.inline select { flex-grow: 1; }
+        .form-group label.checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: normal; }
+        .form-group label.checkbox-label input { width: auto; flex-grow: 0; }
         label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input[type="text"], input[type="search"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #444444; border-radius: 4px; font-size: 1em; background-color: #1e1e1e; color: var(--dark-text); }
+        input[type="text"], input[type="search"], input[type="number"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #444444; border-radius: 4px; font-size: 1em; background-color: #1e1e1e; color: var(--dark-text); }
         input[type="text"]:disabled { background-color: #333333; cursor: not-allowed; }
         textarea { height: 120px; resize: vertical; }
        
@@ -232,13 +234,15 @@
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: none; }
         
-        #style-editor-modal.visible {
+        #style-editor-modal.visible,
+        #batch-image-modal.visible {
             background-color: transparent;
             pointer-events: none;
             justify-content: flex-start; 
             align-items: flex-start;
         }
-        #style-editor-modal .modal-content {
+        #style-editor-modal .modal-content,
+        #batch-image-modal .modal-content {
             pointer-events: auto;
             margin: 0;
             border-radius: 0;
@@ -248,12 +252,18 @@
             border-right: 1px solid var(--border-color);
             position: absolute;
             box-sizing: border-box;
+            resize: horizontal;
+            overflow: auto;
+        }
+        #batch-image-modal .modal-content {
+            display: flex;
+            flex-direction: column;
         }
 
         #tree-context-menu { display: none; position: absolute; background-color: #1e1e1e; border: 1px solid #333333; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); border-radius: 4px; padding: 5px 0; z-index: 1001; }
         #tree-context-menu button { width: 100%; text-align: left; background: none; color: var(--dark-text); margin: 0; padding: 8px 15px; border-radius: 0; }
         #tree-context-menu button:hover { background-color: var(--primary-color); color: white; }
-        #player-container { background-size: cover; background-position: center; background-attachment: fixed; background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); font-size: var(--font-size); }
+        #player-container { background-size: cover; background-position: center; background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); font-size: var(--font-size); }
         #player-inner-container { width: 100%; max-width: 800px; padding: var(--padding); border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); display:flex; gap: 20px; margin: 20px; background-size: cover; background-position: center; background-color: var(--container-bg-color);}
         #player-image { max-width: 100%; max-height: 50vh; display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
         #player-text { white-space: pre-wrap; margin-bottom: 20px; }
@@ -314,6 +324,40 @@
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.1s linear;
+        }
+
+        #batch-fieldset {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-height: 0;
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+        #batch-info-log {
+            background-color: #000;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            height: auto;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        #batch-controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            align-items: end;
+        }
+        #batch-controls-grid .full-width {
+            grid-column: 1 / -1;
         }
     </style>
 </head>
@@ -451,7 +495,7 @@
                     <div id="ai-image-controls">
                         <textarea id="scene-image-prompt" placeholder="A stunning vista of a fantasy castle at sunset, digital art" style="flex-grow: 1; height: 150px; resize: none; margin-top:0;"></textarea>
                         <div class="btn-group" style="flex-direction: column; flex-shrink: 0; gap: 5px; margin-top: 0; align-self: stretch; justify-content: center;">
-                            <button id="render-ai-image-btn" class="btn-purple" style="margin-top:0;" title="Render AI Image">
+                            <button id="render-ai-image-btn" class="btn-purple" style="margin-top:0;" title="Render AI Image (Right-click for batch options)">
                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg>
                             </button>
                             <button id="add-ai-image-btn" class="btn-success" style="margin-top:0;" title="Add Rendered Image to Scene">
@@ -474,7 +518,7 @@
 <div id="tree-context-menu"><button id="set-start-scene-btn">Set as Start Scene</button></div>
 
 <!-- Modals -->
-<div id="project-menu-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Menu</h2><div class="btn-group" style="flex-direction: column; gap: 15px; align-items: stretch;"><button id="new-project-btn" class="btn-secondary">New Project</button><button id="open-project-btn" class="btn-secondary">Open Project</button><button id="save-story-btn" class="btn-success">Save Project</button><button id="about-editor-btn">Project Text Editor</button><button id="export-data-btn" class="btn-warning">Export Data</button><button id="export-project-btn" class="btn-warning">Export Standalone Game</button></div></div></div>
+<div id="project-menu-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Menu</h2><div class="btn-group" style="flex-direction: column; gap: 15px; align-items: stretch;"><button id="new-project-btn" class="btn-secondary">New Project</button><button id="open-project-btn" class="btn-secondary">Open Project</button><button id="save-story-btn" class="btn-success">Save Project</button><button id="about-editor-btn">Project Text Editor</button><button id="batch-image-gen-btn" class="btn-secondary" disabled>Batch Image Generation</button><button id="export-data-btn" class="btn-warning">Export Data</button><button id="export-project-btn" class="btn-warning">Export Standalone Game</button></div></div></div>
 <div id="about-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Text Editor</h2><p>This information will be displayed in the player's "About" section.</p><div class="form-group"><label for="story-title">Story Title</label><input type="text" id="story-title" placeholder="Your story title"></div><div class="form-group"><label for="creator-name">Creator Name</label><input type="text" id="creator-name" placeholder="Your name or alias"></div><div class="form-group"><label for="about-text">About Text</label><textarea id="about-text" placeholder="A brief description of your project."></textarea></div></div></div>
 <div id="export-data-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Export Specific Data</h2><p>Select data to export as a JSON file.</p><button data-export-type="imagePrompts">Export All Image Prompts</button></div></div>
 <div id="style-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Style Template Editor</h2><div id="style-editor-grid" class="modal-grid"></div></div></div>
@@ -499,6 +543,44 @@
     </div>
 </div>
 
+<div id="batch-image-modal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <h2>Batch Image Generation</h2>
+        <p>This tool will generate images for scenes that are missing one.</p>
+        <fieldset id="batch-fieldset">
+            <div id="batch-controls-grid">
+                <div class="form-group full-width" style="margin-bottom:0;">
+                    <label for="batch-suffix-input">Prompt Suffix</label>
+                    <input type="text" id="batch-suffix-input" placeholder="e.g., , cinematic lighting, 4k">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="batch-cooldown-input">Cooldown (sec)</label>
+                    <input type="number" id="batch-cooldown-input" value="15" min="0">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                     <label class="checkbox-label">
+                        <input type="checkbox" id="batch-rewrite-prompt-checkbox">
+                        AI Rewrite Text to Prompt
+                    </label>
+                </div>
+            </div>
+            <div id="batch-info-log">Ready to generate.</div>
+             <hr style="margin-top: 0;">
+             <div class="btn-group" style="justify-content: space-between;">
+                <button id="batch-remove-images-btn" class="btn-danger">Delete All Images</button>
+                <button id="batch-remove-prompts-btn" class="btn-danger">Delete All Prompts</button>
+            </div>
+        </fieldset>
+        <div class="btn-group" style="margin-top: 20px; justify-content: flex-end; flex-shrink: 0;">
+            <button id="batch-generate-btn" class="btn-purple">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg>
+                Generate
+            </button>
+        </div>
+    </div>
+</div>
+
 
 <!-- JSZip Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -513,6 +595,7 @@
         <title>__STORY_TITLE__</title>
         <style>
             :root { --primary-color: #4a78ad; --secondary-color: #6c757d; }
+            * { box-sizing: border-box; }
             body { 
                 margin: 0; 
                 font-family: sans-serif; 
@@ -522,9 +605,7 @@
                 transition: background-color .3s; 
                 background-size: cover; 
                 background-position: center; 
-                background-attachment: fixed; 
-                padding: 20px; 
-                box-sizing: border-box;
+                padding: 20px;
             }
             body:not(.layout-image-as-bg) { align-items: center; }
             body.layout-image-as-bg { align-items: flex-end; }
@@ -539,8 +620,7 @@
                 position: relative; 
                 background-size: cover; 
                 background-position: center; 
-                padding: var(--padding); 
-                box-sizing: border-box;
+                padding: var(--padding);
             }
             #image-container { flex-shrink: 0; }
             #scene-image { display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
@@ -561,10 +641,72 @@
             #game-container.layout-side-by-side #content-container { width: 60%; }
             #game-container.layout-image-as-bg #image-container { display: none; }
             #game-container.layout-image-as-bg #content-container { width: 100%; }
+            body.layout-image-as-bg .choice-btn { text-align: center; }
 
-            #player-menu-btn { position: fixed; top: 15px; right: 15px; z-index: 100; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.5); border-radius: 50%; width: 40px; height: 40px; padding: 0; font-size: 24px; line-height: 40px; text-align: center; cursor: pointer; }
+            .player-top-bar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                padding: 10px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                z-index: 100;
+                pointer-events: none; /* Allows clicks to pass through the container */
+            }
+            .player-top-bar-left, .player-top-bar-right {
+                display: flex;
+                gap: 10px;
+            }
+            .player-ui-btn {
+                pointer-events: auto; /* Re-enable clicks on buttons */
+                background: rgba(0,0,0,0.5);
+                color: white;
+                border: 1px solid rgba(255,255,255,0.5);
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                padding: 0;
+                font-size: 24px;
+                line-height: 40px;
+                text-align: center;
+                cursor: pointer;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .player-ui-btn svg {
+                width: 22px;
+                height: 22px;
+                fill: currentColor;
+            }
+            .player-ui-btn .icon-off {
+                display: none;
+            }
             
-            /* MODIFICATION: Restyled Player Menu */
+            #exit-message {
+                display: none;
+                width: 100%;
+                text-align: center;
+                font-size: 1.2em;
+                color: var(--text-color, #f0f0f0);
+            }
+
+            @media (max-width: 600px) {
+                body {
+                    padding: 10px;
+                }
+                #game-container {
+                    padding: 15px;
+                    gap: 15px;
+                }
+                .choice-btn {
+                    padding: 12px 15px;
+                    font-size: 0.9em;
+                }
+            }
+            
             .player-modal {
                 display: none;
                 position: fixed;
@@ -586,7 +728,7 @@
                 overflow-y: auto;
             }
             #player-menu-modal {
-                justify-content: flex-end;
+                justify-content: flex-start;
             }
             #player-menu-modal .player-modal-content {
                 background-color: #202124;
@@ -596,7 +738,7 @@
                 max-height: 100vh;
                 border-radius: 0;
                 margin: 0;
-                transform: translateX(100%);
+                transform: translateX(-100%);
                 transition: transform 0.3s ease-out;
                 padding: 0;
                 display: flex;
@@ -659,6 +801,10 @@
         </style>
     </head>
     <body class="__LAYOUT_CLASS__">
+        <div id="exit-message">
+            <p>Thanks for playing!</p>
+            <p>You can now close this window.</p>
+        </div>
         <div id="game-container" class="__LAYOUT_CLASS__">
             <div id="image-container"><img id="scene-image" src=""></div>
             <div id="content-container">
@@ -668,7 +814,21 @@
             <audio id="ambience-player"></audio>
             <audio id="music-player" loop></audio>
         </div>
-        <button id="player-menu-btn">&#9776;</button>
+
+        <div class="player-top-bar">
+            <div class="player-top-bar-left">
+                <button id="player-menu-btn" class="player-ui-btn" title="Open Menu">&#9776;</button>
+                <button id="player-sound-toggle-btn" class="player-ui-btn" title="Toggle Sound">
+                    <svg class="icon-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+                    <svg class="icon-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
+                </button>
+            </div>
+            <div class="player-top-bar-right">
+                <button id="player-close-btn" class="player-ui-btn" title="Exit Game">
+                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+                </button>
+            </div>
+        </div>
 
         <div id="player-menu-modal" class="player-modal">
             <div class="player-modal-content">
@@ -683,8 +843,7 @@
                     <hr>
                     <div class="menu-item"><span>Music</span><input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.4"></div>
                     <div class="menu-item"><span>Ambience</span><input type="range" id="ambience-volume-slider" min="0" max="1" step="0.05" value="0.8"></div>
-                    <div class="menu-item"><span>Font Size</span><input type="range" id="font-size-slider" min="12" max="28" step="1" value="16"></div>
-                    <div class="menu-item"><button id="music-toggle-btn">Music On</button><button id="sound-toggle-btn">Sound On</button></div>
+                    <div class="menu-item"><span>Font Size</span><input type="range" id="font-size-slider" min="8" max="28" step="1" value="16"></div>
                     <div class="menu-item"><button id="fullscreen-btn">Toggle Fullscreen</button></div>
                     <hr>
                     <div class="menu-item"><button id="about-btn">About</button></div>
@@ -759,7 +918,7 @@ const App = {
             'toggle-ambience-btn', 'ambience-play-icon', 'ambience-pause-icon', 'toggle-loop-btn',
             'scene-editor-preview', 'scene-editor-preview-wrapper',
             'pollinations-text-modal', 'pollinations-instruction', 'pollinations-submit-btn', 'process-text-ai-btn',
-            'style-editor-btn'
+            'style-editor-btn', 'batch-image-modal', 'batch-image-gen-btn'
         ];
         ids.forEach(id => this.elements[id] = document.getElementById(id));
     },
@@ -813,7 +972,14 @@ const App = {
             });
         });
 
+        // Main render button click
         this.elements['render-ai-image-btn'].addEventListener('click', () => this.assets.renderPollinationImage());
+        // Right-click for batch modal
+        this.elements['render-ai-image-btn'].addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            this.batch.open();
+        });
+        
         this.elements['add-ai-image-btn'].addEventListener('click', () => this.assets.addPollinationImageToScene());
 
         this.elements['process-text-ai-btn'].addEventListener('click', () => this.modals.show('pollinations-text-modal'));
@@ -829,6 +995,7 @@ const App = {
         document.getElementById('preview-btn').addEventListener('click', () => this.io.previewProject());
         document.getElementById('export-data-btn').addEventListener('click', () => this.modals.show('export-data-modal'));
         this.elements['style-editor-btn'].addEventListener('click', () => this.styles.open());
+        this.elements['batch-image-gen-btn'].addEventListener('click', () => this.batch.open());
         document.getElementById('about-editor-btn').addEventListener('click', () => this.modals.show('about-editor-modal'));
         
         document.querySelectorAll('.modal-close').forEach(el => el.addEventListener('click', (e) => this.modals.hide(e.target.closest('.modal'))));
@@ -844,6 +1011,11 @@ const App = {
 
         document.getElementById('project-menu-btn').addEventListener('click', () => this.modals.show('project-menu-modal'));
         this.elements['notification-close-btn'].addEventListener('click', () => this.modals.hide(this.elements['notification-modal']));
+        
+        // Batch processing button events
+        document.getElementById('batch-generate-btn').addEventListener('click', () => this.batch.startGeneration());
+        document.getElementById('batch-remove-images-btn').addEventListener('click', () => this.batch.removeAllImages());
+        document.getElementById('batch-remove-prompts-btn').addEventListener('click', () => this.batch.removeAllImagePrompts());
 
 
         window.addEventListener('beforeunload', (e) => { if (this.state.isDirty) { e.preventDefault(); e.returnValue = ''; } });
@@ -959,6 +1131,18 @@ const App = {
             document.getElementById('export-data-btn').disabled = !isEnabled;
             App.elements['style-editor-btn'].disabled = !isEnabled;
             document.getElementById('about-editor-btn').disabled = !isEnabled;
+            
+            const batchBtn = App.elements['batch-image-gen-btn'];
+            if (batchBtn) {
+                batchBtn.disabled = !isEnabled;
+                if (isEnabled) {
+                    batchBtn.classList.remove('btn-secondary');
+                    batchBtn.classList.add('btn-purple');
+                } else {
+                    batchBtn.classList.remove('btn-purple');
+                    batchBtn.classList.add('btn-secondary');
+                }
+            }
         },
         displayWelcomeMessage() {
             App.elements['tree-view'].innerHTML = `<li>Welcome! Please create a <strong>New Project</strong> or <strong>Open an existing one</strong> to begin.</li>`;
@@ -1199,6 +1383,7 @@ const App = {
                 let typewriterState = { intervalId: null, skipListener: null };
                 
                 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                const isAndroid = /android/i.test(navigator.userAgent);
                 const clickEvent = isTouchDevice ? 'touchend' : 'click';
 
                 function bindEvent(element, handler) {
@@ -1238,6 +1423,8 @@ const App = {
                     const saveBtn = document.getElementById('save-btn');
                     const loadBtn = document.getElementById('load-btn');
                     const fontSizeSlider = document.getElementById('font-size-slider');
+                    const soundToggleBtn = document.getElementById('player-sound-toggle-btn');
+                    const closeBtn = document.getElementById('player-close-btn');
 
                     bindEvent(playerMenuBtn, () => showModal(playerMenuModal));
                     bindEvent(playerMenuModal, (e) => { if (e.target === playerMenuModal) hideModal(playerMenuModal); });
@@ -1246,8 +1433,25 @@ const App = {
 
                     bindEvent(document.getElementById('about-btn'), () => { hideModal(playerMenuModal); showModal(aboutModal); });
                     bindEvent(document.getElementById('restart-btn'), () => { if (storageAvailable) { localStorage.removeItem('cyoa-save-' + storyData.meta.title); } renderScene(storyData.meta.startSceneId); hideModal(playerMenuModal); });
-                    bindEvent(document.getElementById('fullscreen-btn'), () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(e => console.warn(e)); } else { document.exitFullscreen(); } });
+                    bindEvent(document.getElementById('fullscreen-btn'), () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(e => console.warn(e)); } else { if(document.exitFullscreen) document.exitFullscreen(); } });
                     
+                    bindEvent(closeBtn, () => {
+                        if (window.top === window.self) {
+                            if (document.fullscreenElement) document.exitFullscreen();
+                            window.close();
+                        } else {
+                            document.body.innerHTML = '<div id="exit-message" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; font-size: 1.2em; color: #f0f0f0;"><p>Thanks for playing!</p><p>You can now close this window.</p></div>';
+                        }
+                    });
+
+                    bindEvent(soundToggleBtn, function() {
+                        const isMuted = !musicPlayer.muted;
+                        musicPlayer.muted = isMuted;
+                        ambiencePlayer.muted = isMuted;
+                        soundToggleBtn.querySelector('.icon-on').style.display = isMuted ? 'none' : 'block';
+                        soundToggleBtn.querySelector('.icon-off').style.display = isMuted ? 'block' : 'none';
+                    });
+
                     if (!storageAvailable) {
                         saveBtn.disabled = true;
                         loadBtn.disabled = true;
@@ -1258,8 +1462,6 @@ const App = {
                         bindEvent(loadBtn, () => { const savedId = localStorage.getItem('cyoa-save-' + storyData.meta.title); if (savedId && storyData.scenes[savedId]) { renderScene(savedId); } else { alert('No save data found.'); } hideModal(playerMenuModal); });
                     }
                     
-                    bindEvent(document.getElementById('music-toggle-btn'), function(e) { musicPlayer.muted = !musicPlayer.muted; e.target.textContent = musicPlayer.muted ? 'Music Off' : 'Music On'; });
-                    bindEvent(document.getElementById('sound-toggle-btn'), function(e) { ambiencePlayer.muted = !ambiencePlayer.muted; e.target.textContent = ambiencePlayer.muted ? 'Sound Off' : 'Sound On'; });
                     document.getElementById('volume-slider').addEventListener('input', function() { musicPlayer.volume = this.value; });
                     document.getElementById('ambience-volume-slider').addEventListener('input', function() { ambiencePlayer.volume = this.value; });
                     
@@ -1268,18 +1470,22 @@ const App = {
                     
                     function applyFontSize(size) {
                         gameContainer.style.fontSize = size + 'px';
-                        fontSizeSlider.value = size;
+                        if(fontSizeSlider) fontSizeSlider.value = size;
                     }
 
-                    if (storageAvailable) {
-                        const savedSize = localStorage.getItem('cyoa-fontsize-' + storyData.meta.title);
-                        if (savedSize) { applyFontSize(savedSize); }
+                    const savedSize = storageAvailable ? localStorage.getItem('cyoa-fontsize-' + storyData.meta.title) : null;
+                    if (savedSize) {
+                        applyFontSize(savedSize);
+                    } else if (isAndroid) {
+                        applyFontSize(12); 
                     }
 
-                    fontSizeSlider.addEventListener('input', function() {
-                        applyFontSize(this.value);
-                        if (storageAvailable) { localStorage.setItem('cyoa-fontsize-' + storyData.meta.title, this.value); }
-                    });
+                    if(fontSizeSlider) {
+                        fontSizeSlider.addEventListener('input', function() {
+                            applyFontSize(this.value);
+                            if (storageAvailable) { localStorage.setItem('cyoa-fontsize-' + storyData.meta.title, this.value); }
+                        });
+                    }
 
                     document.getElementById('about-title').textContent = storyData.meta.title;
                     document.getElementById('about-creator').textContent = storyData.meta.creatorName ? 'By ' + storyData.meta.creatorName : '';
@@ -1327,6 +1533,7 @@ const App = {
                     contentContainer.style.minHeight = containerHeight + 'px';
 
                     function showChoices() {
+                        while (choicesContainer.firstChild) { choicesContainer.removeChild(choicesContainer.firstChild); }
                         (choices || []).forEach((choice, index) => {
                             const button = document.createElement('button');
                             button.textContent = choice.text;
@@ -2047,7 +2254,7 @@ const App = {
                 urlSuffix = '&width=1280&height=720';
             }
 
-            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + "?token=fxj5LLKJi8hIjZbK&model=flux&nologo=true&enhance=true" + urlSuffix;
+            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + "?safe=true&model=flux&nologo=true&enhance=true" + urlSuffix;
             App.state.aiImageUrl = url;
             App.ui.updateAiImagePreview(null, 'Rendering...');
             const tempImg = new Image();
@@ -2091,7 +2298,8 @@ const App = {
             App.modals.hide(App.elements['pollinations-text-modal']);
             App.ui.showNotification("Processing text with AI...");
 
-            const combinedText = `${instruction}: ${sceneText}`;
+            const randomSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+            const combinedText = `${instruction}: ${sceneText} &seed=${randomSeed}`;
             const url = "https://text.pollinations.ai/" + encodeURIComponent(combinedText);
 
             try {
@@ -2486,10 +2694,217 @@ body {
         show(modalId) { document.getElementById(modalId).classList.add('visible'); },
         hide(modal) {
             if (modal) {
+                // Prevent hiding the batch modal while generation is active
+                if (modal.id === 'batch-image-modal' && App.batch.isGenerating) {
+                    App.batch.logInfo("Cannot close panel while generation is running. Please Abort first.");
+                    return;
+                }
                 modal.classList.remove('visible');
             }
         },
-        hideAll() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('visible')); }
+        hideAll() { document.querySelectorAll('.modal').forEach(m => this.hide(m)); }
+    },
+    
+    batch: {
+        isGenerating: false,
+        abortRequested: false,
+
+        open() {
+            App.modals.hide(document.getElementById('project-menu-modal'));
+
+            const sidebar = document.getElementById('tree-view-container');
+            const rect = sidebar.getBoundingClientRect();
+            const modalContent = document.querySelector('#batch-image-modal .modal-content');
+            
+            const style = getComputedStyle(sidebar);
+            const scrollbarWidth = sidebar.offsetWidth - sidebar.clientWidth;
+
+            modalContent.style.top = `${rect.top}px`;
+            modalContent.style.left = `${rect.left}px`;
+            modalContent.style.width = `${rect.width - scrollbarWidth}px`;
+            modalContent.style.height = `${rect.height}px`;
+
+            App.modals.show('batch-image-modal');
+        },
+
+        logInfo(message) {
+            const logEl = document.getElementById('batch-info-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logEl.textContent += `[${timestamp}] ${message}\n`;
+            logEl.scrollTop = logEl.scrollHeight; // Auto-scroll to bottom
+        },
+
+        removeAllImages() {
+            if (!confirm("Are you sure you want to delete the image paths from ALL scenes? This cannot be undone.")) return;
+            let count = 0;
+            Object.values(App.state.storyData.scenes).forEach(scene => {
+                if (scene.image) {
+                    scene.image = '';
+                    count++;
+                }
+            });
+            App.setDirty(true);
+            App.editor.render(); // Re-render current scene editor
+            App.tree.render(); // Re-render tree view
+            App.ui.showNotification(`${count} image paths have been deleted.`);
+        },
+
+        removeAllImagePrompts() {
+            if (!confirm("Are you sure you want to delete the image prompts from ALL scenes? This cannot be undone.")) return;
+            let count = 0;
+            Object.values(App.state.storyData.scenes).forEach(scene => {
+                if (scene.imagePrompt) {
+                    scene.imagePrompt = '';
+                    count++;
+                }
+            });
+            App.setDirty(true);
+            App.editor.render(); // Re-render current scene editor
+            App.ui.showNotification(`${count} image prompts have been deleted.`);
+        },
+
+        async startGeneration() {
+            if (this.isGenerating) {
+                this.abortRequested = true;
+                this.logInfo("Abort requested. Finishing current operation...");
+                document.getElementById('batch-generate-btn').disabled = true;
+                document.getElementById('batch-generate-btn').querySelector('span').textContent = 'Aborting...';
+                return;
+            }
+
+            this.isGenerating = true;
+            this.abortRequested = false;
+
+            const generateBtn = document.getElementById('batch-generate-btn');
+            const fieldset = document.getElementById('batch-fieldset');
+            const logEl = document.getElementById('batch-info-log');
+            
+            logEl.textContent = ''; // Clear log
+            this.logInfo("Starting batch generation...");
+            
+            fieldset.disabled = true;
+            generateBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5zM4 5a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H4z"/></svg> <span>Abort</span>`;
+
+            const suffix = document.getElementById('batch-suffix-input').value.trim();
+            const cooldown = parseInt(document.getElementById('batch-cooldown-input').value, 10) * 1000;
+            const rewritePrompt = document.getElementById('batch-rewrite-prompt-checkbox').checked;
+
+            const sceneIds = Object.keys(App.state.storyData.scenes);
+            let generatedCount = 0;
+
+            for (const sceneId of sceneIds) {
+                if (this.abortRequested) break;
+                
+                const scene = App.state.storyData.scenes[sceneId];
+                this.logInfo(`--- Processing scene: ${sceneId} ---`);
+
+                if (scene.image) {
+                    this.logInfo("Scene already has an image. Skipping.");
+                    continue;
+                }
+
+                let prompt = scene.imagePrompt;
+
+                if (rewritePrompt) {
+                    this.logInfo("AI rewrite enabled. Converting scene text to prompt...");
+                    prompt = await this.generatePromptForScene(scene);
+                    if (!prompt) {
+                        this.logInfo("Failed to generate prompt from text. Skipping scene.");
+                        continue;
+                    }
+                    scene.imagePrompt = prompt; // Save the newly generated prompt
+                    App.setDirty(true);
+                    this.logInfo(`New prompt: "${prompt}"`);
+                }
+
+                if (!prompt) {
+                    this.logInfo("Scene has no image prompt and rewrite is off. Skipping.");
+                    continue;
+                }
+                
+                const success = await this.generateAndSaveImage(sceneId, scene, prompt, suffix);
+                if (!success) {
+                    this.logInfo("An error occurred during image generation. ABORTING PROCESS.");
+                    break; 
+                }
+                
+                generatedCount++;
+
+                if (this.abortRequested) break;
+
+                this.logInfo(`Cooldown: Waiting ${cooldown / 1000}s...`);
+                await new Promise(resolve => setTimeout(resolve, cooldown));
+            }
+
+            // Teardown
+            this.logInfo("-----------------------------------");
+            if (this.abortRequested) this.logInfo("Batch process aborted by user.");
+            this.logInfo(`Finished. Generated ${generatedCount} new images.`);
+            if (generatedCount > 0) {
+                this.logInfo("IMPORTANT: Remember to Save Project to write the new images to disk!");
+            }
+            
+            this.isGenerating = false;
+            this.abortRequested = false;
+            fieldset.disabled = false;
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg> <span>Generate</span>`;
+            
+            // Final UI refresh
+            App.editor.render();
+            App.tree.render();
+        },
+        
+        async generatePromptForScene(scene) {
+            if (!scene.text) return null;
+            const instruction = "Analyze the text like a cinematographer. Create a vivid, cinematic image prompt. Structure: camera angle, subject, action, setting, location, year, lighting, colors, mood. Combine related details into evocative concepts. Output as comma-separated nouns and adjectives. No labels in the result.";
+            const combinedText = `${instruction}: ${scene.text}`;
+            const url = "https://text.pollinations.ai/" + encodeURIComponent(combinedText);
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const htmlString = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlString, 'text/html');
+                const processedText = doc.body.innerText.trim();
+                return processedText || null;
+            } catch (error) {
+                console.error("Error generating prompt:", error);
+                this.logInfo(`Error generating prompt: ${error.message}`);
+                return null;
+            }
+        },
+
+        async generateAndSaveImage(sceneId, scene, prompt, suffix) {
+            const fullPrompt = (prompt + ' ' + suffix).trim();
+            this.logInfo(`Generating image with prompt: "${fullPrompt}"`);
+            
+            const layout = App.state.storyData.meta.layout;
+            let urlSuffix = '&width=1024&height=1024'; // Default
+            if (layout === 'layout-top-down' || layout === 'layout-image-as-bg') {
+                urlSuffix = '&width=1280&height=720';
+            }
+            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(fullPrompt) + "?safe=true&model=flux&nologo=true&enhance=true" + urlSuffix;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Fetch failed: ${response.status} ${response.statusText}`);
+                const imageBlob = await response.blob();
+                const filename = `${sceneId}_${Date.now()}.jpg`;
+                const destinationPath = `images/${filename}`;
+                
+                App.state.pendingAssetCopies.set(destinationPath, imageBlob);
+                scene.image = destinationPath;
+                App.setDirty(true);
+                
+                this.logInfo(`Image successfully generated and saved to path: ${destinationPath}`);
+                return true;
+            } catch (err) {
+                console.error("Error generating/saving AI image:", err);
+                this.logInfo(`Error: ${err.message}`);
+                return false;
+            }
+        }
     }
 };
 

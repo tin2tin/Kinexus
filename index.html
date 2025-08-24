@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +6,7 @@
     <title>CYOA Studio Pro</title>
     <style>
         :root {
-            /* Desaturated colors */
+            /* Desaturated colors as requested */
             --primary-color: #4a78ad; --secondary-color: #6c757d; --light-bg: #121212;
             --dark-text: #e0e0e0; --border-color: #333333; --success-color: #5a8f66;
             --danger-color: #b85a66; --warning-color: #c7921a; --warning-text: #ffffff;
@@ -46,11 +45,12 @@
         #editor-container h1 { margin-top: 20px; }
         .header { display: flex; justify-content: space-between; align-items: center; }
         .header h1 { white-space: nowrap; }
+        .header h2 { margin-bottom: 0; }
         .header h3 { border-bottom: none; }
         #main-title-dirty-indicator { color: var(--danger-color); font-size: 0.7em; margin-left: 5px; display: none; }
         
         hr { border: none; border-top: 1px solid var(--border-color); margin: 15px 0; }
-        #tree-view { list-style-type: none; padding-left: 0; flex-grow: 1; overflow: auto; min-height: 100px; }
+        #tree-view { list-style-type: none; padding-left: 0; flex-grow: 1; overflow: auto; min-height: 100px; margin-top: 0; }
         #tree-view > ul { display: table; width: 100%; list-style-type: none; padding-left: 0; }
         #tree-view ul ul { list-style-type: none; padding-left: 20px; border-left: 1px solid #444; }
         #tree-view li { margin-top: 5px; color: var(--dark-text); }
@@ -66,7 +66,7 @@
         }
         .scene-node:hover { background-color: #333333; }
         .scene-node.active { background-color: var(--primary-color); color: white; font-weight: bold; }
-        .scene-node-text { white-space: nowrap; }
+        .scene-node-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .scene-node-icons { display: flex; gap: 4px; align-items: center; }
         .scene-node-icons svg { width: 14px; height: 14px; flex-shrink: 0; }
         .scene-node-icons .icon-start { fill: var(--success-color); }
@@ -215,7 +215,6 @@
         .layout-image-as-bg #player-content-container, .layout-image-as-bg #preview-player-content-container { width: 100%; }
 
         #ai-image-generator { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
-        /* MODIFIED: Changed width and height to 150px */
         #ai-image-preview { width: 150px; height: 150px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; position: relative; }
         #ai-image-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
         #ai-image-controls { display: flex; gap: 10px; align-items: center; flex-grow: 1; }
@@ -229,7 +228,9 @@
         .modal-grid .grid-span-2 { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .modal-grid .grid-full-width { grid-column: 1 / -1; }
         .modal-grid .grid-separator { grid-column: 1 / -1; margin: 5px 0; border: none; border-top: 1px solid var(--border-color); }
-        input[type="color"] { width: 100%; height: 40px; padding: 0; border: none; cursor: pointer; }
+        input[type="color"] { width: 100%; height: 40px; padding: 0; border: 1px solid #444444; cursor: pointer; background-color: transparent; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; }
         
         #style-editor-modal.visible {
             background-color: transparent;
@@ -258,7 +259,8 @@
         #player-text { white-space: pre-wrap; margin-bottom: 20px; }
         #player-choices { display: flex; flex-direction: column; gap: 12px; }
         #player-choices .choice-btn { width: 100%; text-align: left; padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; transition: background-color .2s, transform .1s, border-color .2s; background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid var(--btn-color); }
-        #player-choices .choice-btn:hover { transform: translateY(-2px); background-color: var(--btn-hover-color); border-color: var(--btn-hover-color); }
+        #player-choices .choice-btn:hover { transform: translateY(-2px); }
+        #player-choices .choice-btn:active { transform: translateY(1px); }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         #player-choices .choice-btn.fade-in { animation: fadeIn 0.5s forwards; opacity: 0; }
 
@@ -281,6 +283,38 @@
         #ai-image-preview:hover .thumbnail-fullscreen-icon { opacity: 1; }
         .thumbnail-fullscreen-icon svg { width: 16px; height: 16px; }
         .play-pause-icon.hidden { display: none; }
+        
+        #style-editor-grid #style-font-size,
+        #style-editor-grid #style-padding {
+            background-color: #1E1E1E;
+            color: white;
+            border: 1px solid #444444;
+            border-radius: 4px;
+            height: 40px;
+            box-sizing: border-box;
+        }
+        
+        #toggle-loop-btn.active {
+            background-color: var(--primary-color);
+        }
+
+        #custom-tooltip {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 14px;
+            max-width: 350px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s linear;
+        }
     </style>
 </head>
 <body>
@@ -316,7 +350,6 @@
                     <button id="rename-scene-btn" title="Rename Scene ID" class="file-icon-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
                     </button>
-                    <!-- MODIFIED: "New Scene" button is now a round, blue + button -->
                     <button id="new-scene-btn" class="btn-round" title="Create New Scene">+</button>
                 </div>
             </div>
@@ -330,7 +363,7 @@
                  <button id="preview-btn" class="btn-success" title="Preview Project in New Tab">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445z"/></svg>
                 </button>
-                <button id="save-scene-btn" class="btn-warning" title="Save Changes to Memory">
+                <button id="save-scene-btn" class="btn-warning" title="Save Changes to Memory (Ctrl+S)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.5 0h-2A1.5 1.5 0 0 0 1 1.5V15a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2.5A1.5 1.5 0 0 0 13.5 1h-2a.5.5 0 0 1 0-1h-2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H4.5zM3 14V2.5A.5.5 0 0 1 3.5 2H5v1.5A1.5 1.5 0 0 0 6.5 5h3A1.5 1.5 0 0 0 11 3.5V2h1.5a.5.5 0 0 1 .5.5V14a.5.5 0 0 1-.5-.5H3.5a.5.5 0 0 1-.5-.5z"/></svg>
                 </button>
                 <button id="delete-scene-btn" class="btn-danger" title="Delete Current Scene">
@@ -387,6 +420,12 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 3zm-2 2a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 1 .5-.5zm-6 1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zm8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zm-10 1a.5.5 0 0 1 .5.5v0a.5.5 0 0 1-1 0v0a.5.5 0 0 1 .5-.5zm12 0a.5.5 0 0 1 .5.5v0a.5.5 0 0 1-1 0v0a.5.5 0 0 1 .5-.5z"/></svg>
                         </span>
                         <input type="text" id="scene-sound" placeholder="e.g., sounds/wind.mp3">
+                         <button id="toggle-loop-btn" class="btn-secondary file-icon-btn" title="Toggle Ambience Loop">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                 <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                                 <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/>
+                             </svg>
+                         </button>
                          <button id="toggle-ambience-btn" class="btn-secondary file-icon-btn" title="Play/Pause Ambience">
                             <svg class="play-pause-icon" id="ambience-play-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734L10.804 8z"/></svg>
                             <svg class="play-pause-icon hidden" id="ambience-pause-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z"/></svg>
@@ -410,7 +449,6 @@
                         </div>
                     </div>
                     <div id="ai-image-controls">
-                        <!-- MODIFIED: Changed height to 150px -->
                         <textarea id="scene-image-prompt" placeholder="A stunning vista of a fantasy castle at sunset, digital art" style="flex-grow: 1; height: 150px; resize: none; margin-top:0;"></textarea>
                         <div class="btn-group" style="flex-direction: column; flex-shrink: 0; gap: 5px; margin-top: 0; align-self: stretch; justify-content: center;">
                             <button id="render-ai-image-btn" class="btn-purple" style="margin-top:0;" title="Render AI Image">
@@ -432,7 +470,7 @@
 <input type="file" id="sound-file-input" accept="audio/*">
 
 <!-- Player and Context Menu -->
-<div id="player-container"><button id="stop-play-x" class="btn-danger">X</button><button id="restart-play" class="btn-secondary" title="Restart Game"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg></button><div id="player-inner-container"><div id="player-image-container"><img id="player-image" src=""></div><div id="player-content-container"><div id="player-text"></div><div id="player-choices"></div></div></div><audio id="ambience-player" loop></audio><audio id="music-player" loop></audio></div>
+<div id="player-container"><button id="stop-play-x" class="btn-danger">X</button><button id="restart-play" class="btn-secondary" title="Restart Game"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg></button><div id="player-inner-container"><div id="player-image-container"><img id="player-image" src=""></div><div id="player-content-container"><div id="player-text"></div><div id="player-choices"></div></div></div><audio id="ambience-player"></audio><audio id="music-player" loop></audio></div>
 <div id="tree-context-menu"><button id="set-start-scene-btn">Set as Start Scene</button></div>
 
 <!-- Modals -->
@@ -510,6 +548,7 @@
             #choices-container { display: flex; flex-direction: column; gap: 12px; }
             .choice-btn { padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; text-align: left; transition: background-color .2s,transform .1s, border-color .2s; }
             .choice-btn:hover { transform: translateY(-2px); }
+            .choice-btn:active { transform: translateY(1px); }
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
             .choice-btn.fade-in { animation: fadeIn 0.5s forwards; opacity: 0; }
 
@@ -524,18 +563,96 @@
             #game-container.layout-image-as-bg #content-container { width: 100%; }
 
             #player-menu-btn { position: fixed; top: 15px; right: 15px; z-index: 100; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.5); border-radius: 50%; width: 40px; height: 40px; padding: 0; font-size: 24px; line-height: 40px; text-align: center; cursor: pointer; }
-            .player-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
-            .player-modal-content { background-color: #2c2c2c; color: #e0e0e0; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; }
-            .player-modal-close { position: absolute; top: 10px; right: 15px; font-size: 1.5em; font-weight: bold; cursor: pointer; color: #aaa; }
-            .player-modal-close:hover { color: #fff; }
+            
+            /* MODIFICATION: Restyled Player Menu */
+            .player-modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0; top: 0; width: 100%; height: 100%;
+                background-color: transparent;
+                transition: background-color 0.3s ease-out;
+            }
+            .player-modal.visible {
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+            .player-modal-content {
+                background-color: #2c2c2c;
+                color: #e0e0e0;
+                padding: 20px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                position: relative;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            #player-menu-modal {
+                justify-content: flex-end;
+            }
+            #player-menu-modal .player-modal-content {
+                background-color: #202124;
+                width: 100%;
+                max-width: 360px;
+                height: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+                margin: 0;
+                transform: translateX(100%);
+                transition: transform 0.3s ease-out;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+            }
+            #player-menu-modal.visible .player-modal-content {
+                transform: translateX(0);
+            }
+            #about-modal {
+                justify-content: center;
+                align-items: center;
+            }
+            #about-modal .player-modal-content {
+                width: 90%;
+                max-width: 500px;
+                border-radius: 8px;
+            }
+            .menu-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 16px 20px;
+                flex-shrink: 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            .menu-header h2 {
+                margin: 0;
+                border: none;
+                font-size: 1.1em;
+                color: #e8eaed;
+            }
+            .menu-header .player-modal-close {
+                position: static;
+                font-size: 1.8em;
+                line-height: 1;
+            }
+            .menu-body {
+                padding: 20px;
+                overflow-y: auto;
+                flex-grow: 1;
+            }
+            .menu-body hr {
+                border: none;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                margin: 20px 0;
+            }
             .menu-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 15px; }
             .menu-item button { flex-grow: 1; margin: 0; background-color: var(--secondary-color); padding: 8px 12px; }
             .menu-item button:disabled { background-color: #444; color: #888; cursor: not-allowed; }
-            .menu-item span { flex-shrink: 0; }
-            .menu-item hr { flex-grow: 1; border: none; border-top: 1px solid #444; }
+            .menu-item span { flex-shrink: 0; color: #bdc1c6; }
+            
             #about-title { text-align: center; }
             #about-creator { text-align: center; font-style: italic; margin-top: -10px; }
             #about-text { text-align: left; }
+            #about-text a { color: #8ab4f8; text-decoration: none; }
+            #about-text a:hover { text-decoration: underline; }
             .about-footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #444; font-size: 0.8em; text-align: center; white-space: pre-wrap; }
             .about-footer a { color: #8af; text-decoration: none; }
             __CUSTOM_STYLES__
@@ -548,26 +665,30 @@
                 <div id="scene-text"></div>
                 <div id="choices-container"></div>
             </div>
-            <audio id="ambience-player" loop></audio>
+            <audio id="ambience-player"></audio>
             <audio id="music-player" loop></audio>
         </div>
         <button id="player-menu-btn">&#9776;</button>
 
         <div id="player-menu-modal" class="player-modal">
             <div class="player-modal-content">
-                <span class="player-modal-close">&times;</span>
-                <h2>Menu</h2>
-                <div class="menu-item"><button id="restart-btn">Restart Game</button></div>
-                <hr style="border-color: #444;">
-                <div class="menu-item"><button id="save-btn">Save Progress</button><button id="load-btn">Load Progress</button></div>
-                <hr style="border-color: #444;">
-                <div class="menu-item"><span>Music</span><input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.4"></div>
-                <div class="menu-item"><span>Ambience</span><input type="range" id="ambience-volume-slider" min="0" max="1" step="0.05" value="0.8"></div>
-                 <div class="menu-item"><span>Font Size</span><input type="range" id="font-size-slider" min="12" max="28" step="1" value="16"></div>
-                <div class="menu-item"><button id="music-toggle-btn">Music On</button><button id="sound-toggle-btn">Sound On</button></div>
-                <div class="menu-item"><button id="fullscreen-btn">Toggle Fullscreen</button></div>
-                <hr style="border-color: #444;">
-                <div class="menu-item"><button id="about-btn">About</button></div>
+                <div class="menu-header">
+                    <h2>Menu</h2>
+                    <span class="player-modal-close">&times;</span>
+                </div>
+                <div class="menu-body">
+                    <div class="menu-item"><button id="restart-btn">Restart Game</button></div>
+                    <hr>
+                    <div class="menu-item"><button id="save-btn">Save Progress</button><button id="load-btn">Load Progress</button></div>
+                    <hr>
+                    <div class="menu-item"><span>Music</span><input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.4"></div>
+                    <div class="menu-item"><span>Ambience</span><input type="range" id="ambience-volume-slider" min="0" max="1" step="0.05" value="0.8"></div>
+                    <div class="menu-item"><span>Font Size</span><input type="range" id="font-size-slider" min="12" max="28" step="1" value="16"></div>
+                    <div class="menu-item"><button id="music-toggle-btn">Music On</button><button id="sound-toggle-btn">Sound On</button></div>
+                    <div class="menu-item"><button id="fullscreen-btn">Toggle Fullscreen</button></div>
+                    <hr>
+                    <div class="menu-item"><button id="about-btn">About</button></div>
+                </div>
             </div>
         </div>
 
@@ -619,9 +740,9 @@ const App = {
                 creatorName: "",
                 aboutText: "",
                 styles: App.styles.getDefaults(), 
-                layout: 'layout-top-down' 
+                layout: 'layout-image-as-bg' 
             },
-            scenes: { "start": { text: "Start here.", image: "", imagePrompt: "", ambienceSound: "", choices: [] } } 
+            scenes: { "start": { text: "Start here.", image: "", imagePrompt: "", ambienceSound: "", ambienceLoop: true, choices: [] } } 
         };
     },
     
@@ -635,7 +756,7 @@ const App = {
             'editor-fieldset', 'ai-image-preview', 'render-ai-image-btn', 'add-ai-image-btn', 'image-preview',
             'story-title', 'creator-name', 'about-text',
             'notification-modal', 'notification-message', 'notification-close-btn',
-            'toggle-ambience-btn', 'ambience-play-icon', 'ambience-pause-icon', 
+            'toggle-ambience-btn', 'ambience-play-icon', 'ambience-pause-icon', 'toggle-loop-btn',
             'scene-editor-preview', 'scene-editor-preview-wrapper',
             'pollinations-text-modal', 'pollinations-instruction', 'pollinations-submit-btn', 'process-text-ai-btn',
             'style-editor-btn'
@@ -657,9 +778,26 @@ const App = {
         document.getElementById('select-image-btn').addEventListener('click', () => App.assets.selectFile('images', 'scene-image'));
         document.getElementById('select-sound-btn').addEventListener('click', () => App.assets.selectFile('sounds', 'scene-sound'));
         this.elements['scene-image'].addEventListener('change', (e) => this.ui.updateImageThumbnail(e.target.value));
+        this.elements['scene-sound'].addEventListener('input', (e) => {
+            const hasSound = !!e.target.value;
+            const btn = this.elements['toggle-ambience-btn'];
+            btn.classList.toggle('btn-success', hasSound);
+            btn.classList.toggle('btn-secondary', !hasSound);
+        });
+
         this.elements['toggle-ambience-btn'].addEventListener('click', () => this.player.toggleAmbienceSound());
         this.elements['ambience-player'].addEventListener('play', () => this.player.updateAmbienceButton(true));
         this.elements['ambience-player'].addEventListener('pause', () => this.player.updateAmbienceButton(false));
+
+        this.elements['toggle-loop-btn'].addEventListener('click', (e) => {
+            const btn = e.currentTarget;
+            const scene = this.state.storyData.scenes[this.state.currentSceneId];
+            if (scene) {
+                scene.ambienceLoop = !btn.classList.contains('active');
+                btn.classList.toggle('active', scene.ambienceLoop);
+                this.setDirty(true);
+            }
+        });
 
         ['scene-text', 'scene-image'].forEach(id => {
             this.elements[id].addEventListener('input', () => this.editor.renderPreview());
@@ -697,7 +835,13 @@ const App = {
         this.elements['export-data-modal'].addEventListener('click', (e) => { if(e.target.dataset.exportType) this.io.exportData(e.target.dataset.exportType); });
         document.getElementById('set-start-scene-btn').addEventListener('click', () => this.tree.setAsStartScene());
         document.addEventListener('click', (e) => { if (!e.target.closest('.scene-node')) this.elements['tree-context-menu'].style.display = 'none'; });
-        window.addEventListener('click', (e) => { if (e.target.classList.contains('modal')) this.modals.hide(e.target); });
+        
+        window.addEventListener('click', (e) => { 
+            if (e.target.classList.contains('modal') && e.target.id !== 'about-editor-modal') {
+                this.modals.hide(e.target); 
+            }
+        });
+
         document.getElementById('project-menu-btn').addEventListener('click', () => this.modals.show('project-menu-modal'));
         this.elements['notification-close-btn'].addEventListener('click', () => this.modals.hide(this.elements['notification-modal']));
 
@@ -726,6 +870,74 @@ const App = {
         document.getElementById('fullscreen-viewer').addEventListener('click', (e) => {
             if (e.target.id === 'fullscreen-viewer') {
                 App.modals.hide(document.getElementById('fullscreen-viewer'));
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                if (this.state.projectDirectoryHandle && this.elements['editor-container'].style.display !== 'none') {
+                    this.editor.saveCurrentScene(true);
+                    this.io.saveProject();
+                }
+            }
+        });
+
+        const tooltip = document.createElement('div');
+        tooltip.id = 'custom-tooltip';
+        document.body.appendChild(tooltip);
+        let tooltipTarget = null;
+
+        document.body.addEventListener('mouseover', e => {
+            const target = e.target.closest('[title]');
+            if (target && target.title) {
+                tooltipTarget = target;
+                tooltip.textContent = target.title;
+                target.dataset.originalTitle = target.title;
+                target.removeAttribute('title');
+                tooltip.style.display = 'block';
+                requestAnimationFrame(() => {
+                    tooltip.style.opacity = '1';
+                });
+            }
+        });
+
+        document.body.addEventListener('mouseout', () => {
+            if (tooltipTarget) {
+                tooltipTarget.setAttribute('title', tooltipTarget.dataset.originalTitle);
+                tooltipTarget.removeAttribute('data-original-title');
+                tooltip.style.opacity = '0';
+                setTimeout(() => {
+                    if (tooltip.style.opacity === '0') {
+                        tooltip.style.display = 'none';
+                    }
+                }, 150);
+                tooltipTarget = null;
+            }
+        });
+
+        document.body.addEventListener('mousemove', e => {
+            if (tooltipTarget) {
+                const x = e.clientX;
+                const y = e.clientY;
+                const tooltipRect = tooltip.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+
+                let top = y + 24;
+                let left = x + 12;
+
+                if (left + tooltipRect.width > viewportWidth) {
+                    left = x - tooltipRect.width - 12;
+                }
+                if (top + tooltipRect.height > viewportHeight) {
+                    top = y - tooltipRect.height - 24;
+                }
+                if (left < 0) left = 0;
+                if (top < 0) top = 0;
+                
+                tooltip.style.left = `${left}px`;
+                tooltip.style.top = `${top}px`;
             }
         });
     },
@@ -985,6 +1197,17 @@ const App = {
                 const sceneImage = document.getElementById('scene-image'), sceneText = document.getElementById('scene-text'), choicesContainer = document.getElementById('choices-container'), ambiencePlayer = document.getElementById('ambience-player'), musicPlayer = document.getElementById('music-player'), playerMenuBtn = document.getElementById('player-menu-btn'), playerMenuModal = document.getElementById('player-menu-modal'), aboutModal = document.getElementById('about-modal'), gameContainer = document.getElementById('game-container'), contentContainer = document.getElementById('content-container');
                 let currentSceneId, currentAmbienceSrc = '', currentMusicSrc = '';
                 let typewriterState = { intervalId: null, skipListener: null };
+                
+                const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                const clickEvent = isTouchDevice ? 'touchend' : 'click';
+
+                function bindEvent(element, handler) {
+                    if(!element) return;
+                    element.addEventListener(clickEvent, (e) => {
+                        if (isTouchDevice) e.preventDefault();
+                        handler(e);
+                    });
+                }
 
                 function isStorageAvailable() {
                     try {
@@ -999,17 +1222,31 @@ const App = {
                 }
 
                 const storageAvailable = isStorageAvailable();
+                
+                function linkify(text) {
+                    if (!text) return '';
+                    const urlRegex = /(\\b(https?|ftp|file):\\/\\/[-A-Z0-9+&@#\\/%?=~_|!:,.;]*[-A-Z0-9+&@#\\/%=~_|])/ig;
+                    return text.replace(urlRegex, function(url) {
+                        return '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
+                    });
+                }
+
+                function showModal(modal) { modal.style.display = 'flex'; setTimeout(() => modal.classList.add('visible'), 10); }
+                function hideModal(modal) { modal.classList.remove('visible'); setTimeout(() => modal.style.display = 'none', 300); }
 
                 function setupMenu() {
                     const saveBtn = document.getElementById('save-btn');
                     const loadBtn = document.getElementById('load-btn');
                     const fontSizeSlider = document.getElementById('font-size-slider');
 
-                    playerMenuBtn.onclick = () => playerMenuModal.style.display = 'flex';
-                    [playerMenuModal, aboutModal].forEach(m => m.querySelector('.player-modal-close').onclick = () => m.style.display = 'none');
-                    document.getElementById('about-btn').onclick = () => { playerMenuModal.style.display = 'none'; aboutModal.style.display = 'flex'; };
-                    document.getElementById('restart-btn').onclick = () => { if (storageAvailable) { localStorage.removeItem('cyoa-save-' + storyData.meta.title); } renderScene(storyData.meta.startSceneId); playerMenuModal.style.display = 'none'; };
-                    document.getElementById('fullscreen-btn').onclick = () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(e => console.warn(e)); } else { document.exitFullscreen(); } };
+                    bindEvent(playerMenuBtn, () => showModal(playerMenuModal));
+                    bindEvent(playerMenuModal, (e) => { if (e.target === playerMenuModal) hideModal(playerMenuModal); });
+                    bindEvent(playerMenuModal.querySelector('.player-modal-close'), () => hideModal(playerMenuModal));
+                    bindEvent(aboutModal.querySelector('.player-modal-close'), () => hideModal(aboutModal));
+
+                    bindEvent(document.getElementById('about-btn'), () => { hideModal(playerMenuModal); showModal(aboutModal); });
+                    bindEvent(document.getElementById('restart-btn'), () => { if (storageAvailable) { localStorage.removeItem('cyoa-save-' + storyData.meta.title); } renderScene(storyData.meta.startSceneId); hideModal(playerMenuModal); });
+                    bindEvent(document.getElementById('fullscreen-btn'), () => { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(e => console.warn(e)); } else { document.exitFullscreen(); } });
                     
                     if (!storageAvailable) {
                         saveBtn.disabled = true;
@@ -1017,14 +1254,14 @@ const App = {
                         saveBtn.title = "Saving/Loading is disabled when running from a local file.";
                         loadBtn.title = "Saving/Loading is disabled when running from a local file.";
                     } else {
-                        saveBtn.onclick = () => { localStorage.setItem('cyoa-save-' + storyData.meta.title, currentSceneId); alert('Progress saved!'); playerMenuModal.style.display = 'none'; };
-                        loadBtn.onclick = () => { const savedId = localStorage.getItem('cyoa-save-' + storyData.meta.title); if (savedId && storyData.scenes[savedId]) { renderScene(savedId); } else { alert('No save data found.'); } playerMenuModal.style.display = 'none'; };
+                        bindEvent(saveBtn, () => { localStorage.setItem('cyoa-save-' + storyData.meta.title, currentSceneId); alert('Progress saved!'); hideModal(playerMenuModal); });
+                        bindEvent(loadBtn, () => { const savedId = localStorage.getItem('cyoa-save-' + storyData.meta.title); if (savedId && storyData.scenes[savedId]) { renderScene(savedId); } else { alert('No save data found.'); } hideModal(playerMenuModal); });
                     }
-
-                    document.getElementById('music-toggle-btn').onclick = function() { musicPlayer.muted = !musicPlayer.muted; this.textContent = musicPlayer.muted ? 'Music Off' : 'Music On'; };
-                    document.getElementById('sound-toggle-btn').onclick = function() { ambiencePlayer.muted = !ambiencePlayer.muted; this.textContent = ambiencePlayer.muted ? 'Sound Off' : 'Sound On'; };
-                    document.getElementById('volume-slider').oninput = function() { musicPlayer.volume = this.value; };
-                    document.getElementById('ambience-volume-slider').oninput = function() { ambiencePlayer.volume = this.value; };
+                    
+                    bindEvent(document.getElementById('music-toggle-btn'), function(e) { musicPlayer.muted = !musicPlayer.muted; e.target.textContent = musicPlayer.muted ? 'Music Off' : 'Music On'; });
+                    bindEvent(document.getElementById('sound-toggle-btn'), function(e) { ambiencePlayer.muted = !ambiencePlayer.muted; e.target.textContent = ambiencePlayer.muted ? 'Sound Off' : 'Sound On'; });
+                    document.getElementById('volume-slider').addEventListener('input', function() { musicPlayer.volume = this.value; });
+                    document.getElementById('ambience-volume-slider').addEventListener('input', function() { ambiencePlayer.volume = this.value; });
                     
                     musicPlayer.volume = document.getElementById('volume-slider').value;
                     ambiencePlayer.volume = document.getElementById('ambience-volume-slider').value;
@@ -1039,14 +1276,14 @@ const App = {
                         if (savedSize) { applyFontSize(savedSize); }
                     }
 
-                    fontSizeSlider.oninput = function() {
+                    fontSizeSlider.addEventListener('input', function() {
                         applyFontSize(this.value);
                         if (storageAvailable) { localStorage.setItem('cyoa-fontsize-' + storyData.meta.title, this.value); }
-                    };
+                    });
 
                     document.getElementById('about-title').textContent = storyData.meta.title;
                     document.getElementById('about-creator').textContent = storyData.meta.creatorName ? 'By ' + storyData.meta.creatorName : '';
-                    document.getElementById('about-text').textContent = storyData.meta.aboutText;
+                    document.getElementById('about-text').innerHTML = linkify(storyData.meta.aboutText);
                 }
 
                 function setupGlobalStyles() {
@@ -1061,9 +1298,12 @@ const App = {
                         }
                     }
                     
-                    document.body.addEventListener('click', () => {
+                    document.body.addEventListener(clickEvent, () => {
                         if(musicPlayer.src && musicPlayer.paused) {
                             musicPlayer.play().catch(e => console.warn("Could not start music even after interaction."));
+                        }
+                        if(ambiencePlayer.src && ambiencePlayer.paused) {
+                            ambiencePlayer.play().catch(e => console.warn("Could not start ambience even after interaction."));
                         }
                     }, { once: true });
                 }
@@ -1092,13 +1332,13 @@ const App = {
                             button.textContent = choice.text;
                             button.className = 'choice-btn fade-in';
                             button.style.animationDelay = \`\${index * 0.2}s\`;
-                            button.onclick = (e) => { e.stopPropagation(); renderScene(choice.target); };
+                            bindEvent(button, (e) => { e.stopPropagation(); renderScene(choice.target); });
                             choicesContainer.appendChild(button);
                         });
                     }
                     
                     if (typewriterState.intervalId) clearInterval(typewriterState.intervalId);
-                    if (typewriterState.skipListener) gameContainer.removeEventListener('click', typewriterState.skipListener);
+                    if (typewriterState.skipListener) gameContainer.removeEventListener(clickEvent, typewriterState.skipListener);
                     
                     const skipTyping = () => {
                         clearInterval(typewriterState.intervalId);
@@ -1106,11 +1346,11 @@ const App = {
                         sceneText.innerHTML = text;
                         contentContainer.style.minHeight = '';
                         showChoices();
-                        gameContainer.removeEventListener('click', typewriterState.skipListener);
+                        gameContainer.removeEventListener(clickEvent, typewriterState.skipListener);
                         typewriterState.skipListener = null;
                     };
                     typewriterState.skipListener = skipTyping;
-                    gameContainer.addEventListener('click', skipTyping);
+                    bindEvent(gameContainer, skipTyping);
                     
                     typewriterState.intervalId = setInterval(() => {
                         if (i < text.length) {
@@ -1138,7 +1378,7 @@ const App = {
                                 const button = document.createElement('button'); 
                                 button.textContent = choice.text; 
                                 button.className = 'choice-btn'; 
-                                button.onclick = () => renderScene(choice.target); 
+                                bindEvent(button, () => renderScene(choice.target)); 
                                 choicesContainer.appendChild(button); 
                             });
                         }
@@ -1166,7 +1406,8 @@ const App = {
                                 imageContainer.style.display = 'none';
                             }
                         }
-
+                        
+                        ambiencePlayer.loop = scene.ambienceLoop ?? true;
                         const soundUrl = scene.ambienceSound || '';
                         if (soundUrl !== currentAmbienceSrc) {
                             currentAmbienceSrc = soundUrl;
@@ -1553,7 +1794,7 @@ const App = {
                 newId = newId.trim().replace(/\s+/g, '_');
                 if (!newId.length) return;
             }
-            App.state.storyData.scenes[newId] = { text: `This is the new scene '${newId}'.`, choices: [] };
+            App.state.storyData.scenes[newId] = { text: `This is the new scene '${newId}'.`, choices: [], ambienceLoop: true };
             App.setDirty(true);
             this.render();
             this.selectScene(newId);
@@ -1638,7 +1879,18 @@ const App = {
             App.elements['scene-image'].value = scene.image || ''; 
             App.ui.updateImageThumbnail(scene.image); 
             App.elements['scene-image-prompt'].value = scene.imagePrompt || ''; 
-            App.elements['scene-sound'].value = scene.ambienceSound || ''; 
+            
+            const soundInput = App.elements['scene-sound'];
+            soundInput.value = scene.ambienceSound || ''; 
+            const hasSound = !!soundInput.value;
+            const playBtn = App.elements['toggle-ambience-btn'];
+            playBtn.classList.toggle('btn-success', hasSound);
+            playBtn.classList.toggle('btn-secondary', !hasSound);
+            
+            const loopBtn = App.elements['toggle-loop-btn'];
+            const shouldLoop = scene.ambienceLoop ?? true;
+            loopBtn.classList.toggle('active', shouldLoop);
+
             App.ui.updateAiImagePreview(null); 
             App.state.aiImageUrl = null; 
             App.elements['creator-name'].value = meta.creatorName || '';
@@ -1705,7 +1957,8 @@ const App = {
             if (!scene) return; 
             scene.image = App.elements['scene-image'].value.trim(); 
             scene.imagePrompt = App.elements['scene-image-prompt'].value.trim(); 
-            scene.ambienceSound = App.elements['scene-sound'].value.trim(); 
+            scene.ambienceSound = App.elements['scene-sound'].value.trim();
+            scene.ambienceLoop = App.elements['toggle-loop-btn'].classList.contains('active');
             scene.text = App.elements['scene-text'].value; 
             scene.choices = Array.from(App.elements['choices-container'].querySelectorAll('.choice-group')).map(div => ({ text: div.querySelector('input[type=text]').value, target: div.querySelector('select').value })); 
             App.setDirty(true); 
@@ -1794,7 +2047,7 @@ const App = {
                 urlSuffix = '&width=1280&height=720';
             }
 
-            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + "?model=flux&nologo=true&enhance=true" + urlSuffix;
+            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + "?token=fxj5LLKJi8hIjZbK&model=flux&nologo=true&enhance=true" + urlSuffix;
             App.state.aiImageUrl = url;
             App.ui.updateAiImagePreview(null, 'Rendering...');
             const tempImg = new Image();
@@ -1957,6 +2210,7 @@ const App = {
                 });
             }
             
+            audio.loop = scene.ambienceLoop ?? true;
             const soundUrl = await App.io.getAssetDataUrl(scene.ambienceSound);
             if (soundUrl) {
                 if(audio.src !== soundUrl) audio.src = soundUrl;
@@ -1979,7 +2233,6 @@ const App = {
             App.elements['ambience-player'].src = '';
             App.elements['music-player'].src = '';
             
-            // BUG FIX: Resynchronize the editor with the current state when the player stops.
             if (App.state.currentSceneId) {
                 App.editor.render();
             }
@@ -1989,6 +2242,11 @@ const App = {
             const soundPath = App.elements['scene-sound'].value;
 
             if (!soundPath) return;
+
+            const scene = App.state.storyData.scenes[App.state.currentSceneId];
+            if (scene) {
+                audio.loop = scene.ambienceLoop ?? true;
+            }
 
             const soundUrl = await App.io.getAssetDataUrl(soundPath);
 
@@ -2020,10 +2278,7 @@ const App = {
             const rect = sidebar.getBoundingClientRect();
             const modalContent = document.querySelector('#style-editor-modal .modal-content');
             
-            // Correctly calculate dimensions by subtracting padding
             const style = getComputedStyle(sidebar);
-            const paddingHeight = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
-            const paddingWidth = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
             const scrollbarWidth = sidebar.offsetWidth - sidebar.clientWidth;
 
             modalContent.style.top = `${rect.top}px`;
@@ -2224,18 +2479,13 @@ body {
             }
             return css;
         },
-        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': '#6c757d', '--btn-text-color': '#ffffff', '--btn-hover-color': '#5a6268', '--font-family': 'sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--music-path': '', '--typewriter-effect': 'off' }; }
+        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': '#6c757d', '--btn-text-color': '#ffffff', '--btn-hover-color': '#5a6268', '--font-family': 'sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--music-path': '', '--typewriter-effect': 'on' }; }
     },
     
     modals: {
         show(modalId) { document.getElementById(modalId).classList.add('visible'); },
         hide(modal) {
             if (modal) {
-                if (modal.id === 'style-editor-modal' || modal.id === 'about-editor-modal') {
-                    if (App.state.isDirty) {
-                       App.io.saveProject().catch(err => console.error("Auto-save on modal close failed", err));
-                    }
-                }
                 modal.classList.remove('visible');
             }
         },

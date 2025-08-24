@@ -1,6 +1,6 @@
 # CYOA Studio (Choose Your Own Adventure Editor)
 
-CYOA Studio is a powerful tool for creating, styling, and exporting choice-based narrative games, interactive fiction, and interactive graphic novels. It runs entirely in your web browser, providing a complete workflow from writing your story to packaging a distributable ZIP file for platforms like itch.io. [itch.io](https://itch.io/).
+CYOA Studio is a powerful tool for creating, styling, and exporting choice-based narrative games, interactive fiction, and interactive graphic novels. It runs entirely in your web browser, providing a complete workflow from writing your story to packaging a distributable ZIP file for platforms like [itch.io](https://itch.io/).
 
 <img width="1905" height="959" alt="image" src="https://github.com/user-attachments/assets/8a7c3d51-4abd-4d48-8a15-cb728ec17401" />
 
@@ -21,7 +21,9 @@ An example project. Unzip and open with CYOA Studio: [Example_The_Last_Broadcast
 *   **Visual Story Creation:**
     *   A rich text editor for writing your narrative.
     *   Easily add, edit, and link choices between scenes.
-    *   Includes an integrated **Generative AI Image** tool to create and add unique artwork for your scenes directly within the editor.
+    *   **Integrated Generative AI Tools:**
+        *   **Image Generation:** Create and add unique artwork for your scenes directly within the editor.
+        *   **Text Processing:** Use AI to rewrite or expand upon your story text.
 
 *   **Interactive Story Map:**
     *   A collapsible tree view provides a clear visualization of your story's branches.
@@ -32,18 +34,31 @@ An example project. Unzip and open with CYOA Studio: [Example_The_Last_Broadcast
 *   **Live Player & Preview:**
     *   Instantly playtest your game from the start or the current scene using the built-in player.
     *   Launch a full, clean preview of your project in a new browser tab at any time.
+    *   **Modern Player UI:** The exported game features a clean, overlay-based UI with quick access to menu, sound toggle, and exit functions, ensuring an immersive experience.
 
-*   **Integrated Asset Management:** Select image and audio files from your computer. The studio automatically copies them into your project folder on save, ensuring all asset paths are correct and ready for export.
+*   **Integrated Asset Management:**
+    *   Select image and audio files from your computer using a file picker or by **dragging and dropping** them directly onto the input fields.
+    *   The studio automatically copies them into your project folder on save, ensuring all asset paths are correct and ready for export.
 
-*   **Powerful Style Editor:** Customize the visual theme of your game, including layout, colors, fonts, padding, background images, and even global background music. Your custom style is saved with the project.
+*   **Powerful Style Editor:**
+    *   Customize the visual theme of your game, including layout, colors, fonts, padding, background images, and even global background music. Your custom style is saved with the project.
+
+*   **Batch AI Processing:**
+    *   Automate image creation for all scenes that are missing one.
+    *   Optionally use AI to automatically generate image prompts based on your scene's text.
+    *   Globally add artistic suffixes (e.g., ", cinematic lighting, 4k") to all generated images.
+    *   Includes tools to safely delete all image paths or all prompts from your project at once.
 
 *   **One-Click Export:**
     *   Export your complete, playable project as a self-contained `.zip` file. This bundle includes the game, your custom theme, and all required assets, ready to be shared or hosted.
+    *   The exported game is optimized for both desktop and mobile browsers.
     *   Export specific data, such as all AI image prompts, to a structured `.json` file for analysis or external use.
 
-*   **Single-File, Zero Installation:** The entire studio is a single `.html` file. It runs directly in your browser with no installation, servers, or dependencies required.
+*   **Single-File, Zero Installation:**
+    *   The entire studio is a single `.html` file. It runs directly in your browser with no installation, servers, or dependencies required.
 
-*   **Local-First Project Management:** Works directly with folders on your computer via the File System Access API. Your project, including the story file and all assets, is saved locally, not in the cloud. The app tracks unsaved changes to prevent data loss.
+*   **Local-First Project Management:**
+    *   Works directly with folders on your computer via the File System Access API. Your project, including the story file and all assets, is saved locally, not in the cloud. The app tracks unsaved changes to prevent data loss.
 
 ## Screenshots
 
@@ -111,18 +126,21 @@ First, open the `index.html` file in your browser. From the **Menu**, you have t
 
 ### 3. Add Media (Image & Audio)
 
-You have two ways to add images, and one way to add audio:
+You have multiple ways to add images and audio:
 
-1.  **From Your Computer:**
+1.  **From Your Computer (File Picker):**
     *   Click the **yellow folder icon** next to the "Image" or "Audio" field.
     *   Select any image or audio file from your computer.
-    *   Or you can drag & drop the files to the string widgets.
-    *   The app automatically sets the correct path. The file will be copied into your project's `images/` or `sounds/` folder the next time you click **"Save Project"**.
 
-2.  **Using Generative AI (for Images):**
-    *   Write a descriptive prompt in the "Generative AI Image" text box.
+2.  **From Your Computer (Drag & Drop):**
+    *   Drag an image or audio file from your file explorer directly onto the corresponding text input field (e.g., drag `my_image.png` onto the "Image Path" field). The input will highlight to show it's a valid target.
+
+3.  **Using Generative AI (for Images):**
+    *   Write a descriptive prompt in the "AI Image Prompt" text box.
     *   Click the **purple Render button** (with the stars icon) to create an image.
     *   Once you're happy with the result, click the **green Add button** (with the plus icon) to add it to your scene.
+
+For all methods, the app automatically sets the correct path. The file will be copied into your project's `images/` or `sounds/` folder the next time you click **"Save Project"**.
 
 ### 4. Customize the Look & Feel
 

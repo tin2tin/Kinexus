@@ -126,6 +126,11 @@
         input[type="text"]:disabled { background-color: #333333; cursor: not-allowed; }
         textarea { height: 120px; resize: vertical; }
        
+        input.drag-over {
+            border: 2px dashed var(--primary-color) !important;
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+
         #media-hub { display: flex; gap: 15px; align-items: center; }
         #media-paths-container { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
         #media-paths-container .form-group.inline { margin: 0; }
@@ -454,7 +459,7 @@
                         <span class="media-icon-label" title="Image Path">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
                         </span>
-                        <input type="text" id="scene-image" placeholder="e.g., images/trench.jpg">
+                        <input type="text" id="scene-image" data-asset-type="images" placeholder="e.g., images/trench.jpg">
                         <button id="select-image-btn" class="btn-warning file-icon-btn" title="Select Image File">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
                         </button>
@@ -463,7 +468,7 @@
                          <span class="media-icon-label" title="Sound Path">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 3zm-2 2a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 1 .5-.5zm-6 1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zm8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zm-10 1a.5.5 0 0 1 .5.5v0a.5.5 0 0 1-1 0v0a.5.5 0 0 1 .5-.5zm12 0a.5.5 0 0 1 .5.5v0a.5.5 0 0 1-1 0v0a.5.5 0 0 1 .5-.5z"/></svg>
                         </span>
-                        <input type="text" id="scene-sound" placeholder="e.g., sounds/wind.mp3">
+                        <input type="text" id="scene-sound" data-asset-type="sounds" placeholder="e.g., sounds/wind.mp3">
                          <button id="toggle-loop-btn" class="btn-secondary file-icon-btn" title="Toggle Ambience Loop">
                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                  <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
@@ -547,7 +552,6 @@
     <div class="modal-content">
         <span class="modal-close">&times;</span>
         <h2>Batch Image Generation</h2>
-        <p>This tool will generate images for scenes that are missing one.</p>
         <fieldset id="batch-fieldset">
             <div id="batch-controls-grid">
                 <div class="form-group full-width" style="margin-bottom:0;">
@@ -562,6 +566,12 @@
                      <label class="checkbox-label">
                         <input type="checkbox" id="batch-rewrite-prompt-checkbox">
                         AI Rewrite Text to Prompt
+                    </label>
+                </div>
+                 <div class="form-group" style="margin-bottom:0;">
+                     <label class="checkbox-label" title="If checked, new images will be generated even for scenes that already have one. Also allows 'AI Rewrite' to replace existing prompts.">
+                        <input type="checkbox" id="batch-overwrite-checkbox">
+                        Overwrite
                     </label>
                 </div>
             </div>
@@ -924,108 +934,111 @@ const App = {
     },
 
     bindEvents() {
-        document.getElementById('new-project-btn').addEventListener('click', () => this.io.newProject());
-        document.getElementById('open-project-btn').addEventListener('click', () => this.io.openProject());
-        this.elements['save-story-btn'].addEventListener('click', () => this.io.saveProject());
+        document.getElementById('new-project-btn').addEventListener('click', () => App.io.newProject());
+        document.getElementById('open-project-btn').addEventListener('click', () => App.io.openProject());
+        App.elements['save-story-btn'].addEventListener('click', () => App.io.saveProject());
         
-        document.getElementById('new-scene-btn').addEventListener('click', () => this.tree.createNewScene());
-        document.getElementById('rename-scene-btn').addEventListener('click', () => this.tree.renameScene());
-        document.getElementById('delete-scene-btn').addEventListener('click', () => this.tree.deleteCurrentScene());
-        document.getElementById('add-choice-btn').addEventListener('click', () => this.editor.addChoiceToDOM());
-        document.getElementById('save-scene-btn').addEventListener('click', () => this.editor.saveCurrentScene(true));
+        document.getElementById('new-scene-btn').addEventListener('click', () => App.tree.createNewScene());
+        document.getElementById('rename-scene-btn').addEventListener('click', () => App.tree.renameScene());
+        document.getElementById('delete-scene-btn').addEventListener('click', () => App.tree.deleteCurrentScene());
+        document.getElementById('add-choice-btn').addEventListener('click', () => App.editor.addChoiceToDOM());
+        document.getElementById('save-scene-btn').addEventListener('click', () => App.editor.saveCurrentScene(true));
         
         document.getElementById('select-image-btn').addEventListener('click', () => App.assets.selectFile('images', 'scene-image'));
         document.getElementById('select-sound-btn').addEventListener('click', () => App.assets.selectFile('sounds', 'scene-sound'));
-        this.elements['scene-image'].addEventListener('change', (e) => this.ui.updateImageThumbnail(e.target.value));
-        this.elements['scene-sound'].addEventListener('input', (e) => {
+        App.elements['scene-image'].addEventListener('change', (e) => App.ui.updateImageThumbnail(e.target.value));
+        App.elements['scene-sound'].addEventListener('input', (e) => {
             const hasSound = !!e.target.value;
-            const btn = this.elements['toggle-ambience-btn'];
+            const btn = App.elements['toggle-ambience-btn'];
             btn.classList.toggle('btn-success', hasSound);
             btn.classList.toggle('btn-secondary', !hasSound);
         });
 
-        this.elements['toggle-ambience-btn'].addEventListener('click', () => this.player.toggleAmbienceSound());
-        this.elements['ambience-player'].addEventListener('play', () => this.player.updateAmbienceButton(true));
-        this.elements['ambience-player'].addEventListener('pause', () => this.player.updateAmbienceButton(false));
+        App.elements['toggle-ambience-btn'].addEventListener('click', () => App.player.toggleAmbienceSound());
+        App.elements['ambience-player'].addEventListener('play', () => App.player.updateAmbienceButton(true));
+        App.elements['ambience-player'].addEventListener('pause', () => App.player.updateAmbienceButton(false));
 
-        this.elements['toggle-loop-btn'].addEventListener('click', (e) => {
+        App.elements['toggle-loop-btn'].addEventListener('click', (e) => {
             const btn = e.currentTarget;
-            const scene = this.state.storyData.scenes[this.state.currentSceneId];
+            const scene = App.state.storyData.scenes[App.state.currentSceneId];
             if (scene) {
                 scene.ambienceLoop = !btn.classList.contains('active');
                 btn.classList.toggle('active', scene.ambienceLoop);
-                this.setDirty(true);
+                App.setDirty(true);
             }
         });
 
         ['scene-text', 'scene-image'].forEach(id => {
-            this.elements[id].addEventListener('input', () => this.editor.renderPreview());
+            App.elements[id].addEventListener('input', () => App.editor.renderPreview());
         });
-        this.elements['choices-container'].addEventListener('input', () => this.editor.renderPreview());
+        App.elements['choices-container'].addEventListener('input', () => App.editor.renderPreview());
 
 
         ['story-title', 'creator-name', 'about-text'].forEach(id => {
-            this.elements[id].addEventListener('input', (e) => {
+            App.elements[id].addEventListener('input', (e) => {
                 const key = id === 'story-title' ? 'title' : id === 'creator-name' ? 'creatorName' : 'aboutText';
-                this.state.storyData.meta[key] = e.target.value;
-                this.setDirty(true);
+                App.state.storyData.meta[key] = e.target.value;
+                App.setDirty(true);
             });
         });
 
-        // Main render button click
-        this.elements['render-ai-image-btn'].addEventListener('click', () => this.assets.renderPollinationImage());
-        // Right-click for batch modal
-        this.elements['render-ai-image-btn'].addEventListener('contextmenu', (e) => {
+        App.elements['render-ai-image-btn'].addEventListener('click', () => App.assets.renderPollinationImage());
+        App.elements['render-ai-image-btn'].addEventListener('contextmenu', (e) => {
             e.preventDefault();
-            this.batch.open();
+            App.batch.open();
         });
         
-        this.elements['add-ai-image-btn'].addEventListener('click', () => this.assets.addPollinationImageToScene());
+        App.elements['add-ai-image-btn'].addEventListener('click', () => App.assets.addPollinationImageToScene());
+        App.elements['process-text-ai-btn'].addEventListener('click', () => App.modals.show('pollinations-text-modal'));
+        App.elements['pollinations-submit-btn'].addEventListener('click', () => App.assets.processTextWithPollinations());
 
-        this.elements['process-text-ai-btn'].addEventListener('click', () => this.modals.show('pollinations-text-modal'));
-        this.elements['pollinations-submit-btn'].addEventListener('click', () => this.assets.processTextWithPollinations());
-
-
-        document.getElementById('play-from-start-btn').addEventListener('click', () => { this.editor.saveCurrentScene(false); this.player.play(this.state.storyData.meta.startSceneId); });
-        document.getElementById('play-from-current-btn').addEventListener('click', () => { this.editor.saveCurrentScene(false); this.player.play(this.state.currentSceneId); });
-        document.getElementById('stop-play-x')?.addEventListener('click', () => this.player.stop());
-        document.getElementById('restart-play')?.addEventListener('click', () => this.player.play(this.state.storyData.meta.startSceneId));
+        document.getElementById('play-from-start-btn').addEventListener('click', () => { App.editor.saveCurrentScene(false); App.player.play(App.state.storyData.meta.startSceneId); });
+        document.getElementById('play-from-current-btn').addEventListener('click', () => { App.editor.saveCurrentScene(false); App.player.play(App.state.currentSceneId); });
+        document.getElementById('stop-play-x')?.addEventListener('click', () => App.player.stop());
+        document.getElementById('restart-play')?.addEventListener('click', () => App.player.play(App.state.storyData.meta.startSceneId));
         
-        document.getElementById('export-project-btn').addEventListener('click', () => this.io.exportProjectZip());
-        document.getElementById('preview-btn').addEventListener('click', () => this.io.previewProject());
-        document.getElementById('export-data-btn').addEventListener('click', () => this.modals.show('export-data-modal'));
-        this.elements['style-editor-btn'].addEventListener('click', () => this.styles.open());
-        this.elements['batch-image-gen-btn'].addEventListener('click', () => this.batch.open());
-        document.getElementById('about-editor-btn').addEventListener('click', () => this.modals.show('about-editor-modal'));
+        document.getElementById('export-project-btn').addEventListener('click', () => App.io.exportProjectZip());
+        document.getElementById('preview-btn').addEventListener('click', () => App.io.previewProject());
+        document.getElementById('export-data-btn').addEventListener('click', () => App.modals.show('export-data-modal'));
+        App.elements['style-editor-btn'].addEventListener('click', () => App.styles.open());
+        App.elements['batch-image-gen-btn'].addEventListener('click', () => App.batch.open());
+        document.getElementById('about-editor-btn').addEventListener('click', () => App.modals.show('about-editor-modal'));
         
-        document.querySelectorAll('.modal-close').forEach(el => el.addEventListener('click', (e) => this.modals.hide(e.target.closest('.modal'))));
-        this.elements['export-data-modal'].addEventListener('click', (e) => { if(e.target.dataset.exportType) this.io.exportData(e.target.dataset.exportType); });
-        document.getElementById('set-start-scene-btn').addEventListener('click', () => this.tree.setAsStartScene());
-        document.addEventListener('click', (e) => { if (!e.target.closest('.scene-node')) this.elements['tree-context-menu'].style.display = 'none'; });
+        document.querySelectorAll('.modal-close').forEach(el => el.addEventListener('click', (e) => App.modals.hide(e.target.closest('.modal'))));
+        App.elements['export-data-modal'].addEventListener('click', (e) => { if(e.target.dataset.exportType) App.io.exportData(e.target.dataset.exportType); });
+        document.getElementById('set-start-scene-btn').addEventListener('click', () => App.tree.setAsStartScene());
+        document.addEventListener('click', (e) => { if (!e.target.closest('.scene-node')) App.elements['tree-context-menu'].style.display = 'none'; });
         
         window.addEventListener('click', (e) => { 
             if (e.target.classList.contains('modal') && e.target.id !== 'about-editor-modal') {
-                this.modals.hide(e.target); 
+                App.modals.hide(e.target); 
             }
         });
 
-        document.getElementById('project-menu-btn').addEventListener('click', () => this.modals.show('project-menu-modal'));
-        this.elements['notification-close-btn'].addEventListener('click', () => this.modals.hide(this.elements['notification-modal']));
+        document.getElementById('project-menu-btn').addEventListener('click', () => App.modals.show('project-menu-modal'));
+        App.elements['notification-close-btn'].addEventListener('click', () => App.modals.hide(App.elements['notification-modal']));
         
-        // Batch processing button events
-        document.getElementById('batch-generate-btn').addEventListener('click', () => this.batch.startGeneration());
-        document.getElementById('batch-remove-images-btn').addEventListener('click', () => this.batch.removeAllImages());
-        document.getElementById('batch-remove-prompts-btn').addEventListener('click', () => this.batch.removeAllImagePrompts());
+        document.getElementById('batch-generate-btn').addEventListener('click', () => App.batch.startGeneration());
+        document.getElementById('batch-remove-images-btn').addEventListener('click', () => App.batch.removeAllImages());
+        document.getElementById('batch-remove-prompts-btn').addEventListener('click', () => App.batch.removeAllImagePrompts());
+
+        const inputs = ['scene-image', 'scene-sound'];
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('dragover', App.assets.handleDragOver);
+            el.addEventListener('dragleave', App.assets.handleDragLeave);
+            el.addEventListener('drop', App.assets.handleFileDrop);
+        });
 
 
-        window.addEventListener('beforeunload', (e) => { if (this.state.isDirty) { e.preventDefault(); e.returnValue = ''; } });
+        window.addEventListener('beforeunload', (e) => { if (App.state.isDirty) { e.preventDefault(); e.returnValue = ''; } });
         
         const searchInput = document.getElementById('scene-search-input');
         searchInput.addEventListener('input', () => {
-            this.tree.render(searchInput.value);
+            App.tree.render(searchInput.value);
         });
         document.getElementById('scene-search-btn').addEventListener('click', () => {
-             this.tree.render(searchInput.value);
+             App.tree.render(searchInput.value);
         });
 
         document.querySelectorAll('.thumbnail-fullscreen-icon').forEach(icon => {
@@ -1048,9 +1061,9 @@ const App = {
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
-                if (this.state.projectDirectoryHandle && this.elements['editor-container'].style.display !== 'none') {
-                    this.editor.saveCurrentScene(true);
-                    this.io.saveProject();
+                if (App.state.projectDirectoryHandle && App.elements['editor-container'].style.display !== 'none') {
+                    App.editor.saveCurrentScene(true);
+                    App.io.saveProject();
                 }
             }
         });
@@ -1656,45 +1669,57 @@ const App = {
         async exportProjectZip() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to export."); return; }
             App.editor.saveCurrentScene(false);
-            App.ui.showNotification("Preparing project for export. This may take a moment...");
-            
+            App.ui.showNotification("Collecting used assets and preparing export...");
+
             const zip = new window.JSZip();
             
-            const playerHtml = await this.getFormattedPlayerHTML(true);
+            const playerHtml = await App.io.getFormattedPlayerHTML(true);
             zip.file("index.html", playerHtml);
 
-            async function addFolderToZip(dirHandle, zipFolder) {
-                for await (const entry of dirHandle.values()) {
-                    if (entry.kind === 'file') {
-                        const file = await entry.getFile();
-                        zipFolder.file(entry.name, file);
-                    } else if (entry.kind === 'directory') {
-                        await addFolderToZip(entry, zipFolder.folder(entry.name));
+            // 1. Gather all unique, non-empty asset paths from the story data.
+            const usedAssetPaths = new Set();
+            Object.values(App.state.storyData.scenes).forEach(scene => {
+                if (scene.image) usedAssetPaths.add(scene.image);
+                if (scene.ambienceSound) usedAssetPaths.add(scene.ambienceSound);
+            });
+            const metaStyles = App.state.storyData.meta.styles;
+            if (metaStyles['--screen-bg-image']) usedAssetPaths.add(metaStyles['--screen-bg-image']);
+            if (metaStyles['--container-bg-image']) usedAssetPaths.add(metaStyles['--container-bg-image']);
+            if (metaStyles['--music-path']) usedAssetPaths.add(metaStyles['--music-path']);
+            
+            // 2. Asynchronously fetch and add each used asset to the zip.
+            const assetPromises = Array.from(usedAssetPaths).map(async (path) => {
+                try {
+                    const file = await App.io.getAssetFile(path);
+                    if (file) {
+                        zip.file(path, file); // JSZip creates folder structure from the path.
                     }
+                } catch(err) {
+                     console.warn(`Could not add asset "${path}" to zip:`, err);
                 }
-            }
+            });
 
-            try {
-                const imagesHandle = await App.state.projectDirectoryHandle.getDirectoryHandle('images').catch(() => null);
-                if (imagesHandle) await addFolderToZip(imagesHandle, zip.folder('images'));
-                const soundsHandle = await App.state.projectDirectoryHandle.getDirectoryHandle('sounds').catch(() => null);
-                if (soundsHandle) await addFolderToZip(soundsHandle, zip.folder('sounds'));
+            await Promise.all(assetPromises);
 
-                zip.generateAsync({ type: "blob" }).then(content => {
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(content);
-                    a.download = `${App.state.storyData.meta.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_export.zip`;
-                    a.click();
-                    URL.revokeObjectURL(a.href);
-                });
-            } catch (err) { console.error("ZIP Export failed:", err); App.ui.showNotification("Could not export project. Check console for details."); }
+            // 3. Generate and download the final zip file.
+            zip.generateAsync({ type: "blob" }).then(content => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(content);
+                a.download = `${App.state.storyData.meta.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_export.zip`;
+                a.click();
+                URL.revokeObjectURL(a.href);
+                App.ui.showNotification("Project exported successfully!");
+            }).catch(err => {
+                console.error("ZIP Export failed:", err); 
+                App.ui.showNotification("Could not export project. Check console for details.");
+            });
         },
         
         async previewProject() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to preview."); return; }
             App.editor.saveCurrentScene(false);
             try {
-                const playerHtml = await this.getFormattedPlayerHTML(false);
+                const playerHtml = await App.io.getFormattedPlayerHTML(false);
                 const blob = new Blob([playerHtml], { type: 'text/html' });
                 const url = URL.createObjectURL(blob);
                 window.open(url, '_blank');
@@ -1702,15 +1727,21 @@ const App = {
         },
         
         async getAssetDataUrl(path) {
+            const file = await App.io.getAssetFile(path);
+            if (!file) return null;
+            
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        },
+
+        async getAssetFile(path) {
             if (!path) return null;
             if (App.state.pendingAssetCopies.has(path)) {
-                const file = App.state.pendingAssetCopies.get(path);
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
+                return App.state.pendingAssetCopies.get(path);
             }
             try {
                 const pathParts = path.split('/');
@@ -1720,15 +1751,13 @@ const App = {
                     dirHandle = await dirHandle.getDirectoryHandle(part);
                 }
                 const fileHandle = await dirHandle.getFileHandle(fileName);
-                const file = await fileHandle.getFile();
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-            } catch (e) { console.warn(`Asset not found: ${path}`); return null; }
+                return await fileHandle.getFile();
+            } catch (e) { 
+                console.warn(`Asset file not found in project: ${path}`); 
+                return null; 
+            }
         },
+        
         exportData(type) {
             let data = {};
             let filename = `${type}.json`;
@@ -2242,10 +2271,42 @@ const App = {
             App.setDirty(true);
             event.target.value = '';
         },
+        handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.classList.add('drag-over');
+        },
+        handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.classList.remove('drag-over');
+        },
+        handleFileDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const targetInput = e.target;
+            targetInput.classList.remove('drag-over');
+            
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                const assetTypeFolder = targetInput.dataset.assetType || 'assets';
+                const destinationPath = `${assetTypeFolder}/${file.name}`;
+
+                App.state.pendingAssetCopies.set(destinationPath, file);
+                targetInput.value = destinationPath;
+                targetInput.dispatchEvent(new Event('input', { bubbles: true })); 
+                if (targetInput.id === 'scene-image') App.ui.updateImageThumbnail(destinationPath);
+
+                App.setDirty(true);
+            }
+        },
         renderPollinationImage() {
             const promptText = App.elements['scene-image-prompt'].value.trim();
             if (!promptText) { App.ui.showNotification("Please enter a prompt first."); return; }
             
+            App.state.aiImageUrl = null; 
+            App.ui.updateAiImagePreview(null, 'Rendering...');
+
             const layout = App.state.storyData.meta.layout;
             let urlSuffix = '';
             if (layout === 'layout-side-by-side') {
@@ -2254,12 +2315,18 @@ const App = {
                 urlSuffix = '&width=1280&height=720';
             }
 
-            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + "?safe=true&model=flux&nologo=true&enhance=true" + urlSuffix;
-            App.state.aiImageUrl = url;
-            App.ui.updateAiImagePreview(null, 'Rendering...');
+            const randomSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + `?seed=${randomSeed}&safe=true&model=flux&nologo=true&enhance=true` + urlSuffix;
+            
             const tempImg = new Image();
-            tempImg.onload = () => App.ui.updateAiImagePreview(url);
-            tempImg.onerror = () => { App.ui.updateAiImagePreview(null, 'Render failed.'); App.state.aiImageUrl = null; };
+            tempImg.onload = () => {
+                App.state.aiImageUrl = url;
+                App.ui.updateAiImagePreview(url);
+            };
+            tempImg.onerror = () => { 
+                App.ui.updateAiImagePreview(null, 'Render failed.'); 
+                App.state.aiImageUrl = null; 
+            };
             tempImg.src = url;
         },
         async addPollinationImageToScene() {
@@ -2269,11 +2336,15 @@ const App = {
             }
             App.ui.updateAiImagePreview(null, 'Downloading...');
             try {
-                const response = await fetch(App.state.aiImageUrl);
+                const urlToFetch = App.state.aiImageUrl + '&t=' + Date.now();
+                const response = await fetch(urlToFetch);
+
                 if (!response.ok) throw new Error(`Fetch failed: ${response.statusText}`);
                 const imageBlob = await response.blob();
+                
                 const filename = `${App.state.currentSceneId || 'image'}_${Date.now()}.jpg`;
                 const destinationPath = `images/${filename}`;
+
                 App.state.pendingAssetCopies.set(destinationPath, imageBlob);
                 App.elements['scene-image'].value = destinationPath;
                 App.ui.updateImageThumbnail(destinationPath);
@@ -2298,8 +2369,7 @@ const App = {
             App.modals.hide(App.elements['pollinations-text-modal']);
             App.ui.showNotification("Processing text with AI...");
 
-            const randomSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-            const combinedText = `${instruction}: ${sceneText} &seed=${randomSeed}`;
+            const combinedText = `${instruction}: ${sceneText}`;
             const url = "https://text.pollinations.ai/" + encodeURIComponent(combinedText);
 
             try {
@@ -2568,6 +2638,11 @@ const App = {
                 const input = btn.previousElementSibling;
                 btn.onclick = () => App.assets.selectFile(input.dataset.assetType, input.id);
             });
+            grid.querySelectorAll('.path-input').forEach(input => {
+                input.addEventListener('dragover', App.assets.handleDragOver);
+                input.addEventListener('dragleave', App.assets.handleDragLeave);
+                input.addEventListener('drop', App.assets.handleFileDrop);
+            });
             App.modals.show('style-editor-modal'); 
         },
         handleUpdate(event) {
@@ -2735,7 +2810,10 @@ body {
         },
 
         removeAllImages() {
+            // BUG FIX: Save current scene first to sync any pending editor changes to the state object.
+            App.editor.saveCurrentScene(false);
             if (!confirm("Are you sure you want to delete the image paths from ALL scenes? This cannot be undone.")) return;
+            
             let count = 0;
             Object.values(App.state.storyData.scenes).forEach(scene => {
                 if (scene.image) {
@@ -2743,13 +2821,16 @@ body {
                     count++;
                 }
             });
+
             App.setDirty(true);
-            App.editor.render(); // Re-render current scene editor
-            App.tree.render(); // Re-render tree view
+            App.editor.render(); // Re-render current scene editor to reflect the change.
+            App.tree.render(); // Re-render tree view icons.
             App.ui.showNotification(`${count} image paths have been deleted.`);
         },
 
         removeAllImagePrompts() {
+            // BUG FIX (Proactive): Also save current scene first here for consistency.
+            App.editor.saveCurrentScene(false);
             if (!confirm("Are you sure you want to delete the image prompts from ALL scenes? This cannot be undone.")) return;
             let count = 0;
             Object.values(App.state.storyData.scenes).forEach(scene => {
@@ -2768,9 +2849,26 @@ body {
                 this.abortRequested = true;
                 this.logInfo("Abort requested. Finishing current operation...");
                 document.getElementById('batch-generate-btn').disabled = true;
-                document.getElementById('batch-generate-btn').querySelector('span').textContent = 'Aborting...';
                 return;
             }
+            
+            const rewritePrompt = document.getElementById('batch-rewrite-prompt-checkbox').checked;
+            const overwriteExisting = document.getElementById('batch-overwrite-checkbox').checked;
+
+            // NEW: Confirmation dialog for overwrite
+            if (overwriteExisting) {
+                let confirmMessage = "This will overwrite existing images for all scenes with prompts.";
+                if (rewritePrompt) {
+                    confirmMessage = "This will overwrite existing prompts and images for all scenes.";
+                }
+                if (!confirm(confirmMessage + "\n\nAre you sure you want to continue?")) {
+                    this.logInfo("Overwrite operation cancelled by user.");
+                    return; 
+                }
+            }
+
+            // Sync current scene before starting a batch process
+            App.editor.saveCurrentScene(false);
 
             this.isGenerating = true;
             this.abortRequested = false;
@@ -2787,8 +2885,7 @@ body {
 
             const suffix = document.getElementById('batch-suffix-input').value.trim();
             const cooldown = parseInt(document.getElementById('batch-cooldown-input').value, 10) * 1000;
-            const rewritePrompt = document.getElementById('batch-rewrite-prompt-checkbox').checked;
-
+            
             const sceneIds = Object.keys(App.state.storyData.scenes);
             let generatedCount = 0;
 
@@ -2798,27 +2895,33 @@ body {
                 const scene = App.state.storyData.scenes[sceneId];
                 this.logInfo(`--- Processing scene: ${sceneId} ---`);
 
-                if (scene.image) {
-                    this.logInfo("Scene already has an image. Skipping.");
+                if (scene.image && !overwriteExisting) {
+                    this.logInfo("Scene already has an image. Skipping (Overwrite is off).");
                     continue;
                 }
-
+                
                 let prompt = scene.imagePrompt;
 
                 if (rewritePrompt) {
-                    this.logInfo("AI rewrite enabled. Converting scene text to prompt...");
-                    prompt = await this.generatePromptForScene(scene);
-                    if (!prompt) {
-                        this.logInfo("Failed to generate prompt from text. Skipping scene.");
-                        continue;
+                    // Only rewrite if there's no prompt, OR if overwrite is explicitly enabled.
+                    if (!prompt || overwriteExisting) {
+                        this.logInfo("AI rewrite enabled. Generating new prompt from scene text...");
+                        const newPrompt = await this.generatePromptForScene(scene);
+                        if (newPrompt) {
+                            prompt = newPrompt;
+                            scene.imagePrompt = prompt; // Save the new/overwritten prompt
+                            App.setDirty(true);
+                            this.logInfo(`New prompt: "${prompt}"`);
+                        } else {
+                            this.logInfo("Failed to generate prompt from text. Using existing prompt if available.");
+                        }
+                    } else {
+                        this.logInfo("Using existing prompt (AI Rewrite is on, but Overwrite is off).");
                     }
-                    scene.imagePrompt = prompt; // Save the newly generated prompt
-                    App.setDirty(true);
-                    this.logInfo(`New prompt: "${prompt}"`);
                 }
 
                 if (!prompt) {
-                    this.logInfo("Scene has no image prompt and rewrite is off. Skipping.");
+                    this.logInfo("Scene has no prompt to generate from. Skipping.");
                     continue;
                 }
                 
@@ -2831,9 +2934,10 @@ body {
                 generatedCount++;
 
                 if (this.abortRequested) break;
-
-                this.logInfo(`Cooldown: Waiting ${cooldown / 1000}s...`);
-                await new Promise(resolve => setTimeout(resolve, cooldown));
+                if (cooldown > 0) {
+                    this.logInfo(`Cooldown: Waiting ${cooldown / 1000}s...`);
+                    await new Promise(resolve => setTimeout(resolve, cooldown));
+                }
             }
 
             // Teardown
@@ -2884,7 +2988,8 @@ body {
             if (layout === 'layout-top-down' || layout === 'layout-image-as-bg') {
                 urlSuffix = '&width=1280&height=720';
             }
-            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(fullPrompt) + "?safe=true&model=flux&nologo=true&enhance=true" + urlSuffix;
+            const randomSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(fullPrompt) + `?seed=${randomSeed}&safe=true&model=flux&nologo=true&enhance=true` + urlSuffix;
             
             try {
                 const response = await fetch(url);

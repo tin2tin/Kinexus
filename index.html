@@ -50,7 +50,7 @@
         #main-title-dirty-indicator { color: var(--danger-color); font-size: 0.7em; margin-left: 5px; display: none; }
         
         hr { border: none; border-top: 1px solid var(--border-color); margin: 15px 0; }
-        #tree-view { list-style-type: none; padding-left: 0; flex-grow: 1; overflow: auto; min-height: 100px; margin-top: 0; }
+        #tree-view, #scene-list-view { list-style-type: none; padding-left: 0; flex-grow: 1; overflow: auto; min-height: 100px; margin-top: 10px; }
         #tree-view > ul { display: table; width: 100%; list-style-type: none; padding-left: 0; }
         #tree-view ul ul { list-style-type: none; padding-left: 20px; border-left: 1px solid #444; }
         #tree-view li { margin-top: 5px; color: var(--dark-text); }
@@ -68,13 +68,18 @@
         .scene-node.active { background-color: var(--primary-color); color: white; font-weight: bold; }
         .scene-node-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .scene-node-icons { display: flex; gap: 4px; align-items: center; }
-        .scene-node-icons svg { width: 14px; height: 14px; flex-shrink: 0; }
-        .scene-node-icons .icon-start { fill: var(--success-color); }
-        .scene-node-icons .icon-image { fill: #8ab4f8; }
-        .scene-node-icons .icon-sound { fill: #fdd663; }
-        .scene-node-icons .icon-deadend { fill: var(--danger-color); }
-        .scene-node-icons .icon-orphan { fill: var(--warning-color); }
-        .scene-node.active .scene-node-icons svg { fill: white; }
+        .scene-node-icons svg, .scene-card-icon { 
+            width: 16px; height: 16px; flex-shrink: 0; 
+            fill: currentColor; 
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .icon-start { color: var(--success-color); }
+        .icon-image { color: #8ab4f8; }
+        .icon-sound { color: #fdd663; }
+        .icon-deadend { color: var(--danger-color); }
+        .icon-orphan { color: var(--warning-color); }
+        .scene-node.active .scene-node-icons { color: white; }
         .choice-node { 
             list-style-type: none; 
             position: relative; 
@@ -98,6 +103,144 @@
         .tree-toggle { font-family: monospace; width: 20px; text-align: center; border-radius: 4px; background: #333333; user-select: none; color: var(--dark-text); flex-shrink: 0; }
         .scene-node.active .tree-toggle { background: #ffffff; color: var(--primary-color); }
         .tree-toggle.empty { opacity: 0; cursor: default; }
+
+        /* Scene List View Styles */
+        #scene-list-view {
+            margin-top: 0; /* Wrapper handles spacing */
+        }
+        #scene-list-controls {
+            display: flex;
+            justify-content: flex-end; /* Moved to right */
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px; /* Spacing between list and controls */
+            flex-shrink: 0; /* Prevent controls from shrinking */
+        }
+        #scene-list-sort {
+            background-color: #1e1e1e;
+            color: var(--dark-text);
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 5px 8px;
+            font-size: 0.9em;
+        }
+        .scene-list-group-header {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            color: #888;
+            margin: 15px 0 5px 5px;
+            font-weight: bold;
+        }
+        .scene-card {
+            display: flex;
+            gap: 12px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .scene-card:hover {
+            background-color: #2a2a2a;
+            border-color: #555;
+        }
+        .scene-card.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        .scene-card-thumbnail {
+            width: 96px; /* 16:9 ratio */
+            height: 54px;
+            flex-shrink: 0;
+            background-color: #111;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7em;
+            color: var(--secondary-color);
+            overflow: hidden;
+            border: 1px solid #444;
+        }
+        .scene-card.active .scene-card-thumbnail {
+            border-color: rgba(255,255,255,0.5);
+        }
+        .scene-card-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .scene-card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+            overflow: hidden; /* Important for ellipsis */
+        }
+        .scene-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .scene-card-id {
+            font-weight: bold;
+            font-size: 1.1em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .scene-card.active .scene-card-id {
+            color: white;
+        }
+        .scene-card-icons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 0.9em;
+        }
+        .scene-card-icon-group {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .scene-card.active .scene-card-icons {
+            color: #e0e0e0;
+        }
+        .scene-card.active .icon-orphan,
+        .scene-card.active .icon-deadend {
+             color: white;
+             background-color: rgba(0,0,0,0.2);
+             border-radius: 3px;
+             padding: 1px;
+        }
+        .scene-card-text {
+            font-size: 0.85em;
+            color: #aaa;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .scene-card.active .scene-card-text {
+            color: #ddd;
+        }
+
+        /* View Toggler Styles */
+        #view-mode-toggle {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        #view-mode-toggle button {
+            flex-grow: 1;
+            background-color: var(--secondary-color);
+            opacity: 0.6;
+        }
+        #view-mode-toggle button.active {
+            background-color: var(--primary-color);
+            opacity: 1;
+        }
         
         button { padding: 10px 15px; background-color: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; transition: background-color 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         .form-group.inline button { margin-top: 0; }
@@ -378,8 +521,30 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm-8 8A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm8 0A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3z"/></svg>
         </button>
     </div>
-    <div class="header"><h2>Story Map</h2></div>
+    
+    <div id="view-mode-toggle">
+        <button id="toggle-tree-view-btn" class="active" title="Tree View">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15.5 3.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5Zm-2-2a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5Zm-5 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5ZM8 7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 7Zm-5 3a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5Zm10 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5Z"/><path d="M1.226 8.322a.5.5 0 0 1 .63.062L3.5 9.542a.5.5 0 0 1 0 .894l-1.644 1.16a.5.5 0 0 1-.692-.692l1.232-.872-1.232-.872a.5.5 0 0 1 .062-.63zM14.774 8.322a.5.5 0 0 0-.63.062L12.5 9.542a.5.5 0 0 0 0 .894l1.644 1.16a.5.5 0 0 0 .692-.692l-1.232-.872 1.232-.872a.5.5 0 0 0-.062-.63zM4.5 1.5a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5ZM8.5 4.5a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5ZM11.5 1.5a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5Z"/></svg>
+            Tree
+        </button>
+        <button id="toggle-scene-view-btn" title="Scene List View">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3.854 2.146a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L2 2.793l1.146-1.147a.5.5 0 0 1 .708 0zM2 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z"/></svg>
+            Scenes
+        </button>
+    </div>
+    
     <ul id="tree-view"></ul>
+    <div id="scene-list-view-wrapper" style="display: none; flex-direction: column; flex-grow: 1; min-height: 0;">
+        <div id="scene-list-view"></div>
+        <div id="scene-list-controls">
+            <label for="scene-list-sort" style="font-size: 0.9em; margin: 0; font-weight: normal;">Sort by:</label>
+            <select id="scene-list-sort">
+                <option value="id">ID (A-Z)</option>
+                <option value="modified">Last Modified</option>
+            </select>
+        </div>
+    </div>
+
     <div class="form-group inline" style="margin-top: 15px; margin-bottom: 0;">
         <input type="search" id="scene-search-input" placeholder="Filter scenes...">
         <button id="scene-search-btn" class="file-icon-btn" title="Search Scenes">
@@ -829,7 +994,7 @@
             <div class="player-top-bar-left">
                 <button id="player-menu-btn" class="player-ui-btn" title="Open Menu">&#9776;</button>
                 <button id="player-sound-toggle-btn" class="player-ui-btn" title="Toggle Sound">
-                    <svg class="icon-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+                    <svg class="icon-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
                     <svg class="icon-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
                 </button>
             </div>
@@ -890,6 +1055,7 @@ const App = {
         aiImageUrl: null,
         orphanSceneIds: new Set(),
         typewriter: { intervalId: null, skipListener: null },
+        currentNavView: 'tree', // 'tree' or 'list'
     },
     elements: {},
 
@@ -899,6 +1065,7 @@ const App = {
         this.ui.enableEditor(false);
         this.ui.displayWelcomeMessage();
         this.modals.show('project-menu-modal');
+        this.ui.setViewMode(localStorage.getItem('cyoa-nav-view') || 'tree');
     },
 
     getNewStoryObject() {
@@ -911,7 +1078,7 @@ const App = {
                 styles: App.styles.getDefaults(), 
                 layout: 'layout-image-as-bg' 
             },
-            scenes: { "start": { text: "Start here.", image: "", imagePrompt: "", ambienceSound: "", ambienceLoop: true, choices: [] } } 
+            scenes: { "start": { id: "start", text: "Start here.", image: "", imagePrompt: "", ambienceSound: "", ambienceLoop: true, choices: [], lastModified: Date.now() } } 
         };
     },
     
@@ -928,7 +1095,9 @@ const App = {
             'toggle-ambience-btn', 'ambience-play-icon', 'ambience-pause-icon', 'toggle-loop-btn',
             'scene-editor-preview', 'scene-editor-preview-wrapper',
             'pollinations-text-modal', 'pollinations-instruction', 'pollinations-submit-btn', 'process-text-ai-btn',
-            'style-editor-btn', 'batch-image-modal', 'batch-image-gen-btn'
+            'style-editor-btn', 'batch-image-modal', 'batch-image-gen-btn',
+            'scene-list-view', 'toggle-tree-view-btn', 'toggle-scene-view-btn',
+            'scene-list-view-wrapper', 'scene-list-sort'
         ];
         ids.forEach(id => this.elements[id] = document.getElementById(id));
     },
@@ -1034,12 +1203,13 @@ const App = {
         window.addEventListener('beforeunload', (e) => { if (App.state.isDirty) { e.preventDefault(); e.returnValue = ''; } });
         
         const searchInput = document.getElementById('scene-search-input');
-        searchInput.addEventListener('input', () => {
-            App.tree.render(searchInput.value);
-        });
-        document.getElementById('scene-search-btn').addEventListener('click', () => {
-             App.tree.render(searchInput.value);
-        });
+        searchInput.addEventListener('input', () => App.ui.renderCurrentView());
+        document.getElementById('scene-search-btn').addEventListener('click', () => App.ui.renderCurrentView());
+
+        App.elements['toggle-tree-view-btn'].addEventListener('click', () => App.ui.setViewMode('tree'));
+        App.elements['toggle-scene-view-btn'].addEventListener('click', () => App.ui.setViewMode('list'));
+        App.elements['scene-list-sort'].addEventListener('change', () => App.sceneList.render());
+
 
         document.querySelectorAll('.thumbnail-fullscreen-icon').forEach(icon => {
             icon.addEventListener('click', (e) => {
@@ -1134,6 +1304,84 @@ const App = {
     },
 
     ui: {
+        cursor: {
+            wait() { document.body.style.cursor = 'wait'; },
+            default() { document.body.style.cursor = 'default'; }
+        },
+        setViewMode(mode) {
+            this.cursor.wait();
+            try {
+                App.state.currentNavView = mode;
+                localStorage.setItem('cyoa-nav-view', mode);
+
+                const isTreeView = mode === 'tree';
+                App.elements['tree-view'].style.display = isTreeView ? 'block' : 'none';
+                App.elements['scene-list-view-wrapper'].style.display = isTreeView ? 'none' : 'flex';
+                
+                App.elements['toggle-tree-view-btn'].classList.toggle('active', isTreeView);
+                App.elements['toggle-scene-view-btn'].classList.toggle('active', !isTreeView);
+
+                this.renderCurrentView();
+            } finally {
+                this.cursor.default();
+            }
+        },
+
+        renderCurrentView() {
+            if (!App.state.projectDirectoryHandle) {
+                this.displayWelcomeMessage();
+                return;
+            }
+            const filterTerm = document.getElementById('scene-search-input').value;
+            if (App.state.currentNavView === 'tree') {
+                App.tree.render(filterTerm);
+            } else {
+                App.sceneList.render(filterTerm);
+            }
+        },
+
+        selectScene(sceneId) {
+            if (!sceneId || !App.state.storyData.scenes[sceneId]) {
+                console.error(`Attempted to select non-existent scene: ${sceneId}`);
+                return;
+            }
+
+            if (App.elements['player-container'].style.display === 'flex') {
+                App.player.renderScene(sceneId);
+                return;
+            }
+
+            App.editor.saveCurrentScene(false);
+            const needsSelectionChange = App.state.currentSceneId !== sceneId;
+            
+            if (needsSelectionChange) {
+                const oldSceneId = App.state.currentSceneId;
+                App.state.currentSceneId = sceneId;
+                App.elements['ambience-player'].pause();
+                
+                const oldTreeNode = document.querySelector(`.scene-node[data-scene-id="${oldSceneId}"]`);
+                const oldCardNode = document.querySelector(`.scene-card[data-scene-id="${oldSceneId}"]`);
+                if (oldTreeNode) oldTreeNode.classList.remove('active');
+                if (oldCardNode) oldCardNode.classList.remove('active');
+            }
+            
+            const newTreeNode = document.querySelector(`.scene-node[data-scene-id="${sceneId}"]`);
+            const newCardNode = document.querySelector(`.scene-card[data-scene-id="${sceneId}"]`);
+            if (newTreeNode) newTreeNode.classList.add('active');
+            if (newCardNode) newCardNode.classList.add('active');
+
+            if (needsSelectionChange) {
+                App.editor.render();
+            }
+
+            requestAnimationFrame(() => {
+                const activeNode = document.querySelector(`.scene-node.active, .scene-card.active`);
+                if (activeNode) {
+                    activeNode.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                }
+            });
+        },
+
         enableEditor(isEnabled) {
             App.elements['editor-fieldset'].disabled = !isEnabled;
             document.getElementById('new-scene-btn').disabled = !isEnabled;
@@ -1159,6 +1407,7 @@ const App = {
         },
         displayWelcomeMessage() {
             App.elements['tree-view'].innerHTML = `<li>Welcome! Please create a <strong>New Project</strong> or <strong>Open an existing one</strong> to begin.</li>`;
+            App.elements['scene-list-view'].innerHTML = `<li style="padding:10px;">Welcome! Please create a project to see scenes here.</li>`;
             document.getElementById('scene-search-input').disabled = true;
             document.getElementById('scene-search-btn').disabled = true;
         },
@@ -1259,10 +1508,11 @@ const App = {
                 App.state.storyData = newStory;
                 App.state.pendingAssetCopies.clear();
                 App.modals.hideAll(); 
-                App.tree.selectScene('start');
                 App.ui.enableEditor(true);
                 App.setDirty(false);
                 App.ui.updateMetaInputs();
+                App.ui.renderCurrentView(); // Render the new project
+                App.ui.selectScene('start'); // Select the start scene
                 App.ui.showNotification(`Project '${projectName}' created successfully!`);
 
             } catch (err) { 
@@ -1274,6 +1524,7 @@ const App = {
         },
 
         async openProject(dirHandle = null) {
+            App.ui.cursor.wait();
             try {
                 App.player.stop();
                 document.getElementById('scene-search-input').value = '';
@@ -1300,6 +1551,11 @@ const App = {
                     const defaultStory = App.getNewStoryObject();
                     storyData.meta = { ...defaultStory.meta, ...storyData.meta };
                     storyData.meta.styles = { ...defaultStory.meta.styles, ...storyData.meta.styles };
+                    Object.keys(storyData.scenes).forEach(id => {
+                        if (!storyData.scenes[id].id) {
+                            storyData.scenes[id].id = id;
+                        }
+                    });
 
                     App.state.storyData = storyData;
                 }
@@ -1310,22 +1566,31 @@ const App = {
                 App.state.projectDirectoryHandle = dirHandle;
                 App.state.pendingAssetCopies.clear();
                 App.modals.hideAll();
-                App.tree.selectScene(App.state.storyData.meta.startSceneId || 'start');
                 App.ui.enableEditor(true);
                 App.setDirty(false);
                 App.ui.updateMetaInputs();
+                App.ui.renderCurrentView(); 
+                App.ui.selectScene(App.state.storyData.meta.startSceneId || 'start');
                 App.ui.showNotification(`Project '${App.state.storyData.meta.title}' loaded successfully!`);
 
-            } catch (err) { if (err.name !== 'AbortError') { console.error(err); App.ui.showNotification('Could not open the project.'); } }
+            } catch (err) { 
+                if (err.name !== 'AbortError') { 
+                    console.error(err); 
+                    App.ui.showNotification('Could not open the project.'); 
+                } 
+            } finally {
+                App.ui.cursor.default();
+            }
         },
         
         async saveProject() {
-            if (!App.state.projectDirectoryHandle) { App.ui.showNotification("No project is open."); return; }
-            if (App.elements['editor-container'].style.display !== 'none') {
-                App.editor.saveCurrentScene(false);
-            }
-            
+            App.ui.cursor.wait();
             try {
+                if (!App.state.projectDirectoryHandle) { App.ui.showNotification("No project is open."); return; }
+                if (App.elements['editor-container'].style.display !== 'none') {
+                    App.editor.saveCurrentScene(false);
+                }
+                
                 if (App.state.pendingAssetCopies.size > 0) {
                     for (const [relativePath, fileObject] of App.state.pendingAssetCopies.entries()) {
                         const pathParts = relativePath.split('/');
@@ -1352,7 +1617,12 @@ const App = {
                 console.log("Project saved successfully!");
                 App.ui.showNotification("Project saved successfully!");
 
-            } catch (err) { console.error(err); App.ui.showNotification("Failed to save project. Check the console for errors."); }
+            } catch (err) { 
+                console.error(err); 
+                App.ui.showNotification("Failed to save project. Check the console for errors."); 
+            } finally {
+                App.ui.cursor.default();
+            }
         },
         
         async getFormattedPlayerHTML(isForExport = false) {
@@ -1676,7 +1946,6 @@ const App = {
             const playerHtml = await App.io.getFormattedPlayerHTML(true);
             zip.file("index.html", playerHtml);
 
-            // 1. Gather all unique, non-empty asset paths from the story data.
             const usedAssetPaths = new Set();
             Object.values(App.state.storyData.scenes).forEach(scene => {
                 if (scene.image) usedAssetPaths.add(scene.image);
@@ -1687,12 +1956,11 @@ const App = {
             if (metaStyles['--container-bg-image']) usedAssetPaths.add(metaStyles['--container-bg-image']);
             if (metaStyles['--music-path']) usedAssetPaths.add(metaStyles['--music-path']);
             
-            // 2. Asynchronously fetch and add each used asset to the zip.
             const assetPromises = Array.from(usedAssetPaths).map(async (path) => {
                 try {
                     const file = await App.io.getAssetFile(path);
                     if (file) {
-                        zip.file(path, file); // JSZip creates folder structure from the path.
+                        zip.file(path, file);
                     }
                 } catch(err) {
                      console.warn(`Could not add asset "${path}" to zip:`, err);
@@ -1701,7 +1969,6 @@ const App = {
 
             await Promise.all(assetPromises);
 
-            // 3. Generate and download the final zip file.
             zip.generateAsync({ type: "blob" }).then(content => {
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(content);
@@ -1781,6 +2048,125 @@ const App = {
             URL.revokeObjectURL(a.href);
         }
     },
+    
+    sceneList: {
+        // FIX: Replaced icons with robust, complete SVG definitions to ensure proper rendering.
+        ICONS: {
+            start: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-start" title="Start Scene" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>`,
+            audio: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-sound" title="Has Audio" viewBox="0 0 16 16"><path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-1.414 1.414A6.472 6.472 0 0 1 12.026 8c0 1.767-.683 3.392-1.904 4.604l1.414 1.406zM9.086 4.636l-1.414-1.414A3.483 3.483 0 0 0 6.026 8c0 1.13.512 2.148 1.348 2.78l1.414-1.414A1.483 1.483 0 0 1 8.026 8a1.483 1.483 0 0 1 1.06-2.364zM6.671 11.889l-1.414 1.414a3.483 3.483 0 0 0 0-4.574l1.414 1.414a1.483 1.483 0 0 1 0 1.746z"/><path d="M1.554 8.446a.5.5 0 0 1 0-.892L3.25 6.554a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 0 1 0 .708L3.957 10.12a.5.5 0 0 1-.707 0L1.554 8.446zM4.026 8 3.25 7.224 2.523 8 3.25 8.776 4.026 8z"/></svg>`,
+            loop: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon" title="Audio Loops" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>`,
+            orphan: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-orphan" title="Orphan Scene" viewBox="0 0 16 16"><path d="M8.982 4.146a.5.5 0 0 0-.964 0l-3.5 7a.5.5 0 0 0 .482.654h7a.5.5 0 0 0 .482-.654l-3.5-7zM8 5.794 9.5 8.794H6.5L8 5.794zM15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0zm-1 0A6 6 0 1 0 2 8a6 6 0 0 0 12 0z"/></svg>`,
+            end: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-deadend" title="End of a Branch" viewBox="0 0 16 16"><path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"/></svg>`,
+            choices: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon" title="Number of Choices" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6v1H11a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 5 7h2.5V6A1.5 1.5 0 0 1 6 4.5v-1zM7.5 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1z"/><path d="M6 4.5H5V8h1V4.5zM11 7.5v1h-1V7.5h1z"/></svg>`,
+        },
+        
+        createCard(scene) {
+            const card = document.createElement('div');
+            card.className = 'scene-card';
+            card.dataset.sceneId = scene.id;
+            if (scene.id === App.state.currentSceneId) {
+                card.classList.add('active');
+            }
+            card.onclick = () => App.ui.selectScene(scene.id);
+            card.oncontextmenu = (e) => {
+                e.preventDefault();
+                App.state.contextSceneId = scene.id;
+                const menu = App.elements['tree-context-menu'];
+                menu.style.display = 'block'; menu.style.left = `${e.pageX}px`; menu.style.top = `${e.pageY}px`;
+            };
+
+            let iconsHTML = '';
+            if (scene.id === App.state.storyData.meta.startSceneId) {
+                iconsHTML += this.ICONS.start;
+            }
+            if (scene.ambienceSound) {
+                iconsHTML += this.ICONS.audio;
+                if (scene.ambienceLoop !== false) iconsHTML += this.ICONS.loop;
+            }
+            const choiceCount = scene.choices?.length || 0;
+            if (choiceCount > 0) {
+                iconsHTML += `<div class="scene-card-icon-group">${this.ICONS.choices}<span>${choiceCount}</span></div>`;
+            } else {
+                iconsHTML += this.ICONS.end;
+            }
+            if (App.state.orphanSceneIds.has(scene.id)) {
+                iconsHTML += this.ICONS.orphan;
+            }
+
+            card.innerHTML = `
+                <div class="scene-card-thumbnail">
+                    ${scene.image ? `<img data-src-path="${scene.image}" alt="Thumbnail for ${scene.id}">` : `<span>No Image</span>`}
+                </div>
+                <div class="scene-card-content">
+                    <div class="scene-card-header">
+                        <div class="scene-card-id">${scene.id}</div>
+                        <div class="scene-card-icons">${iconsHTML}</div>
+                    </div>
+                    <div class="scene-card-text">${scene.text ? scene.text.split('\n')[0] : '...'}</div>
+                </div>
+            `;
+            return card;
+        },
+
+        render(filterTerm = '') {
+            App.tree.findOrphans();
+            const container = App.elements['scene-list-view'];
+            container.innerHTML = '';
+            
+            const searchTerm = filterTerm.trim().toLowerCase();
+            let scenes = Object.values(App.state.storyData.scenes || {});
+            
+            if (searchTerm) {
+                scenes = scenes.filter(scene => 
+                    scene.id.toLowerCase().includes(searchTerm) || 
+                    (scene.text && scene.text.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            const sortMethod = App.elements['scene-list-sort'].value;
+            scenes.sort((a, b) => {
+                if (sortMethod === 'modified') {
+                    return (b.lastModified || 0) - (a.lastModified || 0);
+                }
+                return a.id.localeCompare(b.id);
+            });
+
+            if (scenes.length === 0) {
+                container.innerHTML = `<li style="padding:10px;">No scenes found.</li>`;
+                return;
+            }
+            
+            const connectedScenes = scenes.filter(s => !App.state.orphanSceneIds.has(s.id));
+            const orphanScenes = scenes.filter(s => App.state.orphanSceneIds.has(s.id));
+
+            if (connectedScenes.length > 0) {
+                const header = document.createElement('div');
+                header.className = 'scene-list-group-header';
+                header.textContent = 'Connected Scenes';
+                container.appendChild(header);
+                connectedScenes.forEach(scene => container.appendChild(this.createCard(scene)));
+            }
+
+            if (orphanScenes.length > 0) {
+                 const header = document.createElement('div');
+                header.className = 'scene-list-group-header';
+                header.textContent = 'Orphan Scenes';
+                container.appendChild(header);
+                orphanScenes.forEach(scene => container.appendChild(this.createCard(scene)));
+            }
+
+            container.querySelectorAll('img[data-src-path]').forEach(async img => {
+                const path = img.dataset.srcPath;
+                const url = await App.io.getAssetDataUrl(path);
+                if (url) {
+                    img.src = url;
+                } else {
+                    const parent = img.parentElement;
+                    parent.innerHTML = `<span>Invalid Path</span>`;
+                }
+            });
+        },
+    },
 
     tree: {
         colorCache: new Map(),
@@ -1800,14 +2186,18 @@ const App = {
             return color;
         },
         ICONS: {
-            start: `<svg class="icon-start" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>`,
-            image: `<svg class="icon-image" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>`,
-            sound: `<svg class="icon-sound" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`,
-            deadEnd: `<svg class="icon-deadend" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>`,
-            orphan: `<svg class="icon-orphan" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`,
+            start: `<svg class="icon-start" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>`,
+            image: `<svg class="icon-image" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>`,
+            sound: `<svg class="icon-sound" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`,
+            deadEnd: `<svg class="icon-deadend" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>`,
+            orphan: `<svg class="icon-orphan" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`,
         },
 
         findOrphans() {
+            if (!App.state.storyData || !App.state.storyData.scenes) {
+                App.state.orphanSceneIds.clear();
+                return;
+            }
             const scenes = App.state.storyData.scenes;
             const allSceneIds = new Set(Object.keys(scenes));
             const reachableSceneIds = new Set();
@@ -1844,7 +2234,10 @@ const App = {
             const searchTerm = filterTerm.trim().toLowerCase();
 
             if (searchTerm) {
-                const matchingIds = Object.keys(App.state.storyData.scenes || {}).filter(id => id.toLowerCase().includes(searchTerm));
+                const matchingIds = Object.keys(App.state.storyData.scenes || {}).filter(id => 
+                    id.toLowerCase().includes(searchTerm) || 
+                    (App.state.storyData.scenes[id].text && App.state.storyData.scenes[id].text.toLowerCase().includes(searchTerm))
+                );
                 
                 if (matchingIds.length > 0) {
                     const list = document.createElement('ul');
@@ -1852,6 +2245,7 @@ const App = {
                         const li = document.createElement('li');
                         const sceneNode = document.createElement('div');
                         sceneNode.className = 'scene-node';
+                        sceneNode.dataset.sceneId = id; 
                         if (id === App.state.currentSceneId) sceneNode.classList.add('active');
                         
                         const text = document.createElement('span');
@@ -1860,7 +2254,7 @@ const App = {
 
                         sceneNode.onclick = () => {
                             document.getElementById('scene-search-input').value = '';
-                            this.selectScene(id);
+                            App.ui.selectScene(id);
                         };
                         li.appendChild(sceneNode);
                         list.appendChild(li);
@@ -1922,6 +2316,7 @@ const App = {
             
             const sceneNode = document.createElement('div');
             sceneNode.className = 'scene-node';
+            sceneNode.dataset.sceneId = sceneId;
             if (sceneId === App.state.currentSceneId) sceneNode.classList.add('active');
             
             const sceneText = scene.text || 'Empty scene';
@@ -1952,7 +2347,7 @@ const App = {
             sceneNode.appendChild(iconsDiv);
             sceneNode.appendChild(text);
 
-            sceneNode.onclick = () => this.selectScene(sceneId);
+            sceneNode.onclick = () => App.ui.selectScene(sceneId);
             sceneNode.oncontextmenu = (e) => {
                 e.preventDefault(); App.state.contextSceneId = sceneId;
                 const menu = App.elements['tree-context-menu'];
@@ -1984,41 +2379,6 @@ const App = {
             }
             parentElement.appendChild(li);
         },
-        selectScene(sceneId) {
-            if (!sceneId || !App.state.storyData.scenes[sceneId]) {
-                console.error(`Attempted to select non-existent scene: ${sceneId}`);
-                return;
-            }
-
-            if (App.elements['player-container'].style.display === 'flex') {
-                App.player.renderScene(sceneId);
-                return;
-            }
-
-            App.editor.saveCurrentScene(false);
-            const needsSelectionChange = App.state.currentSceneId !== sceneId;
-            if (needsSelectionChange) {
-                App.state.currentSceneId = sceneId;
-                 App.elements['ambience-player'].pause();
-            }
-            
-            this.render(); 
-            
-            if (needsSelectionChange) {
-                App.editor.render();
-            }
-
-            requestAnimationFrame(() => {
-                const activeNode = App.elements['tree-view'].querySelector('.scene-node.active');
-                if (activeNode) {
-                    activeNode.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'nearest',
-                        inline: 'nearest'
-                    });
-                }
-            });
-        },
         createNewScene() {
             let newId = prompt("Enter a unique ID for the new scene:");
             if (!newId) return;
@@ -2030,10 +2390,10 @@ const App = {
                 newId = newId.trim().replace(/\s+/g, '_');
                 if (!newId.length) return;
             }
-            App.state.storyData.scenes[newId] = { text: `This is the new scene '${newId}'.`, choices: [], ambienceLoop: true };
+            App.state.storyData.scenes[newId] = { id: newId, text: `This is the new scene '${newId}'.`, choices: [], ambienceLoop: true, lastModified: Date.now() };
             App.setDirty(true);
-            this.render();
-            this.selectScene(newId);
+            App.ui.renderCurrentView(); 
+            App.ui.selectScene(newId);
         },
         renameScene() {
             const oldId = App.state.currentSceneId;
@@ -2045,6 +2405,8 @@ const App = {
             if (App.state.storyData.scenes[newId]) { App.ui.showNotification(`Scene ID "${newId}" already exists.`); return; }
 
             const sceneData = App.state.storyData.scenes[oldId];
+            sceneData.id = newId; 
+            sceneData.lastModified = Date.now();
             App.state.storyData.scenes[newId] = sceneData;
             delete App.state.storyData.scenes[oldId];
 
@@ -2062,7 +2424,7 @@ const App = {
             
             App.state.currentSceneId = newId;
             App.setDirty(true);
-            this.render();
+            App.ui.renderCurrentView(); 
             App.editor.render();
         },
         deleteCurrentScene() {
@@ -2080,15 +2442,17 @@ const App = {
                 }
             });
             
-            App.state.currentSceneId = null;
             App.setDirty(true);
-            this.selectScene(App.state.storyData.meta.startSceneId);
+            const nextSceneId = App.state.storyData.meta.startSceneId;
+            App.state.currentSceneId = null; // Unset current so selectScene forces a render
+            App.ui.renderCurrentView(); 
+            App.ui.selectScene(nextSceneId);
         },
         setAsStartScene() {
             if (App.state.contextSceneId) {
                 App.state.storyData.meta.startSceneId = App.state.contextSceneId;
                 App.setDirty(true);
-                App.tree.render();
+                App.ui.renderCurrentView();
             }
         }
     },
@@ -2191,17 +2555,22 @@ const App = {
             const id = App.state.currentSceneId; 
             const scene = App.state.storyData.scenes[id]; 
             if (!scene) return; 
+            
+            scene.lastModified = Date.now();
+            scene.id = id;
             scene.image = App.elements['scene-image'].value.trim(); 
             scene.imagePrompt = App.elements['scene-image-prompt'].value.trim(); 
             scene.ambienceSound = App.elements['scene-sound'].value.trim();
             scene.ambienceLoop = App.elements['toggle-loop-btn'].classList.contains('active');
             scene.text = App.elements['scene-text'].value; 
             scene.choices = Array.from(App.elements['choices-container'].querySelectorAll('.choice-group')).map(div => ({ text: div.querySelector('input[type=text]').value, target: div.querySelector('select').value })); 
+            
             App.setDirty(true); 
-            if (!document.getElementById('scene-search-input').value) {
-                App.tree.render(); 
+
+            if (showAlert) {
+                App.ui.renderCurrentView();
+                console.log(`Scene '${id}' changes saved to memory.`);
             }
-            if(showAlert) { console.log(`Scene '${id}' changes saved to memory.`); }
          },
         addChoiceToDOM(choice = { text: '', target: '' }) { 
             const choiceDiv = document.createElement('div'); 
@@ -2231,7 +2600,7 @@ const App = {
             goToBtn.title = "Go to selected scene";
             goToBtn.style.padding = '8px';
             goToBtn.style.lineHeight = 1;
-            goToBtn.onclick = () => { const targetScene = targetSelect.value; if (targetScene) App.tree.selectScene(targetScene); };
+            goToBtn.onclick = () => { const targetScene = targetSelect.value; if (targetScene) App.ui.selectScene(targetScene); };
             const deleteBtn = document.createElement('button'); 
             deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>`;
             deleteBtn.className = 'btn-danger'; 
@@ -2316,7 +2685,7 @@ const App = {
             }
 
             const randomSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + `?seed=${randomSeed}&safe=true&model=flux&nologo=true&enhance=true` + urlSuffix;
+            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + `?seed=${randomSeed}&token=fxj5LLKJi8hIjZbK&safe=true&nologo=true&enhance=true&model=flux` + urlSuffix;
             
             const tempImg = new Image();
             tempImg.onload = () => {
@@ -2351,6 +2720,7 @@ const App = {
                 App.elements['scene-image'].dispatchEvent(new Event('input', { bubbles: true }));
                 App.setDirty(true);
                 App.editor.saveCurrentScene(false);
+                App.ui.renderCurrentView();
             } catch (err) {
                 console.error("Error adding AI image:", err);
                 App.ui.showNotification("Could not download or save the image.");
@@ -2462,9 +2832,7 @@ const App = {
         },
         async renderScene(sceneId) {
             App.state.currentSceneId = sceneId;
-            App.tree.render();
-            const activeNode = App.elements['tree-view'].querySelector('.scene-node.active');
-            if (activeNode) { activeNode.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+            App.ui.renderCurrentView();
 
             const scene = App.state.storyData.scenes[sceneId];
             const { 'player-text': text, 'player-choices': choices, 'ambience-player': audio, 'player-inner-container': innerContainer } = App.elements;
@@ -2769,7 +3137,6 @@ body {
         show(modalId) { document.getElementById(modalId).classList.add('visible'); },
         hide(modal) {
             if (modal) {
-                // Prevent hiding the batch modal while generation is active
                 if (modal.id === 'batch-image-modal' && App.batch.isGenerating) {
                     App.batch.logInfo("Cannot close panel while generation is running. Please Abort first.");
                     return;
@@ -2806,11 +3173,10 @@ body {
             const logEl = document.getElementById('batch-info-log');
             const timestamp = new Date().toLocaleTimeString();
             logEl.textContent += `[${timestamp}] ${message}\n`;
-            logEl.scrollTop = logEl.scrollHeight; // Auto-scroll to bottom
+            logEl.scrollTop = logEl.scrollHeight;
         },
 
         removeAllImages() {
-            // BUG FIX: Save current scene first to sync any pending editor changes to the state object.
             App.editor.saveCurrentScene(false);
             if (!confirm("Are you sure you want to delete the image paths from ALL scenes? This cannot be undone.")) return;
             
@@ -2823,13 +3189,12 @@ body {
             });
 
             App.setDirty(true);
-            App.editor.render(); // Re-render current scene editor to reflect the change.
-            App.tree.render(); // Re-render tree view icons.
+            App.editor.render(); 
+            App.ui.renderCurrentView(); 
             App.ui.showNotification(`${count} image paths have been deleted.`);
         },
 
         removeAllImagePrompts() {
-            // BUG FIX (Proactive): Also save current scene first here for consistency.
             App.editor.saveCurrentScene(false);
             if (!confirm("Are you sure you want to delete the image prompts from ALL scenes? This cannot be undone.")) return;
             let count = 0;
@@ -2840,7 +3205,7 @@ body {
                 }
             });
             App.setDirty(true);
-            App.editor.render(); // Re-render current scene editor
+            App.editor.render(); 
             App.ui.showNotification(`${count} image prompts have been deleted.`);
         },
 
@@ -2855,7 +3220,6 @@ body {
             const rewritePrompt = document.getElementById('batch-rewrite-prompt-checkbox').checked;
             const overwriteExisting = document.getElementById('batch-overwrite-checkbox').checked;
 
-            // NEW: Confirmation dialog for overwrite
             if (overwriteExisting) {
                 let confirmMessage = "This will overwrite existing images for all scenes with prompts.";
                 if (rewritePrompt) {
@@ -2867,7 +3231,6 @@ body {
                 }
             }
 
-            // Sync current scene before starting a batch process
             App.editor.saveCurrentScene(false);
 
             this.isGenerating = true;
@@ -2877,7 +3240,7 @@ body {
             const fieldset = document.getElementById('batch-fieldset');
             const logEl = document.getElementById('batch-info-log');
             
-            logEl.textContent = ''; // Clear log
+            logEl.textContent = ''; 
             this.logInfo("Starting batch generation...");
             
             fieldset.disabled = true;
@@ -2903,13 +3266,12 @@ body {
                 let prompt = scene.imagePrompt;
 
                 if (rewritePrompt) {
-                    // Only rewrite if there's no prompt, OR if overwrite is explicitly enabled.
                     if (!prompt || overwriteExisting) {
                         this.logInfo("AI rewrite enabled. Generating new prompt from scene text...");
                         const newPrompt = await this.generatePromptForScene(scene);
                         if (newPrompt) {
                             prompt = newPrompt;
-                            scene.imagePrompt = prompt; // Save the new/overwritten prompt
+                            scene.imagePrompt = prompt; 
                             App.setDirty(true);
                             this.logInfo(`New prompt: "${prompt}"`);
                         } else {
@@ -2931,6 +3293,8 @@ body {
                     break; 
                 }
                 
+                App.ui.selectScene(sceneId);
+                
                 generatedCount++;
 
                 if (this.abortRequested) break;
@@ -2940,7 +3304,6 @@ body {
                 }
             }
 
-            // Teardown
             this.logInfo("-----------------------------------");
             if (this.abortRequested) this.logInfo("Batch process aborted by user.");
             this.logInfo(`Finished. Generated ${generatedCount} new images.`);
@@ -2954,9 +3317,8 @@ body {
             generateBtn.disabled = false;
             generateBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg> <span>Generate</span>`;
             
-            // Final UI refresh
             App.editor.render();
-            App.tree.render();
+            App.ui.renderCurrentView();
         },
         
         async generatePromptForScene(scene) {
@@ -2984,12 +3346,12 @@ body {
             this.logInfo(`Generating image with prompt: "${fullPrompt}"`);
             
             const layout = App.state.storyData.meta.layout;
-            let urlSuffix = '&width=1024&height=1024'; // Default
+            let urlSuffix = '&width=1024&height=1024'; 
             if (layout === 'layout-top-down' || layout === 'layout-image-as-bg') {
                 urlSuffix = '&width=1280&height=720';
             }
             const randomSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(fullPrompt) + `?seed=${randomSeed}&safe=true&model=flux&nologo=true&enhance=true` + urlSuffix;
+            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(fullPrompt) + `?seed=${randomSeed}&token=fxj5LLKJi8hIjZbK&safe=true&nologo=true&enhance=true&model=flux` + urlSuffix;
             
             try {
                 const response = await fetch(url);

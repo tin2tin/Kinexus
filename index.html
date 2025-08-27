@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -416,8 +417,8 @@
         #player-image { max-width: 100%; max-height: 50vh; display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
         #player-text { white-space: pre-wrap; margin-bottom: 20px; }
         #player-choices { display: flex; flex-direction: column; gap: 12px; }
-        #player-choices .choice-btn { width: 100%; text-align: left; padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; transition: background-color .2s, transform .1s, border-color .2s; background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid var(--btn-color); }
-        #player-choices .choice-btn:hover { transform: translateY(-2px); }
+        #player-choices .choice-btn { width: 100%; text-align: left; padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; transition: background-color .2s, transform .1s, border-color .2s; background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid transparent; }
+        #player-choices .choice-btn:hover { transform: translateY(-2px); background-color: var(--btn-hover-color); }
         #player-choices .choice-btn:active { transform: translateY(1px); }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         #player-choices .choice-btn.fade-in { animation: fadeIn 0.5s forwards; opacity: 0; }
@@ -994,7 +995,8 @@
             <div class="player-top-bar-left">
                 <button id="player-menu-btn" class="player-ui-btn" title="Open Menu">&#9776;</button>
                 <button id="player-sound-toggle-btn" class="player-ui-btn" title="Toggle Sound">
-                    <svg class="icon-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
+                    <!-- FIX: Correct SVG for the "sound on" icon -->
+                    <svg class="icon-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
                     <svg class="icon-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
                 </button>
             </div>
@@ -1017,7 +1019,7 @@
                     <div class="menu-item"><button id="save-btn">Save Progress</button><button id="load-btn">Load Progress</button></div>
                     <hr>
                     <div class="menu-item"><span>Music</span><input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.4"></div>
-                    <div class="menu-item"><span>Ambience</span><input type="range" id="ambience-volume-slider" min="0" max="1" step="0.05" value="0.8"></div>
+                    <div class="menu-item"><span>Ambience</span><input type="range" id="ambience-volume-slider" min="0" max="1" step="0.05" value="0.4"></div>
                     <div class="menu-item"><span>Font Size</span><input type="range" id="font-size-slider" min="8" max="28" step="1" value="16"></div>
                     <div class="menu-item"><button id="fullscreen-btn">Toggle Fullscreen</button></div>
                     <hr>
@@ -1056,6 +1058,7 @@ const App = {
         orphanSceneIds: new Set(),
         typewriter: { intervalId: null, skipListener: null },
         currentNavView: 'tree', // 'tree' or 'list'
+        navViewsDirty: true, // IMPROVEMENT: Flag to check if tree/list needs re-rendering
     },
     elements: {},
 
@@ -1308,25 +1311,34 @@ const App = {
             wait() { document.body.style.cursor = 'wait'; },
             default() { document.body.style.cursor = 'default'; }
         },
-        setViewMode(mode) {
-            this.cursor.wait();
-            try {
-                App.state.currentNavView = mode;
-                localStorage.setItem('cyoa-nav-view', mode);
-
-                const isTreeView = mode === 'tree';
-                App.elements['tree-view'].style.display = isTreeView ? 'block' : 'none';
-                App.elements['scene-list-view-wrapper'].style.display = isTreeView ? 'none' : 'flex';
-                
-                App.elements['toggle-tree-view-btn'].classList.toggle('active', isTreeView);
-                App.elements['toggle-scene-view-btn'].classList.toggle('active', !isTreeView);
-
-                this.renderCurrentView();
-            } finally {
-                this.cursor.default();
+        invalidateNavViews() {
+            if (!App.state.navViewsDirty) {
+                App.state.navViewsDirty = true;
             }
         },
+        setViewMode(mode) {
+            if (App.state.navViewsDirty) {
+                this.cursor.wait();
+                try {
+                    const filterTerm = document.getElementById('scene-search-input').value;
+                    App.tree.render(filterTerm);
+                    App.sceneList.render(filterTerm);
+                    App.state.navViewsDirty = false;
+                } finally {
+                    this.cursor.default();
+                }
+            }
 
+            App.state.currentNavView = mode;
+            localStorage.setItem('cyoa-nav-view', mode);
+
+            const isTreeView = mode === 'tree';
+            App.elements['tree-view'].style.display = isTreeView ? 'block' : 'none';
+            App.elements['scene-list-view-wrapper'].style.display = isTreeView ? 'none' : 'flex';
+            
+            App.elements['toggle-tree-view-btn'].classList.toggle('active', isTreeView);
+            App.elements['toggle-scene-view-btn'].classList.toggle('active', !isTreeView);
+        },
         renderCurrentView() {
             if (!App.state.projectDirectoryHandle) {
                 this.displayWelcomeMessage();
@@ -1511,8 +1523,9 @@ const App = {
                 App.ui.enableEditor(true);
                 App.setDirty(false);
                 App.ui.updateMetaInputs();
-                App.ui.renderCurrentView(); // Render the new project
-                App.ui.selectScene('start'); // Select the start scene
+                App.ui.invalidateNavViews();
+                App.ui.setViewMode(App.state.currentNavView);
+                App.ui.selectScene('start');
                 App.ui.showNotification(`Project '${projectName}' created successfully!`);
 
             } catch (err) { 
@@ -1569,7 +1582,8 @@ const App = {
                 App.ui.enableEditor(true);
                 App.setDirty(false);
                 App.ui.updateMetaInputs();
-                App.ui.renderCurrentView(); 
+                App.ui.invalidateNavViews();
+                App.ui.setViewMode(App.state.currentNavView);
                 App.ui.selectScene(App.state.storyData.meta.startSceneId || 'start');
                 App.ui.showNotification(`Project '${App.state.storyData.meta.title}' loaded successfully!`);
 
@@ -1787,14 +1801,19 @@ const App = {
                         }
                     }
                     
-                    document.body.addEventListener(clickEvent, () => {
-                        if(musicPlayer.src && musicPlayer.paused) {
-                            musicPlayer.play().catch(e => console.warn("Could not start music even after interaction."));
+                    // FIX: Robust audio start on first user interaction to comply with autoplay policies
+                    const startAudioOnFirstInteraction = () => {
+                        if (musicPlayer.src && musicPlayer.paused) {
+                            musicPlayer.play().catch(e => console.warn("Music could not be started on interaction.", e));
                         }
-                        if(ambiencePlayer.src && ambiencePlayer.paused) {
-                            ambiencePlayer.play().catch(e => console.warn("Could not start ambience even after interaction."));
+                        if (ambiencePlayer.src && ambiencePlayer.paused) {
+                            ambiencePlayer.play().catch(e => console.warn("Ambience could not be started on interaction.", e));
                         }
-                    }, { once: true });
+                        document.body.removeEventListener('click', startAudioOnFirstInteraction);
+                        document.body.removeEventListener('touchend', startAudioOnFirstInteraction);
+                    };
+                    document.body.addEventListener('click', startAudioOnFirstInteraction);
+                    document.body.addEventListener('touchend', startAudioOnFirstInteraction);
                 }
                 
                 function typeWriter(text, choices) {
@@ -2050,7 +2069,6 @@ const App = {
     },
     
     sceneList: {
-        // FIX: Replaced icons with robust, complete SVG definitions to ensure proper rendering.
         ICONS: {
             start: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-start" title="Start Scene" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>`,
             audio: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-sound" title="Has Audio" viewBox="0 0 16 16"><path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-1.414 1.414A6.472 6.472 0 0 1 12.026 8c0 1.767-.683 3.392-1.904 4.604l1.414 1.406zM9.086 4.636l-1.414-1.414A3.483 3.483 0 0 0 6.026 8c0 1.13.512 2.148 1.348 2.78l1.414-1.414A1.483 1.483 0 0 1 8.026 8a1.483 1.483 0 0 1 1.06-2.364zM6.671 11.889l-1.414 1.414a3.483 3.483 0 0 0 0-4.574l1.414 1.414a1.483 1.483 0 0 1 0 1.746z"/><path d="M1.554 8.446a.5.5 0 0 1 0-.892L3.25 6.554a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 0 1 0 .708L3.957 10.12a.5.5 0 0 1-.707 0L1.554 8.446zM4.026 8 3.25 7.224 2.523 8 3.25 8.776 4.026 8z"/></svg>`,
@@ -2392,7 +2410,8 @@ const App = {
             }
             App.state.storyData.scenes[newId] = { id: newId, text: `This is the new scene '${newId}'.`, choices: [], ambienceLoop: true, lastModified: Date.now() };
             App.setDirty(true);
-            App.ui.renderCurrentView(); 
+            App.ui.invalidateNavViews();
+            App.ui.setViewMode(App.state.currentNavView);
             App.ui.selectScene(newId);
         },
         renameScene() {
@@ -2424,7 +2443,8 @@ const App = {
             
             App.state.currentSceneId = newId;
             App.setDirty(true);
-            App.ui.renderCurrentView(); 
+            App.ui.invalidateNavViews();
+            App.ui.setViewMode(App.state.currentNavView);
             App.editor.render();
         },
         deleteCurrentScene() {
@@ -2445,14 +2465,16 @@ const App = {
             App.setDirty(true);
             const nextSceneId = App.state.storyData.meta.startSceneId;
             App.state.currentSceneId = null; // Unset current so selectScene forces a render
-            App.ui.renderCurrentView(); 
+            App.ui.invalidateNavViews();
+            App.ui.setViewMode(App.state.currentNavView);
             App.ui.selectScene(nextSceneId);
         },
         setAsStartScene() {
             if (App.state.contextSceneId) {
                 App.state.storyData.meta.startSceneId = App.state.contextSceneId;
                 App.setDirty(true);
-                App.ui.renderCurrentView();
+                App.ui.invalidateNavViews();
+                App.ui.setViewMode(App.state.currentNavView);
             }
         }
     },
@@ -2550,26 +2572,59 @@ const App = {
                 }
             }
         },
-        saveCurrentScene(showAlert = false) { 
-            if (!App.state.currentSceneId) return; 
-            const id = App.state.currentSceneId; 
-            const scene = App.state.storyData.scenes[id]; 
-            if (!scene) return; 
+        saveCurrentScene(showAlert = false) {
+            if (!App.state.currentSceneId) return;
+            const id = App.state.currentSceneId;
+            const scene = App.state.storyData.scenes[id];
+            if (!scene) return;
+        
+            // Capture the current state for comparison to avoid unnecessary re-renders
+            const originalData = {
+                text: scene.text || '',
+                image: scene.image || '',
+                imagePrompt: scene.imagePrompt || '',
+                ambienceSound: scene.ambienceSound || '',
+                ambienceLoop: scene.ambienceLoop ?? true,
+                choices: JSON.stringify(scene.choices || []) // Use JSON for deep comparison
+            };
+        
+            // Gather new state from the DOM
+            const newChoices = Array.from(App.elements['choices-container'].querySelectorAll('.choice-group')).map(div => ({
+                text: div.querySelector('input[type=text]').value,
+                target: div.querySelector('select').value
+            }));
+            const newData = {
+                text: App.elements['scene-text'].value,
+                image: App.elements['scene-image'].value.trim(),
+                imagePrompt: App.elements['scene-image-prompt'].value.trim(),
+                ambienceSound: App.elements['scene-sound'].value.trim(),
+                ambienceLoop: App.elements['toggle-loop-btn'].classList.contains('active'),
+                choices: JSON.stringify(newChoices)
+            };
             
+            // Compare states to see if an update is needed
+            if (Object.keys(originalData).every(key => originalData[key] === newData[key])) {
+                if (showAlert) {
+                    console.log(`No changes detected for scene '${id}'.`);
+                }
+                return; // Nothing to save or re-render
+            }
+        
+            // Apply the new data to the scene object
+            scene.text = newData.text;
+            scene.image = newData.image;
+            scene.imagePrompt = newData.imagePrompt;
+            scene.ambienceSound = newData.ambienceSound;
+            scene.ambienceLoop = newData.ambienceLoop;
+            scene.choices = JSON.parse(newData.choices);
             scene.lastModified = Date.now();
-            scene.id = id;
-            scene.image = App.elements['scene-image'].value.trim(); 
-            scene.imagePrompt = App.elements['scene-image-prompt'].value.trim(); 
-            scene.ambienceSound = App.elements['scene-sound'].value.trim();
-            scene.ambienceLoop = App.elements['toggle-loop-btn'].classList.contains('active');
-            scene.text = App.elements['scene-text'].value; 
-            scene.choices = Array.from(App.elements['choices-container'].querySelectorAll('.choice-group')).map(div => ({ text: div.querySelector('input[type=text]').value, target: div.querySelector('select').value })); 
-            
-            App.setDirty(true); 
-
+        
+            App.setDirty(true);
+            App.ui.invalidateNavViews(); // Mark the other view as dirty
+            App.ui.renderCurrentView();   // Immediately update the current view to reflect changes
+        
             if (showAlert) {
-                App.ui.renderCurrentView();
-                console.log(`Scene '${id}' changes saved to memory.`);
+                console.log(`Scene '${id}' changes saved to memory and view updated.`);
             }
          },
         addChoiceToDOM(choice = { text: '', target: '' }) { 
@@ -2720,7 +2775,8 @@ const App = {
                 App.elements['scene-image'].dispatchEvent(new Event('input', { bubbles: true }));
                 App.setDirty(true);
                 App.editor.saveCurrentScene(false);
-                App.ui.renderCurrentView();
+                App.ui.invalidateNavViews();
+                App.ui.setViewMode(App.state.currentNavView);
             } catch (err) {
                 console.error("Error adding AI image:", err);
                 App.ui.showNotification("Could not download or save the image.");
@@ -2832,7 +2888,7 @@ const App = {
         },
         async renderScene(sceneId) {
             App.state.currentSceneId = sceneId;
-            App.ui.renderCurrentView();
+            App.ui.setViewMode(App.state.currentNavView);
 
             const scene = App.state.storyData.scenes[sceneId];
             const { 'player-text': text, 'player-choices': choices, 'ambience-player': audio, 'player-inner-container': innerContainer } = App.elements;
@@ -2968,9 +3024,15 @@ const App = {
                 </div>
                 
                 <hr class="grid-separator">
-                <label>Button Color <input type="color" id="style-btn-color"></label>
-                <label>Button Hover Color <input type="color" id="style-btn-hover-color"></label>
-                <label>Button Text Color <input type="color" id="style-btn-text-color"></label>
+                <div class="grid-span-2">
+                    <label>Button Color <input type="color" id="style-btn-color"></label>
+                    <label>Button Opacity <input type="range" id="style-btn-opacity" min="0" max="1" step="0.01" value="1"></label>
+                </div>
+                <div class="grid-span-2">
+                    <label>Button Hover Color <input type="color" id="style-btn-hover-color"></label>
+                    <label>Button Text Color <input type="color" id="style-btn-text-color"></label>
+                </div>
+
 
                 <hr class="grid-separator">
                 <div class="grid-full-width">
@@ -2983,23 +3045,38 @@ const App = {
                 if(el) {
                     if (el.type === 'number') {
                         el.value = parseInt(styles[key] || defaults[key]);
-                    } else {
-                        el.value = styles[key] || defaults[key];
+                    } else if (el.type !== 'color' && el.type !== 'range') {
+                         el.value = styles[key] || defaults[key];
                     }
                 }
             });
             grid.querySelector('#style-layout').value = layout;
 
-            const containerBgColor = styles['--container-bg-color'] || defaults['--container-bg-color'];
-            const rgbaMatch = containerBgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-            if (rgbaMatch) {
-                const r = parseInt(rgbaMatch[1]), g = parseInt(rgbaMatch[2]), b = parseInt(rgbaMatch[3]);
-                const a = rgbaMatch[4] !== undefined ? parseFloat(rgbaMatch[4]) : 1;
-                const toHex = c => ('0' + c.toString(16)).slice(-2);
-                grid.querySelector('#style-container-bg-color').value = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-                grid.querySelector('#style-container-bg-opacity').value = a;
-            }
+            // Helper to parse RGBA/Hex and set color/opacity inputs
+            const parseAndSetColor = (colorVar, hexInputId, opacitySliderId = null) => {
+                const colorValue = styles[colorVar] || defaults[colorVar];
+                const match = colorValue.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                const toHex = c => ('0' + parseInt(c).toString(16)).slice(-2);
+                
+                if (match) {
+                    const r = match[1], g = match[2], b = match[3];
+                    const a = match[4] !== undefined ? parseFloat(match[4]) : 1;
+                    grid.querySelector(`#${hexInputId}`).value = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+                    if (opacitySliderId) grid.querySelector(`#${opacitySliderId}`).value = a;
+                } else { // Handle plain hex/color names
+                    grid.querySelector(`#${hexInputId}`).value = colorValue;
+                     if (opacitySliderId) grid.querySelector(`#${opacitySliderId}`).value = 1;
+                }
+            };
             
+            parseAndSetColor('--bg-color', 'style-bg-color');
+            parseAndSetColor('--text-color', 'style-text-color');
+            parseAndSetColor('--btn-text-color', 'style-btn-text-color');
+            parseAndSetColor('--container-bg-color', 'style-container-bg-color', 'style-container-bg-opacity');
+            parseAndSetColor('--btn-color', 'style-btn-color', 'style-btn-opacity');
+            parseAndSetColor('--btn-hover-color', 'style-btn-hover-color');
+
+
             grid.oninput = (e) => this.handleUpdate(e);
 
             grid.querySelectorAll('.file-icon-btn').forEach(btn => {
@@ -3018,12 +3095,22 @@ const App = {
             const id = target.id.replace('style-', '');
             let value = target.value;
 
+            const hexToRgba = (h, o) => {
+                const r = parseInt(h.slice(1, 3), 16), g = parseInt(h.slice(3, 5), 16), b = parseInt(h.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${o})`;
+            };
+
             if (target.id === 'style-container-bg-color' || target.id === 'style-container-bg-opacity') {
                 const hex = document.getElementById('style-container-bg-color').value;
                 const opacity = document.getElementById('style-container-bg-opacity').value;
-                const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
-                App.state.storyData.meta.styles['--container-bg-color'] = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-            } 
+                App.state.storyData.meta.styles['--container-bg-color'] = hexToRgba(hex, opacity);
+            } else if (['btn-color', 'btn-hover-color', 'btn-opacity'].includes(id)) {
+                const hex = document.getElementById('style-btn-color').value;
+                const hoverHex = document.getElementById('style-btn-hover-color').value;
+                const opacity = document.getElementById('style-btn-opacity').value;
+                App.state.storyData.meta.styles['--btn-color'] = hexToRgba(hex, opacity);
+                App.state.storyData.meta.styles['--btn-hover-color'] = hexToRgba(hoverHex, opacity);
+            }
             else if (id === 'layout') { App.state.storyData.meta.layout = value; } 
             else {
                 if (target.type === 'number') value += 'px';
@@ -3115,11 +3202,10 @@ body {
 .choice-btn {
     background-color: var(--btn-color);
     color: var(--btn-text-color);
-    border: 1px solid var(--btn-color);
+    border: 1px solid transparent;
 }
 .choice-btn:hover {
     background-color: var(--btn-hover-color);
-    border-color: var(--btn-hover-color);
 }
 `;
             if (styles['--screen-bg-image']) {
@@ -3130,7 +3216,7 @@ body {
             }
             return css;
         },
-        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': '#6c757d', '--btn-text-color': '#ffffff', '--btn-hover-color': '#5a6268', '--font-family': 'sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--music-path': '', '--typewriter-effect': 'on' }; }
+        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': 'sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--music-path': '', '--typewriter-effect': 'on' }; }
     },
     
     modals: {
@@ -3190,7 +3276,8 @@ body {
 
             App.setDirty(true);
             App.editor.render(); 
-            App.ui.renderCurrentView(); 
+            App.ui.invalidateNavViews();
+            App.ui.setViewMode(App.state.currentNavView);
             App.ui.showNotification(`${count} image paths have been deleted.`);
         },
 
@@ -3318,7 +3405,8 @@ body {
             generateBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg> <span>Generate</span>`;
             
             App.editor.render();
-            App.ui.renderCurrentView();
+            App.ui.invalidateNavViews();
+            App.ui.setViewMode(App.state.currentNavView);
         },
         
         async generatePromptForScene(scene) {

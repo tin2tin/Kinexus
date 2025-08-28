@@ -7,7 +7,7 @@
 ## Try It
 
 <div align="left">
-  <a href="https://tin2tin.github.io/CYOA_Studio/">Open Kinexus</a><br><br>
+  <a href="https://tin2tin.github.io/Kinexus/">Open Kinexus</a><br><br>
 </div>
 
 <div align="left">

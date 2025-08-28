@@ -1,13 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYOA Studio Pro</title>
+    <title>Kinexus</title>
     <style>
         :root {
-            /* Desaturated colors as requested */
             --primary-color: #4a78ad; --secondary-color: #6c757d; --light-bg: #121212;
             --dark-text: #e0e0e0; --border-color: #333333; --success-color: #5a8f66;
             --danger-color: #b85a66; --warning-color: #c7921a; --warning-text: #ffffff;
@@ -69,6 +67,9 @@
         .scene-node.active { background-color: var(--primary-color); color: white; font-weight: bold; }
         .scene-node-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .scene-node-icons { display: flex; gap: 4px; align-items: center; }
+        .scene-node-icons .icon-orphan {
+            order: -1; /* Place orphan icon first */
+        }
         .scene-node-icons svg, .scene-card-icon { 
             width: 16px; height: 16px; flex-shrink: 0; 
             fill: currentColor; 
@@ -79,7 +80,7 @@
         .icon-image { color: #8ab4f8; }
         .icon-sound { color: #fdd663; }
         .icon-deadend { color: var(--danger-color); }
-        .icon-orphan { color: var(--warning-color); }
+        .icon-orphan { color: var(--danger-color); }
         .scene-node.active .scene-node-icons { color: white; }
         .choice-node { 
             list-style-type: none; 
@@ -201,10 +202,30 @@
             align-items: center;
             font-size: 0.9em;
         }
+        .scene-card-icons .icon-orphan {
+             order: -1; /* Place orphan icon first */
+        }
         .scene-card-icon-group {
             display: flex;
             align-items: center;
             gap: 3px;
+        }
+        .choice-count-icon {
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .scene-card.active .choice-count-icon {
+            background-color: rgba(255, 255, 255, 0.3);
         }
         .scene-card.active .scene-card-icons {
             color: #e0e0e0;
@@ -475,6 +496,50 @@
             transition: opacity 0.1s linear;
         }
 
+        #icon-thumbnail-tooltip {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            background-color: #2a2a2e;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 14px;
+            width: 280px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s linear;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        #icon-thumbnail-tooltip .thumbnail-icon {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #icon-thumbnail-tooltip .thumbnail-icon svg {
+            width: 32px;
+            height: 32px;
+        }
+        #icon-thumbnail-tooltip .thumbnail-text h4 {
+            margin: 0 0 4px 0;
+            font-size: 1em;
+            color: #e0e0e0;
+            border: none;
+        }
+        #icon-thumbnail-tooltip .thumbnail-text p {
+            margin: 0;
+            font-size: 0.9em;
+            color: #aaa;
+        }
+
+
         #batch-fieldset {
             display: flex;
             flex-direction: column;
@@ -525,11 +590,21 @@
     
     <div id="view-mode-toggle">
         <button id="toggle-tree-view-btn" class="active" title="Tree View">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M15.5 3.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5Zm-2-2a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5Zm-5 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5ZM8 7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 7Zm-5 3a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5Zm10 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5Z"/><path d="M1.226 8.322a.5.5 0 0 1 .63.062L3.5 9.542a.5.5 0 0 1 0 .894l-1.644 1.16a.5.5 0 0 1-.692-.692l1.232-.872-1.232-.872a.5.5 0 0 1 .062-.63zM14.774 8.322a.5.5 0 0 0-.63.062L12.5 9.542a.5.5 0 0 0 0 .894l1.644 1.16a.5.5 0 0 0 .692-.692l-1.232-.872 1.232-.872a.5.5 0 0 0-.062-.63zM4.5 1.5a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5ZM8.5 4.5a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5ZM11.5 1.5a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5Z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M10.23,6.86,8.7,8.4a.5.5,0,0,1-.71,0L6.44,6.86a.5.5,0,0,1,0-.71l.71-.71a.5.5,0,0,1,.71,0l.71.71a.5.5,0,0,0,.71,0l.71-.71a.5.5,0,0,1,.71,0l.71.71A.5.5,0,0,1,10.23,6.86Z"/>
+                <path d="M15,11.5A1.5,1.5,0,0,1,13.5,13H11V9.5a.5.5,0,0,0-.5-.5H8.71a.5.5,0,0,1,0-1H11.5a.5.5,0,0,0,.5-.5V6h1.5a.5.5,0,0,0,0-1H11.5A1.5,1.5,0,0,0,10,6.5v1a1.5,1.5,0,0,0-1.5,1.5H5.5A1.5,1.5,0,0,0,4,7.5v-1A1.5,1.5,0,0,0,2.5,5H1a.5.5,0,0,0,0,1H2.5a.5.5,0,0,1,.5.5V8H5.29a.5.5,0,0,1,0,1H3a.5.5,0,0,0-.5.5V13H1.5A1.5,1.5,0,0,1,0,11.5v-1A1.5,1.5,0,0,1,1.5,9h.05a.5.5,0,0,1,0,1H1.5a.5.5,0,0,0-.5.5v1a.5.5,0,0,0,.5.5H3v.5a.5.5,0,0,0,.5.5H11a.5.5,0,0,0,.5-.5V13h1.5a.5.5,0,0,0,.5-.5v-1a.5.5,0,0,0-.5-.5h-.05a.5.5,0,0,1,0-1H14.5A1.5,1.5,0,0,1,16,10.5Z"/>
+            </svg>
             Tree
         </button>
         <button id="toggle-scene-view-btn" title="Scene List View">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3.854 2.146a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L2 2.793l1.146-1.147a.5.5 0 0 1 .708 0zM2 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M2.5,4A1.5,1.5,0,1,0,4,2.5,1.5,1.5,0,0,0,2.5,4Z"/>
+                <path d="M2.5,9A1.5,1.5,0,1,0,4,7.5,1.5,1.5,0,0,0,2.5,9Z"/>
+                <path d="M2.5,14A1.5,1.5,0,1,0,4,12.5,1.5,1.5,0,0,0,2.5,14Z"/>
+                <path d="M7,3H15a1,1,0,0,1,0,2H7A1,1,0,0,1,7,3Z"/>
+                <path d="M7,8H15a1,1,0,0,1,0,2H7A1,1,0,0,1,7,8Z"/>
+                <path d="M7,13H15a1,1,0,0,1,0,2H7A1,1,0,0,1,7,13Z"/>
+            </svg>
             Scenes
         </button>
     </div>
@@ -688,6 +763,17 @@
 <div id="player-container"><button id="stop-play-x" class="btn-danger">X</button><button id="restart-play" class="btn-secondary" title="Restart Game"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg></button><div id="player-inner-container"><div id="player-image-container"><img id="player-image" src=""></div><div id="player-content-container"><div id="player-text"></div><div id="player-choices"></div></div></div><audio id="ambience-player"></audio><audio id="music-player" loop></audio></div>
 <div id="tree-context-menu"><button id="set-start-scene-btn">Set as Start Scene</button></div>
 
+<!-- Tooltips -->
+<div id="custom-tooltip"></div>
+<div id="icon-thumbnail-tooltip">
+    <div class="thumbnail-icon"></div>
+    <div class="thumbnail-text">
+        <h4></h4>
+        <p></p>
+    </div>
+</div>
+
+
 <!-- Modals -->
 <div id="project-menu-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Menu</h2><div class="btn-group" style="flex-direction: column; gap: 15px; align-items: stretch;"><button id="new-project-btn" class="btn-secondary">New Project</button><button id="open-project-btn" class="btn-secondary">Open Project</button><button id="save-story-btn" class="btn-success">Save Project</button><button id="about-editor-btn">Project Text Editor</button><button id="batch-image-gen-btn" class="btn-secondary" disabled>Batch Image Generation</button><button id="export-data-btn" class="btn-warning">Export Data</button><button id="export-project-btn" class="btn-warning">Export Standalone Game</button></div></div></div>
 <div id="about-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Text Editor</h2><p>This information will be displayed in the player's "About" section.</p><div class="form-group"><label for="story-title">Story Title</label><input type="text" id="story-title" placeholder="Your story title"></div><div class="form-group"><label for="creator-name">Creator Name</label><input type="text" id="creator-name" placeholder="Your name or alias"></div><div class="form-group"><label for="about-text">About Text</label><textarea id="about-text" placeholder="A brief description of your project."></textarea></div></div></div>
@@ -829,14 +915,14 @@
                 justify-content: space-between;
                 align-items: center;
                 z-index: 100;
-                pointer-events: none; /* Allows clicks to pass through the container */
+                pointer-events: none;
             }
             .player-top-bar-left, .player-top-bar-right {
                 display: flex;
                 gap: 10px;
             }
             .player-ui-btn {
-                pointer-events: auto; /* Re-enable clicks on buttons */
+                pointer-events: auto;
                 background: rgba(0,0,0,0.5);
                 color: white;
                 border: 1px solid rgba(255,255,255,0.5);
@@ -859,6 +945,12 @@
             }
             .player-ui-btn .icon-off {
                 display: none;
+            }
+            #fullscreen-btn {
+                position: fixed;
+                bottom: 15px;
+                right: 15px;
+                z-index: 100;
             }
             
             #exit-message {
@@ -973,10 +1065,29 @@
             #about-text a:hover { text-decoration: underline; }
             .about-footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #444; font-size: 0.8em; text-align: center; white-space: pre-wrap; }
             .about-footer a { color: #8af; text-decoration: none; }
+
+            #loading-overlay {
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: #111; z-index: 9999; display: flex;
+                justify-content: center; align-items: center; flex-direction: column;
+                color: white; font-size: 1.5em;
+            }
+            .loading-spinner {
+                border: 8px solid #f3f3f3; border-top: 8px solid var(--primary-color);
+                border-radius: 50%; width: 60px; height: 60px;
+                animation: spin 1.5s linear infinite; margin-bottom: 20px;
+            }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
             __CUSTOM_STYLES__
         </style>
     </head>
     <body class="__LAYOUT_CLASS__">
+        <div id="loading-overlay">
+            <div class="loading-spinner"></div>
+            <p>Loading...</p>
+        </div>
+
         <div id="exit-message">
             <p>Thanks for playing!</p>
             <p>You can now close this window.</p>
@@ -995,7 +1106,6 @@
             <div class="player-top-bar-left">
                 <button id="player-menu-btn" class="player-ui-btn" title="Open Menu">&#9776;</button>
                 <button id="player-sound-toggle-btn" class="player-ui-btn" title="Toggle Sound">
-                    <!-- FIX: Correct SVG for the "sound on" icon -->
                     <svg class="icon-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
                     <svg class="icon-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
                 </button>
@@ -1006,6 +1116,10 @@
                 </button>
             </div>
         </div>
+        
+        <button id="fullscreen-btn" class="player-ui-btn" title="Toggle Fullscreen">
+            <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
+        </button>
 
         <div id="player-menu-modal" class="player-modal">
             <div class="player-modal-content">
@@ -1018,10 +1132,9 @@
                     <hr>
                     <div class="menu-item"><button id="save-btn">Save Progress</button><button id="load-btn">Load Progress</button></div>
                     <hr>
-                    <div class="menu-item"><span>Music</span><input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.4"></div>
-                    <div class="menu-item"><span>Ambience</span><input type="range" id="ambience-volume-slider" min="0" max="1" step="0.05" value="0.4"></div>
+                    <div class="menu-item"><span>Music</span><input type="range" id="volume-slider" min="0" max="1" step="0.01"></div>
+                    <div class="menu-item"><span>Ambience</span><input type="range" id="ambience-volume-slider" min="0" max="1" step="0.01"></div>
                     <div class="menu-item"><span>Font Size</span><input type="range" id="font-size-slider" min="8" max="28" step="1" value="16"></div>
-                    <div class="menu-item"><button id="fullscreen-btn">Toggle Fullscreen</button></div>
                     <hr>
                     <div class="menu-item"><button id="about-btn">About</button></div>
                 </div>
@@ -1035,7 +1148,7 @@
                 <p id="about-creator"></p>
                 <p id="about-text"></p>
                 <div class="about-footer">Created in
-CYOA Studio
+Kinexus
 <a href="https://github.com/tin2tin/CYOA_Studio" target="_blank">https://github.com/tin2tin/CYOA_Studio</a></div>
             </div>
         </div>
@@ -1241,44 +1354,53 @@ const App = {
             }
         });
 
-        const tooltip = document.createElement('div');
-        tooltip.id = 'custom-tooltip';
-        document.body.appendChild(tooltip);
-        let tooltipTarget = null;
+        // Tooltip Logic
+        const tooltip = document.getElementById('custom-tooltip');
+        const thumbnailTooltip = document.getElementById('icon-thumbnail-tooltip');
+        let activeTooltip = null;
 
         document.body.addEventListener('mouseover', e => {
-            const target = e.target.closest('[title]');
-            if (target && target.title) {
-                tooltipTarget = target;
-                tooltip.textContent = target.title;
-                target.dataset.originalTitle = target.title;
-                target.removeAttribute('title');
+            const iconTarget = e.target.closest('[class^="icon-"]');
+            const titleTarget = e.target.closest('[title]');
+
+            if (iconTarget && App.ui.iconThumbnails[iconTarget.classList[0]]) {
+                activeTooltip = thumbnailTooltip;
+                const iconClass = iconTarget.classList[0];
+                App.ui.showIconThumbnail(App.ui.iconThumbnails[iconClass]);
+            } else if (titleTarget && titleTarget.title) {
+                activeTooltip = tooltip;
+                tooltip.textContent = titleTarget.title;
+                titleTarget.dataset.originalTitle = titleTarget.title;
+                titleTarget.removeAttribute('title');
                 tooltip.style.display = 'block';
-                requestAnimationFrame(() => {
-                    tooltip.style.opacity = '1';
-                });
+                requestAnimationFrame(() => { tooltip.style.opacity = '1'; });
             }
         });
 
         document.body.addEventListener('mouseout', () => {
-            if (tooltipTarget) {
-                tooltipTarget.setAttribute('title', tooltipTarget.dataset.originalTitle);
-                tooltipTarget.removeAttribute('data-original-title');
-                tooltip.style.opacity = '0';
+            if (activeTooltip) {
+                if (activeTooltip === tooltip) {
+                    const originalTarget = document.querySelector('[data-original-title]');
+                    if (originalTarget) {
+                        originalTarget.setAttribute('title', originalTarget.dataset.originalTitle);
+                        originalTarget.removeAttribute('data-original-title');
+                    }
+                }
+                activeTooltip.style.opacity = '0';
                 setTimeout(() => {
-                    if (tooltip.style.opacity === '0') {
-                        tooltip.style.display = 'none';
+                    if (activeTooltip.style.opacity === '0') {
+                        activeTooltip.style.display = 'none';
                     }
                 }, 150);
-                tooltipTarget = null;
+                activeTooltip = null;
             }
         });
 
         document.body.addEventListener('mousemove', e => {
-            if (tooltipTarget) {
+            if (activeTooltip) {
                 const x = e.clientX;
                 const y = e.clientY;
-                const tooltipRect = tooltip.getBoundingClientRect();
+                const tooltipRect = activeTooltip.getBoundingClientRect();
                 const viewportWidth = window.innerWidth;
                 const viewportHeight = window.innerHeight;
 
@@ -1294,8 +1416,8 @@ const App = {
                 if (left < 0) left = 0;
                 if (top < 0) top = 0;
                 
-                tooltip.style.left = `${left}px`;
-                tooltip.style.top = `${top}px`;
+                activeTooltip.style.left = `${left}px`;
+                activeTooltip.style.top = `${top}px`;
             }
         });
     },
@@ -1479,6 +1601,41 @@ const App = {
             App.elements['notification-message'].textContent = message;
             App.modals.show('notification-modal');
         },
+        showIconThumbnail(data) {
+            const tooltip = document.getElementById('icon-thumbnail-tooltip');
+            tooltip.querySelector('.thumbnail-icon').innerHTML = data.icon;
+            tooltip.querySelector('h4').textContent = data.title;
+            tooltip.querySelector('p').textContent = data.desc;
+            tooltip.style.display = 'flex';
+            requestAnimationFrame(() => { tooltip.style.opacity = '1'; });
+        },
+        iconThumbnails: {
+            'icon-start': {
+                icon: `<svg class="icon-start" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>`,
+                title: 'Start Scene',
+                desc: 'This is the first scene players will see when the story begins.'
+            },
+            'icon-image': {
+                icon: `<svg class="icon-image" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>`,
+                title: 'Has Image',
+                desc: 'This scene has an associated background or display image.'
+            },
+            'icon-sound': {
+                icon: `<svg class="icon-sound" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9.707,2.293a1,1,0,0,0-1.414,0L4.6,6H2.5A1.5,1.5,0,0,0,1,7.5v1A1.5,1.5,0,0,0,2.5,10H4.6l3.69,3.707a1,1,0,0,0,1.414,0V2.293Z"/></svg>`,
+                title: 'Has Audio',
+                desc: 'This scene has ambient sound or music that will play.'
+            },
+            'icon-deadend': {
+                icon: `<svg class="icon-deadend" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>`,
+                title: 'Dead End',
+                desc: 'This scene has no choices and ends a branch of the story.'
+            },
+            'icon-orphan': {
+                icon: `<svg class="icon-orphan" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M7.5 7.5V4h1v3.5h3.5v1H8.5V12h-1V8.5H4v-1h3.5z"/></svg>`,
+                title: 'Orphan Scene',
+                desc: 'This scene cannot be reached from the Start Scene. It is disconnected from the main story flow.'
+            }
+        }
     },
 
     io: {
@@ -1486,7 +1643,7 @@ const App = {
             try {
                 const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
                 
-                let projectName = prompt("Enter a name for your new project:", "My CYOA Story");
+                let projectName = prompt("Enter a name for your new project:", "My Kinexus Story");
                 if (!projectName) return;
                 projectName = projectName.trim().replace(/\s+/g, '_');
 
@@ -1529,6 +1686,9 @@ const App = {
                 App.ui.showNotification(`Project '${projectName}' created successfully!`);
 
             } catch (err) { 
+                if (err.name === 'SecurityError') {
+                    return App.ui.showNotification("This feature is not available in the current environment (e.g., a sandboxed iframe).\nPlease run this file from a local server or open it directly in a compatible browser (like Chrome or Edge).");
+                }
                 if (err.name !== 'AbortError') { 
                     console.error(err); 
                     App.ui.showNotification('Could not create the project.'); 
@@ -1588,7 +1748,9 @@ const App = {
                 App.ui.showNotification(`Project '${App.state.storyData.meta.title}' loaded successfully!`);
 
             } catch (err) { 
-                if (err.name !== 'AbortError') { 
+                if (err.name === 'SecurityError') {
+                    App.ui.showNotification("This feature is not available in the current environment (e.g., a sandboxed iframe).\nPlease run this file from a local server or open it directly in a compatible browser (like Chrome or Edge).");
+                } else if (err.name !== 'AbortError') { 
                     console.error(err); 
                     App.ui.showNotification('Could not open the project.'); 
                 } 
@@ -1722,6 +1884,8 @@ const App = {
                     const fontSizeSlider = document.getElementById('font-size-slider');
                     const soundToggleBtn = document.getElementById('player-sound-toggle-btn');
                     const closeBtn = document.getElementById('player-close-btn');
+                    const volumeSlider = document.getElementById('volume-slider');
+                    const ambienceVolumeSlider = document.getElementById('ambience-volume-slider');
 
                     bindEvent(playerMenuBtn, () => showModal(playerMenuModal));
                     bindEvent(playerMenuModal, (e) => { if (e.target === playerMenuModal) hideModal(playerMenuModal); });
@@ -1759,11 +1923,23 @@ const App = {
                         bindEvent(loadBtn, () => { const savedId = localStorage.getItem('cyoa-save-' + storyData.meta.title); if (savedId && storyData.scenes[savedId]) { renderScene(savedId); } else { alert('No save data found.'); } hideModal(playerMenuModal); });
                     }
                     
-                    document.getElementById('volume-slider').addEventListener('input', function() { musicPlayer.volume = this.value; });
-                    document.getElementById('ambience-volume-slider').addEventListener('input', function() { ambiencePlayer.volume = this.value; });
-                    
-                    musicPlayer.volume = document.getElementById('volume-slider').value;
-                    ambiencePlayer.volume = document.getElementById('ambience-volume-slider').value;
+                    const savedMusicVol = storageAvailable ? localStorage.getItem('cyoa-music-volume-' + storyData.meta.title) : null;
+                    const defaultMusicVol = storyData.meta.styles['--music-volume'] || '0.4';
+                    volumeSlider.value = savedMusicVol !== null ? savedMusicVol : defaultMusicVol;
+                    musicPlayer.volume = volumeSlider.value;
+                    volumeSlider.addEventListener('input', function() {
+                        musicPlayer.volume = this.value;
+                        if (storageAvailable) localStorage.setItem('cyoa-music-volume-' + storyData.meta.title, this.value);
+                    });
+
+                    const savedAmbienceVol = storageAvailable ? localStorage.getItem('cyoa-ambience-volume-' + storyData.meta.title) : null;
+                    const defaultAmbienceVol = storyData.meta.styles['--ambience-volume'] || '0.4';
+                    ambienceVolumeSlider.value = savedAmbienceVol !== null ? savedAmbienceVol : defaultAmbienceVol;
+                    ambiencePlayer.volume = ambienceVolumeSlider.value;
+                    ambienceVolumeSlider.addEventListener('input', function() {
+                        ambiencePlayer.volume = this.value;
+                        if (storageAvailable) localStorage.setItem('cyoa-ambience-volume-' + storyData.meta.title, this.value);
+                    });
                     
                     function applyFontSize(size) {
                         gameContainer.style.fontSize = size + 'px';
@@ -1801,7 +1977,6 @@ const App = {
                         }
                     }
                     
-                    // FIX: Robust audio start on first user interaction to comply with autoplay policies
                     const startAudioOnFirstInteraction = () => {
                         if (musicPlayer.src && musicPlayer.paused) {
                             musicPlayer.play().catch(e => console.warn("Music could not be started on interaction.", e));
@@ -1933,18 +2108,66 @@ const App = {
                         sceneText.textContent = "An error occurred. Check the console for details.";
                     }
                 }
+                
+                function preloadAssets(assets) {
+                    const promises = assets.filter(Boolean).map(url => {
+                        return new Promise((resolve, reject) => {
+                            const isImage = /\\.(jpg|jpeg|png|gif|webp)$/i.test(url) || url.startsWith('data:image');
+                            const isAudio = /\\.(mp3|wav|ogg|m4a)$/i.test(url) || url.startsWith('data:audio');
 
-                setupMenu();
-                setupGlobalStyles();
-                document.title = storyData.meta.title || 'Choose Your Own Adventure';
-                let startingScene = storyData.meta.startSceneId;
-                if(storageAvailable) {
-                    const savedSceneId = localStorage.getItem('cyoa-save-' + storyData.meta.title);
-                     if(savedSceneId && storyData.scenes[savedSceneId]) {
-                        startingScene = savedSceneId;
+                            if (isImage) {
+                                const img = new Image();
+                                img.onload = () => resolve(url);
+                                img.onerror = () => reject(url);
+                                img.src = url;
+                            } else if (isAudio) {
+                                const audio = new Audio();
+                                audio.oncanplaythrough = () => resolve(url);
+                                audio.onerror = () => reject(url);
+                                audio.src = url;
+                            } else {
+                                resolve(url); // Not a preloadable asset type, resolve immediately
+                            }
+                        });
+                    });
+                    return Promise.all(promises);
+                }
+
+                async function main() {
+                    const loader = document.getElementById('loading-overlay');
+                    setupMenu();
+                    document.title = storyData.meta.title || 'Choose Your Own Adventure';
+                    
+                    const startSceneId = storyData.meta.startSceneId;
+                    const startScene = storyData.scenes[startSceneId];
+                    const initialAssets = [
+                        startScene ? startScene.image : null,
+                        startScene ? startScene.ambienceSound : null,
+                        storyData.meta.styles['--music-path'],
+                        storyData.meta.styles['--screen-bg-image'],
+                        storyData.meta.styles['--container-bg-image']
+                    ];
+
+                    try {
+                        await preloadAssets(initialAssets);
+                    } catch (failedUrl) {
+                        console.warn(\`Could not load an initial asset: \${failedUrl}. Starting anyway.\`);
+                    } finally {
+                        if(loader) loader.style.display = 'none';
+                        setupGlobalStyles();
+                        
+                        let startingScene = startSceneId;
+                        if (storageAvailable) {
+                            const savedSceneId = localStorage.getItem('cyoa-save-' + storyData.meta.title);
+                            if (savedSceneId && storyData.scenes[savedSceneId]) {
+                                startingScene = savedSceneId;
+                            }
+                        }
+                        renderScene(startingScene);
                     }
                 }
-                renderScene(startingScene);
+
+                main();
             });
         <\/script>`;
 
@@ -2071,11 +2294,10 @@ const App = {
     sceneList: {
         ICONS: {
             start: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-start" title="Start Scene" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>`,
-            audio: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-sound" title="Has Audio" viewBox="0 0 16 16"><path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-1.414 1.414A6.472 6.472 0 0 1 12.026 8c0 1.767-.683 3.392-1.904 4.604l1.414 1.406zM9.086 4.636l-1.414-1.414A3.483 3.483 0 0 0 6.026 8c0 1.13.512 2.148 1.348 2.78l1.414-1.414A1.483 1.483 0 0 1 8.026 8a1.483 1.483 0 0 1 1.06-2.364zM6.671 11.889l-1.414 1.414a3.483 3.483 0 0 0 0-4.574l1.414 1.414a1.483 1.483 0 0 1 0 1.746z"/><path d="M1.554 8.446a.5.5 0 0 1 0-.892L3.25 6.554a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 0 1 0 .708L3.957 10.12a.5.5 0 0 1-.707 0L1.554 8.446zM4.026 8 3.25 7.224 2.523 8 3.25 8.776 4.026 8z"/></svg>`,
-            loop: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon" title="Audio Loops" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>`,
-            orphan: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-orphan" title="Orphan Scene" viewBox="0 0 16 16"><path d="M8.982 4.146a.5.5 0 0 0-.964 0l-3.5 7a.5.5 0 0 0 .482.654h7a.5.5 0 0 0 .482-.654l-3.5-7zM8 5.794 9.5 8.794H6.5L8 5.794zM15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0zm-1 0A6 6 0 1 0 2 8a6 6 0 0 0 12 0z"/></svg>`,
-            end: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-deadend" title="End of a Branch" viewBox="0 0 16 16"><path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"/></svg>`,
-            choices: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon" title="Number of Choices" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6v1H11a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 5 7h2.5V6A1.5 1.5 0 0 1 6 4.5v-1zM7.5 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1z"/><path d="M6 4.5H5V8h1V4.5zM11 7.5v1h-1V7.5h1z"/></svg>`,
+            audio: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-sound" title="Has Audio" viewBox="0 0 16 16"><path d="M9.707,2.293a1,1,0,0,0-1.414,0L4.6,6H2.5A1.5,1.5,0,0,0,1,7.5v1A1.5,1.5,0,0,0,2.5,10H4.6l3.69,3.707a1,1,0,0,0,1.414,0V2.293Z"/></svg>`,
+            loop: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-sound" title="Audio Loops" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>`,
+            orphan: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-orphan" title="Orphan Scene" viewBox="0 0 16 16"><path d="M7.5 7.5V4h1v3.5h3.5v1H8.5V12h-1V8.5H4v-1h3.5z"/></svg>`,
+            end: `<svg xmlns="http://www.w3.org/2000/svg" class="scene-card-icon icon-deadend" title="End of a Branch" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>`,
         },
         
         createCard(scene) {
@@ -2094,6 +2316,11 @@ const App = {
             };
 
             let iconsHTML = '';
+            let orphanIconHTML = '';
+
+            if (App.state.orphanSceneIds.has(scene.id)) {
+                orphanIconHTML = this.ICONS.orphan;
+            }
             if (scene.id === App.state.storyData.meta.startSceneId) {
                 iconsHTML += this.ICONS.start;
             }
@@ -2103,12 +2330,9 @@ const App = {
             }
             const choiceCount = scene.choices?.length || 0;
             if (choiceCount > 0) {
-                iconsHTML += `<div class="scene-card-icon-group">${this.ICONS.choices}<span>${choiceCount}</span></div>`;
+                iconsHTML += `<div class="choice-count-icon" title="${choiceCount} choices">${choiceCount}</div>`;
             } else {
                 iconsHTML += this.ICONS.end;
-            }
-            if (App.state.orphanSceneIds.has(scene.id)) {
-                iconsHTML += this.ICONS.orphan;
             }
 
             card.innerHTML = `
@@ -2118,7 +2342,7 @@ const App = {
                 <div class="scene-card-content">
                     <div class="scene-card-header">
                         <div class="scene-card-id">${scene.id}</div>
-                        <div class="scene-card-icons">${iconsHTML}</div>
+                        <div class="scene-card-icons">${orphanIconHTML}${iconsHTML}</div>
                     </div>
                     <div class="scene-card-text">${scene.text ? scene.text.split('\n')[0] : '...'}</div>
                 </div>
@@ -2127,6 +2351,9 @@ const App = {
         },
 
         render(filterTerm = '') {
+            if (!App.state.storyData.meta) {
+                return;
+            }
             App.tree.findOrphans();
             const container = App.elements['scene-list-view'];
             container.innerHTML = '';
@@ -2204,11 +2431,11 @@ const App = {
             return color;
         },
         ICONS: {
-            start: `<svg class="icon-start" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>`,
-            image: `<svg class="icon-image" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>`,
-            sound: `<svg class="icon-sound" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`,
-            deadEnd: `<svg class="icon-deadend" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>`,
-            orphan: `<svg class="icon-orphan" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`,
+            start: `<svg class="icon-start" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>`,
+            image: `<svg class="icon-image" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>`,
+            sound: `<svg class="icon-sound" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M9.707,2.293a1,1,0,0,0-1.414,0L4.6,6H2.5A1.5,1.5,0,0,0,1,7.5v1A1.5,1.5,0,0,0,2.5,10H4.6l3.69,3.707a1,1,0,0,0,1.414,0V2.293Z"/></svg>`,
+            deadEnd: `<svg class="icon-deadend" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>`,
+            orphan: `<svg class="icon-orphan" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M7.5 7.5V4h1v3.5h3.5v1H8.5V12h-1V8.5H4v-1h3.5z"/></svg>`,
         },
 
         findOrphans() {
@@ -2245,6 +2472,9 @@ const App = {
         },
 
         render(filterTerm = '') {
+            if (!App.state.storyData.meta) {
+                return;
+            }
             this.findOrphans();
             const treeView = App.elements['tree-view'];
             treeView.innerHTML = '';
@@ -2350,12 +2580,14 @@ const App = {
 
             const iconsDiv = document.createElement('div');
             iconsDiv.className = 'scene-node-icons';
-
-            if (sceneId === App.state.storyData.meta.startSceneId) iconsDiv.innerHTML += this.ICONS.start;
-            if (scene.image) iconsDiv.innerHTML += this.ICONS.image;
-            if (scene.ambienceSound) iconsDiv.innerHTML += this.ICONS.sound;
-            if (!hasChoices) iconsDiv.innerHTML += this.ICONS.deadEnd;
-            if (App.state.orphanSceneIds.has(sceneId)) iconsDiv.innerHTML += this.ICONS.orphan;
+            
+            let iconsHTML = '';
+            if (App.state.orphanSceneIds.has(sceneId)) iconsHTML += this.ICONS.orphan;
+            if (sceneId === App.state.storyData.meta.startSceneId) iconsHTML += this.ICONS.start;
+            if (scene.image) iconsHTML += this.ICONS.image;
+            if (scene.ambienceSound) iconsHTML += this.ICONS.sound;
+            if (!hasChoices) iconsHTML += this.ICONS.deadEnd;
+            iconsDiv.innerHTML = iconsHTML;
 
             const text = document.createElement('span'); 
             text.className = 'scene-node-text';
@@ -2578,17 +2810,15 @@ const App = {
             const scene = App.state.storyData.scenes[id];
             if (!scene) return;
         
-            // Capture the current state for comparison to avoid unnecessary re-renders
             const originalData = {
                 text: scene.text || '',
                 image: scene.image || '',
                 imagePrompt: scene.imagePrompt || '',
                 ambienceSound: scene.ambienceSound || '',
                 ambienceLoop: scene.ambienceLoop ?? true,
-                choices: JSON.stringify(scene.choices || []) // Use JSON for deep comparison
+                choices: JSON.stringify(scene.choices || [])
             };
         
-            // Gather new state from the DOM
             const newChoices = Array.from(App.elements['choices-container'].querySelectorAll('.choice-group')).map(div => ({
                 text: div.querySelector('input[type=text]').value,
                 target: div.querySelector('select').value
@@ -2602,15 +2832,13 @@ const App = {
                 choices: JSON.stringify(newChoices)
             };
             
-            // Compare states to see if an update is needed
             if (Object.keys(originalData).every(key => originalData[key] === newData[key])) {
                 if (showAlert) {
                     console.log(`No changes detected for scene '${id}'.`);
                 }
-                return; // Nothing to save or re-render
+                return;
             }
         
-            // Apply the new data to the scene object
             scene.text = newData.text;
             scene.image = newData.image;
             scene.imagePrompt = newData.imagePrompt;
@@ -2620,8 +2848,8 @@ const App = {
             scene.lastModified = Date.now();
         
             App.setDirty(true);
-            App.ui.invalidateNavViews(); // Mark the other view as dirty
-            App.ui.renderCurrentView();   // Immediately update the current view to reflect changes
+            App.ui.invalidateNavViews();
+            App.ui.renderCurrentView();
         
             if (showAlert) {
                 console.log(`Scene '${id}' changes saved to memory and view updated.`);
@@ -3038,6 +3266,10 @@ const App = {
                 <div class="grid-full-width">
                     <label>Background Music <div class="form-group inline" style="margin:0;"><input type="text" id="style-music-path" class="path-input" data-asset-type="sounds" placeholder="sounds/music.mp3"><button class="btn-warning file-icon-btn" title="Select Music File">📁</button></div></label>
                 </div>
+                <div class="grid-span-2">
+                    <label>Music Volume <input type="range" id="style-music-volume" min="0" max="1" step="0.01"></label>
+                    <label>Ambience Volume <input type="range" id="style-ambience-volume" min="0" max="1" step="0.01"></label>
+                </div>
             `;
             
             Object.keys(defaults).forEach(key => { 
@@ -3045,14 +3277,13 @@ const App = {
                 if(el) {
                     if (el.type === 'number') {
                         el.value = parseInt(styles[key] || defaults[key]);
-                    } else if (el.type !== 'color' && el.type !== 'range') {
+                    } else if (el.type !== 'color') {
                          el.value = styles[key] || defaults[key];
                     }
                 }
             });
             grid.querySelector('#style-layout').value = layout;
 
-            // Helper to parse RGBA/Hex and set color/opacity inputs
             const parseAndSetColor = (colorVar, hexInputId, opacitySliderId = null) => {
                 const colorValue = styles[colorVar] || defaults[colorVar];
                 const match = colorValue.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
@@ -3063,7 +3294,7 @@ const App = {
                     const a = match[4] !== undefined ? parseFloat(match[4]) : 1;
                     grid.querySelector(`#${hexInputId}`).value = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
                     if (opacitySliderId) grid.querySelector(`#${opacitySliderId}`).value = a;
-                } else { // Handle plain hex/color names
+                } else {
                     grid.querySelector(`#${hexInputId}`).value = colorValue;
                      if (opacitySliderId) grid.querySelector(`#${opacitySliderId}`).value = 1;
                 }
@@ -3216,7 +3447,7 @@ body {
             }
             return css;
         },
-        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': 'sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--music-path': '', '--typewriter-effect': 'on' }; }
+        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': 'sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--music-path': '', '--music-volume': '0.4', '--ambience-volume': '0.4', '--typewriter-effect': 'on' }; }
     },
     
     modals: {

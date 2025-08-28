@@ -1,20 +1,20 @@
-# CYOA Studio (Choose Your Own Adventure Editor)
+# Kinexus (Interactive Narrative Editor)
 
-CYOA Studio is a powerful tool for creating, styling, and exporting choice-based narrative games, interactive fiction, and interactive graphic novels. It runs entirely in your web browser, providing a complete workflow from writing your story to packaging a distributable ZIP file for platforms like [itch.io](https://itch.io/).
+**Kinexus** is a powerful tool for creating, styling, and exporting choice-based narrative games, interactive fiction, and interactive graphic novels. It runs entirely in your web browser, providing a complete workflow from writing your story to packaging a distributable ZIP file for platforms like [itch.io](https://itch.io/).
 
 <img width="1905" height="959" alt="image" src="https://github.com/user-attachments/assets/8a7c3d51-4abd-4d48-8a15-cb728ec17401" />
 
 ## Try It
 
 <div align="left">
-  <a href="https://tin2tin.github.io/CYOA_Studio/">Open CYOA Studio</a><br><br>
+  <a href="https://tin2tin.github.io/CYOA_Studio/">Open Kinexus</a><br><br>
 </div>
 
 <div align="left">
   <a href="https://tintwotin.itch.io/cyoa-test?secret=G3dumLNBVgg2migNyde3jOYm8">Try the example game</a><br><br>
 </div>
 
-An example project. Unzip and open with CYOA Studio: [Example_The_Last_Broadcast](https://github.com/tin2tin/CYOA_Studio/raw/refs/heads/main/example_the_last_broadcast.zip)
+An example project. Unzip and open with Kinexus: [Example_The_Last_Broadcast](https://github.com/tin2tin/CYOA_Studio/raw/refs/heads/main/example_the_last_broadcast.zip)
 
 ## Features
 
@@ -350,3 +350,4 @@ This example demonstrates the use of variables (`knows_code`) to unlock a new st
     }
   }
 }
+```

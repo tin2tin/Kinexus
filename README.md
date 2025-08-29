@@ -160,11 +160,9 @@ It's crucial to understand the difference between saving and exporting:
 
 ## The Story File Format
 
-To programmatically generate stories for this application, you must produce a valid JSON file adhering to the precise schema detailed below. This format is ideal for any kind of interactive fiction, from simple stories to complex narratives with state management.
+The entire state of a Kinexus project is stored in a single JSON file named `story.json`. This file contains all story text, choices, scene connections, and styling information. The structure is composed of two primary top-level objects: `meta` and `scenes`.
 
-### Root Object Structure
-
-The root element **MUST** be a single JSON object with two required, top-level keys: `meta` and `scenes`.
+#### **Top-Level Structure**
 
 ```json
 {
@@ -173,181 +171,125 @@ The root element **MUST** be a single JSON object with two required, top-level k
 }
 ```
 
-### The `meta` Object
+---
 
-The `meta` object contains global metadata and configuration for the entire story.
+#### **The `meta` Object**
 
-| Key | Type | Required | Description | Example |
-| :--- | :--- | :--- | :--- | :--- |
-| `title` | String | Yes | The title of your story. | `"The Last Broadcast"` |
-| `creatorName` | String | No | The name of the author. | `"A. N. Author"` |
-| `aboutText` | String | No | A brief description of the project. | `"A short interactive story of suspense."` |
-| `startSceneId` | String | Yes | The ID of the scene where the story begins. | `"radio_room"` |
-| `variables` | Object | No | **OPTIONAL.** An object defining the initial state of all story variables (e.g., inventory, character stats). | `{ "has_key": false, "power_on": true }` |
-| `layout` | String | Yes | The visual layout. **MUST** be either `"layout-top-down"` or `"layout-side-by-side"`. | `"layout-side-by-side"` |
-| `styles` | Object | Yes | An object containing key-value pairs for CSS styling. | `{ "--bg-color": "#1a1a1a", ... }` |
-
-#### The `styles` Object
-
-This object contains CSS custom properties to theme the player. All keys and values **MUST** be strings.
-
-| Key | Type | Description | Example |
-| :--- | :--- | :--- | :--- |
-| `--bg-color` | String | Background color of the game screen. | `"#1a1a1a"` |
-| `--text-color` | String | Main narrative text color. | `"#e0e0e0"` |
-| `--btn-color` | String | Background color of choice buttons. | `"#4a78ad"` |
-| `--btn-text-color` | String | Text color of choice buttons. | `"#ffffff"` |
-| `--btn-hover-color`| String | Background color of choice buttons on hover. | `"#6c757d"` |
-| `--btn-border` | String | **OPTIONAL.** Border style for choice buttons. | `"1px solid #ffffff"` |
-| `--font-family` | String | Font style. **MUST** be `sans-serif`, `serif`, or `monospace`. | `"monospace"` |
-| `--font-size` | String | The base font size, including the `px` unit. | `"18px"` |
-| `--padding` | String | Padding inside the game container, including the `px` unit. | `"40px"` |
-| `--border-radius` | String | **OPTIONAL.** Corner roundness for buttons and containers. | `"8px"` |
-| `--music-path` | String | **OPTIONAL.** Relative path to a global background music file. | `"sounds/bg_music.mp3"` |
-| `--screen-bg-image`| String | **OPTIONAL.** Relative path to a background image for the screen. | `"images/static_bg.png"` |
-| `--container-bg-image` | String | **OPTIONAL.** Relative path to a background image for the content box. | `"images/paper_texture.jpg"` |
-
-### The `scenes` Object
-
-The `scenes` object is a dictionary where each key is a unique `sceneId` (String) and each value is a corresponding Scene Object.
-
-### Scene Object Structure
-
-Each Scene Object represents a single page or moment in the story.
-
-| Key | Type | Required | Description | Example |
-| :--- | :--- | :--- | :--- | :--- |
-| `id` | String | Yes | The unique identifier for the scene. | `"radio_room"` |
-| `text` | String | Yes | The main narrative text for the scene. | `"The static hisses."` |
-| `image` | String | No | **OPTIONAL.** The relative path to the image file. | `"images/radio.jpg"` |
-| `imagePrompt` | String | No | **OPTIONAL.** The descriptive prompt used to generate the image. | `"A vintage 1940s radio..."` |
-| `ambienceSound` | String | No | **OPTIONAL.** The relative path to a looping background audio file. | `"sounds/radio_static.ogg"` |
-| `soundEffect` | String | No | **OPTIONAL.** The relative path to a one-shot sound effect that plays on scene entry. | `"sounds/power_up.wav"` |
-| `setVariables` | Object | No | **OPTIONAL.** An object defining variable changes that occur upon entering this scene. | `{ "power_on": true }` |
-| `choices` | Array | Yes | An array of Choice Objects. An empty array (`[]`) signifies an ending. | `[ { ... } ]` |
-
-### Choice Object Structure
-
-Each Choice Object defines a single player action and its consequences.
-
-| Key | Type | Required | Description | Example |
-| :--- | :--- | :--- | :--- | :--- |
-| `text` | String | Yes | The text that appears on the button. | `"Turn the dial."` |
-| `target` | String | Yes | The `id` of the scene this choice leads to. | `"faint_signal"` |
-| `conditions` | Array | No | **OPTIONAL.** An array of conditions that **MUST** be met for this choice to be visible. | `[{"variable": "power_on", "operator": "equals", "value": true}]` |
-| `setVariables` | Object | No | **OPTIONAL.** An object defining variable changes that occur when this choice is selected. | `{ "heard_signal": true }` |
-
-#### Condition Object Structure
-
-The `conditions` array contains one or more Condition Objects. All conditions must be met for the choice to appear.
+This object contains global information and settings for the project.
 
 | Key | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `variable` | String | Yes | The name of the variable to check (must be defined in `meta.variables`). |
-| `operator` | String | Yes | The comparison to perform. **MUST** be `"equals"` or `"notEquals"`. |
-| `value` | Boolean, String, or Number | Yes | The value to compare against. |
+| `title` | String | Yes | The title of your story. This appears in the player's "About" section and as the title of the exported HTML file. |
+| `startSceneId` | String | Yes | The ID of the scene where the story begins. This ID must correspond to a valid key in the `scenes` object. |
+| `creatorName` | String | No | The name of the author, displayed in the "About" section. Defaults to an empty string. |
+| `aboutText` | String | No | A description of the project, displayed in the "About" section. Defaults to an empty string. |
+| `layout` | String | Yes | Defines the player's visual layout. Must be one of `layout-image-as-bg`, `layout-top-down`, or `layout-side-by-side`. |
+| `styles` | Object | Yes | An object containing key-value pairs for CSS variables that control the player's appearance (fonts, colors, etc.). |
 
-### Complete JSON Example (with new features)
-
-This example demonstrates the use of variables (`knows_code`) to unlock a new story path.
-
+**Example `meta` Object:**
 ```json
-{
-  "meta": {
-    "title": "The Last Broadcast",
-    "creatorName": "A. N. Author",
-    "aboutText": "A short interactive story of suspense set in a remote listening post.",
-    "startSceneId": "radio_room",
-    "variables": {
-      "knows_code": false
-    },
-    "layout": "layout-side-by-side",
-    "styles": {
-      "--bg-color": "#1a1a1a",
-      "--text-color": "#e0e0e0",
-      "--btn-color": "#4a78ad",
-      "--btn-text-color": "#ffffff",
-      "--btn-hover-color": "#6c757d",
-      "--btn-border": "1px solid #333",
-      "--font-family": "monospace",
-      "--font-size": "18px",
-      "--padding": "40px",
-      "--border-radius": "4px",
-      "--music-path": "",
-      "--screen-bg-image": "images/static_bg.png",
-      "--container-bg-image": ""
-    }
-  },
-  "scenes": {
-    "radio_room": {
-      "id": "radio_room",
-      "text": "The only light in the shack comes from the warm, orange glow of the radio's vacuum tubes.\nOutside, the blizzard howls.\nThe constant hiss of static is your only companion.",
-      "image": "images/radio.jpg",
-      "imagePrompt": "A vintage 1940s radio console in a dark, rustic wooden shack, glowing tubes casting long shadows, snow visible through a window, dramatic lighting, photorealistic.",
-      "ambienceSound": "sounds/radio_static.ogg",
-      "choices": [
-        {
-          "text": "Try to tune the main frequency dial.",
-          "target": "faint_signal",
-          "setVariables": {}
-        },
-        {
-          "text": "Make a cup of coffee and wait.",
-          "target": "ending_nothing"
-        }
-      ]
-    },
-    "faint_signal": {
-      "id": "faint_signal",
-      "text": "You slowly turn the heavy bakelite dial. The static crackles and shifts.\nSuddenly, through the noise, you hear something... a voice? It's faint, distorted by distance and the storm.",
-      "image": "",
-      "imagePrompt": "",
-      "soundEffect": "sounds/faint_voice.mp3",
-      "choices": [
-        {
-          "text": "Fine-tune the signal.",
-          "target": "clear_message"
-        },
-        {
-          "text": "Dismiss it as interference and go back.",
-          "target": "radio_room"
-        }
-      ]
-    },
-    "clear_message": {
-      "id": "clear_message",
-      "text": "With delicate adjustments, the voice becomes clearer. It's speaking a sequence of numbers, repeating them over and over.\n'...seven... four... one... zero...'\nIt's a code. Then, the signal dies.",
-      "image": "images/headphones.jpg",
-      "imagePrompt": "Close-up on a pair of vintage 1940s military headphones lying on a wooden desk next to a code book, shallow depth of field, moody lighting.",
-      "setVariables": {
-        "knows_code": true
-      },
-      "choices": [
-        {
-          "text": "Write down the numbers and ponder their meaning.",
-          "target": "secret_ending"
-        },
-        {
-          "text": "The numbers mean nothing. The storm is getting worse.",
-          "target": "ending_nothing"
-        }
-      ]
-    },
-    "ending_nothing": {
-      "id": "ending_nothing",
-      "text": "You decide against chasing phantoms in the static. The storm rages on, and the night passes in quiet solitude.\nNothing happens. Perhaps that's for the best.",
-      "image": "images/snow_window.jpg",
-      "imagePrompt": "Looking out a frosted window from a dark cabin into a fierce blizzard at night.",
-      "ambienceSound": "sounds/blizzard.mp3",
-      "choices": []
-    },
-    "secret_ending": {
-      "id": "secret_ending",
-      "text": "The numbers... it's the access code for the emergency bunker hidden beneath the floorboards. You never thought you'd use it.\nAs the storm worsens, you realize the broadcast wasn't a phantom, but a warning.",
-      "image": "images/bunker_door.jpg",
-      "imagePrompt": "A heavy steel hatch set into a dark wooden floor, a wheel lock in the center.",
-      "choices": []
-    }
+"meta": {
+  "title": "The Cavern of Whispers",
+  "startSceneId": "entry",
+  "creatorName": "Jane Doe",
+  "aboutText": "A short interactive fiction story.",
+  "layout": "layout-image-as-bg",
+  "styles": {
+    "--bg-color": "#1a1a1a",
+    "--text-color": "#e0e0e0",
+    "--btn-color": "rgba(80, 80, 95, 1)",
+    "--font-family": "serif",
+    "--music-path": "sounds/dungeon_theme.mp3"
   }
 }
 ```
+
+---
+
+#### **The `scenes` Object**
+
+This object acts as a dictionary containing all the individual scenes of the story. The key for each entry is the unique Scene ID.
+
+| Key | Type | Description |
+| :--- | :--- | :--- |
+| `[sceneId]` | String | The unique identifier for a scene (e.g., "entry", "hallway", "room_12"). This key must match the `id` property within the scene object itself. |
+| `[sceneObject]` | Object | An object containing all the data for that specific scene. |
+
+**Structure of a Scene Object:**
+
+Each scene object within the `scenes` dictionary has the following structure:
+
+| Key | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | String | Yes | The unique ID of the scene. Must match the key in the parent `scenes` object. |
+| `text` | String | Yes | The main story text displayed to the player for this scene. Can be an empty string. |
+| `image` | String | No | The relative path to an image file for the scene (e.g., `images/cavern.jpg`). |
+| `imagePrompt` | String | No | The text prompt used to generate an AI image for this scene. |
+| `ambienceSound` | String | No | The relative path to a sound file for the scene (e.g., `sounds/dripping.mp3`). |
+| `ambienceLoop` | Boolean | No | If `true` (the default), the `ambienceSound` will loop. If `false`, it will play once. |
+| `choices` | Array | Yes | An array of choice objects. An empty array `[]` signifies a "dead end" scene. |
+| `lastModified` | Number | No | A timestamp (milliseconds since epoch) indicating when the scene was last saved. Used for sorting. |
+
+**Structure of a Choice Object (within the `choices` array):**
+
+| Key | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `text` | String | Yes | The text displayed on the choice button for the player. |
+| `target` | String | Yes | The ID of the scene that this choice leads to. This ID must correspond to a valid key in the `scenes` object. |
+
+**Example `scenes` Object:**
+```json
+"scenes": {
+  "entry": {
+    "id": "entry",
+    "text": "You stand at the mouth of a dark cavern. A cold wind blows out from within, carrying faint whispers.",
+    "image": "images/cave_entrance.jpg",
+    "ambienceSound": "sounds/wind.mp3",
+    "ambienceLoop": true,
+    "choices": [
+      {
+        "text": "Enter the cavern.",
+        "target": "dark_passage"
+      },
+      {
+        "text": "Turn back.",
+        "target": "forest"
+      }
+    ],
+    "lastModified": 1724911380000
+  },
+  "dark_passage": {
+    "id": "dark_passage",
+    "text": "The passage is narrow and dark. You can barely see your hand in front of your face.",
+    "choices": [],
+    "lastModified": 1724911440000
+  }
+}
+```
+
+### 2. Instructions for a Successful Import
+
+To ensure your `story.json` file is imported correctly, it must adhere to the following demands and structure:
+
+1.  **Valid JSON Format**: The file must be a syntactically correct JSON file. You can validate your file using an online JSON validator. Any syntax error (like a missing comma or quote) will cause the import to fail immediately.
+
+2.  **Top-Level Objects**: The root of the JSON object must contain the `meta` and `scenes` keys. The application is designed to be robust and may create them if they are missing, but for a predictable import, they should be present.
+
+3.  **Required `meta` Fields**:
+    *   The `meta` object **must** contain a `startSceneId` property.
+    *   The value of `startSceneId` **must** be a string that matches one of the scene IDs (keys) in the `scenes` object. If it doesn't, the application will attempt to correct it by selecting the first available scene, but this may not be your intended starting point.
+
+4.  **Scene and Choice Integrity**:
+    *   Every scene object in the `scenes` dictionary **must** have a unique key (its ID).
+    *   Inside each scene object, the `id` property should be present and match its key.
+    *   The `text` and `choices` properties must be present in every scene object. `text` must be a string, and `choices` must be an array.
+    *   For every choice object in a `choices` array, the `text` (string) and `target` (string) properties are required.
+    *   The `target` of every choice should point to a valid scene ID that exists in the `scenes` object. A non-existent target will be flagged as a "Broken Link" in the tree view and will result in an error in the player.
+
+5.  **Order of Items**:
+    *   Inside the main JSON object, the order of `meta` and `scenes` does not matter.
+    *   Inside the `scenes` object, the order of the individual scene objects does not matter, as they are accessed by their unique ID keys.
+    *   Inside each scene object, the order of properties (`id`, `text`, `choices`, etc.) does not matter.
+    *   **Crucially, the order of choice objects within a `choices` array is preserved.** They will be displayed to the player in the same order they appear in the array.
+
+

@@ -293,3 +293,39 @@ To ensure your `story.json` file is imported correctly, it must adhere to the fo
     *   **Crucially, the order of choice objects within a `choices` array is preserved.** They will be displayed to the player in the same order they appear in the array.
 
 
+***
+
+## Export to EXE
+
+### Explanation for the Windows Unzipping and Icon Issues
+
+These issues cannot be solved with code, but here is the essential information you need.
+
+#### 1. How to Fix the "Windows blocks unzipping" Warning
+
+When you distribute your game, your users may see a warning when they try to unzip the file. Instruct them to do the following:
+
+1.  Find the downloaded `.zip` file on their computer.
+2.  **Right-click** on the file and choose **Properties**.
+3.  At the bottom of the **General** tab, there will be a security message: *"This file came from another computer and might be blocked to help protect this computer."*
+4.  Check the **Unblock** checkbox next to this message.
+5.  Click **Apply**, and then **OK**.
+
+After doing this, they will be able to unzip the file and run the game without any issues.
+
+#### 2. How to Manually Add the Icon to the EXE
+
+Because the browser cannot modify the EXE file, you must do this one final step manually after exporting.
+
+1.  **Prepare your Icon:** Create a proper Windows icon file. It must have the **`.ico`** extension. You can use free online tools to convert a PNG or JPG into a `.ico` file.
+2.  **Download a Resource Editor:** A free, popular tool for this is **Resource Hacker**. You can download it from its official site.
+3.  **Export and Unzip:** Export your game from your application and unzip the resulting folder.
+4.  **Change the Icon:**
+    *   Open Resource Hacker.
+    *   Go to `File > Open` and select the `.exe` file for your game.
+    *   In the left-hand pane, right-click on the **Icon** folder and choose **Replace Icon...**.
+    *   In the new window, click **Open file with new icon...** and select your `.ico` file.
+    *   Select the icon from the list (usually there's only one) and click **Replace**.
+    *   Go to `File > Save` to save the changes to your `.exe` file.
+
+Your `.exe` will now have a proper custom icon when viewed in Windows Explorer.

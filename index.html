@@ -102,7 +102,7 @@
             border-radius: 0 0 0 5px; 
         }
         .choice-node-text { white-space: nowrap; }
-        .tree-toggle { font-family: monospace; width: 20px; text-align: center; border-radius: 4px; background: #333333; user-select: none; color: var(--dark-text); flex-shrink: 0; }
+        .tree-toggle { font-family: monospace; width: 20px; text-align: center; border-radius: 4px; background: #333333; -webkit-user-select: none; user-select: none; color: var(--dark-text); flex-shrink: 0; }
         .scene-node.active .tree-toggle { background: #ffffff; color: var(--primary-color); }
         .tree-toggle.empty { opacity: 0; cursor: default; }
 
@@ -592,7 +592,7 @@
         <button id="toggle-tree-view-btn" class="active" title="Tree View">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M10.23,6.86,8.7,8.4a.5.5,0,0,1-.71,0L6.44,6.86a.5.5,0,0,1,0-.71l.71-.71a.5.5,0,0,1,.71,0l.71.71a.5.5,0,0,0,.71,0l.71-.71a.5.5,0,0,1,.71,0l.71.71A.5.5,0,0,1,10.23,6.86Z"/>
-                <path d="M15,11.5A1.5,1.5,0,0,1,13.5,13H11V9.5a.5.5,0,0,0-.5-.5H8.71a.5.5,0,0,1,0-1H11.5a.5.5,0,0,0,.5-.5V6h1.5a.5.5,0,0,0,0-1H11.5A1.5,1.5,0,0,0,10,6.5v1a1.5,1.5,0,0,0-1.5,1.5H5.5A1.5,1.5,0,0,0,4,7.5v-1A1.5,1.5,0,0,0,2.5,5H1a.5.5,0,0,0,0,1H2.5a.5.5,0,0,1,.5.5V8H5.29a.5.5,0,0,1,0,1H3a.5.5,0,0,0-.5.5V13H1.5A1.5,1.5,0,0,1,0,11.5v-1A1.5,1.5,0,0,1,1.5,9h.05a.5.5,0,0,1,0,1H1.5a.5.5,0,0,0-.5.5v1a.5.5,0,0,0,.5.5H3v.5a.5.5,0,0,0,.5.5H11a.5.5,0,0,0,.5-.5V13h1.5a.5.5,0,0,0,.5-.5v-1a.5.5,0,0,0-.5-.5h-.05a.5.5,0,0,1,0-1H14.5A1.5,1.5,0,0,1,16,10.5Z"/>
+                <path d="M15,11.5A1.5 1.5,0,0,1,13.5,13H11V9.5a.5.5,0,0,0-.5-.5H8.71a.5.5,0,0,1,0-1H11.5a.5.5,0,0,0,.5-.5V6h1.5a.5.5,0,0,0,0-1H11.5A1.5 1.5,0,0,0,10,6.5v1a1.5,1.5,0,0,0-1.5,1.5H5.5A1.5 1.5,0,0,0,4,7.5v-1A1.5 1.5,0,0,0,2.5,5H1a.5.5,0,0,0,0,1H2.5a.5.5,0,0,1,.5.5V8H5.29a.5.5,0,0,1,0,1H3a.5.5,0,0,0-.5,.5V13H1.5A1.5 1.5,0,0,1,0,11.5v-1A1.5 1.5,0,0,1,1.5,9h.05a.5.5,0,0,1,0,1H1.5a.5.5,0,0,0-.5.5v1a.5.5,0,0,0,.5.5H3v.5a.5.5,0,0,0,.5.5H11a.5.5,0,0,0,.5-.5V13h1.5a.5.5,0,0,0,.5-.5v-1a.5.5,0,0,0-.5-.5h-.05a.5.5,0,0,1,0-1H14.5A1.5 1.5,0,0,1,16,10.5Z"/>
             </svg>
             Tree
         </button>
@@ -666,7 +666,7 @@
             <div id="scene-editor-preview-wrapper">
                 <div id="scene-editor-preview">
                     <div id="preview-player-inner-container" class="layout-top-down">
-                        <div id="preview-player-image-container"><img id="preview-player-image" src=""></div>
+                        <div id="preview-player-image-container"><img id="preview-player-image" src="" alt="Preview image"></div>
                         <div id="preview-player-content-container">
                             <div id="preview-player-text"></div>
                             <div id="preview-player-choices"></div>
@@ -775,7 +775,22 @@
 
 
 <!-- Modals -->
-<div id="project-menu-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Menu</h2><div class="btn-group" style="flex-direction: column; gap: 15px; align-items: stretch;"><button id="new-project-btn" class="btn-secondary">New Project</button><button id="open-project-btn" class="btn-secondary">Open Project</button><button id="save-story-btn" class="btn-success">Save Project</button><button id="about-editor-btn">Project Text Editor</button><button id="batch-image-gen-btn" class="btn-secondary" disabled>Batch Image Generation</button><button id="export-data-btn" class="btn-warning">Export Data</button><button id="export-project-btn" class="btn-warning">Export Standalone Game</button></div></div></div>
+<div id="project-menu-modal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <h2>Project Menu</h2>
+        <div class="btn-group" style="flex-direction: column; gap: 15px; align-items: stretch;">
+            <button id="new-project-btn" class="btn-secondary">New Project</button>
+            <button id="open-project-btn" class="btn-secondary">Open Project</button>
+            <button id="save-story-btn" class="btn-success">Save Project</button>
+            <button id="about-editor-btn">Project Text Editor</button>
+            <button id="batch-image-gen-btn" class="btn-secondary" disabled>Batch Image Generation</button>
+            <button id="export-data-btn" class="btn-warning">Export Data</button>
+            <button id="export-project-btn" class="btn-warning">Export Standalone Game</button>
+            <button id="export-exe-btn" class="btn-warning">Export as EXE (Windows)</button>
+        </div>
+    </div>
+</div>
 <div id="about-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Project Text Editor</h2><p>This information will be displayed in the player's "About" section.</p><div class="form-group"><label for="story-title">Story Title</label><input type="text" id="story-title" placeholder="Your story title"></div><div class="form-group"><label for="creator-name">Creator Name</label><input type="text" id="creator-name" placeholder="Your name or alias"></div><div class="form-group"><label for="about-text">About Text</label><textarea id="about-text" placeholder="A brief description of your project."></textarea></div></div></div>
 <div id="export-data-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Export Specific Data</h2><p>Select data to export as a JSON file.</p><button data-export-type="imagePrompts">Export All Image Prompts</button></div></div>
 <div id="style-editor-modal" class="modal"><div class="modal-content"><span class="modal-close">&times;</span><h2>Style Template Editor</h2><div id="style-editor-grid" class="modal-grid"></div></div></div>
@@ -843,6 +858,40 @@
     </div>
 </div>
 
+<div id="export-exe-modal" class="modal">
+    <div class="modal-content" style="max-width: 560px;">
+        <span class="modal-close">&times;</span>
+        <h2>Export Windows EXE</h2>
+        <div class="form-group" style="display:flex; gap:15px; align-items:center;">
+            <div id="export-icon-preview" style="width:96px; height:96px; border:1px dashed var(--border-color); display:flex; align-items:center; justify-content:center; background:#111; border-radius:8px; overflow:hidden;">
+                <span>Icon (Optional)</span>
+            </div>
+            <div class="btn-group" style="flex-direction:column; gap:8px;">
+                <button id="select-export-icon-btn" class="btn-warning">Select Icon</button>
+                <small style="opacity:.8;">Use a <b>.ico</b> file for the EXE icon.</small>
+            </div>
+        </div>
+        <input type="file" id="export-icon-file-input" accept="image/*" style="display:none;">
+        <div class="form-group">
+            <label for="export-nw-path">NW.js Folder Path</label>
+            <div class="form-group inline" style="margin:0;">
+                <input type="text" id="export-nw-path" placeholder="Select the root NW.js folder" disabled>
+                <button id="select-nw-btn" class="btn-warning file-icon-btn" title="Select NW.js Folder">📁</button>
+                <button id="nw-download-btn" class="btn-secondary file-icon-btn" title="Open NW.js Downloads Page">🌐</button>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Export Log</label>
+            <pre id="export-exe-log" style="background-color: #000; border: 1px solid var(--border-color); border-radius: 4px; height: 150px; overflow-y: auto; padding: 10px; font-family: monospace; font-size: 0.9em; white-space: pre-wrap; color: #ccc;">Ready to export.
+</pre>
+        </div>
+
+        <div class="btn-group" style="justify-content:flex-end;">
+            <button id="export-exe-run-btn" class="btn-success">Export</button>
+        </div>
+    </div>
+</div>
 
 <!-- JSZip Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -1172,6 +1221,7 @@ const App = {
         typewriter: { intervalId: null, skipListener: null },
         currentNavView: 'tree', // 'tree' or 'list'
         navViewsDirty: true, // IMPROVEMENT: Flag to check if tree/list needs re-rendering
+        missingAssetWarnings: new Set(),
     },
     elements: {},
 
@@ -1283,8 +1333,21 @@ const App = {
         document.getElementById('restart-play')?.addEventListener('click', () => App.player.play(App.state.storyData.meta.startSceneId));
         
         document.getElementById('export-project-btn').addEventListener('click', () => App.io.exportProjectZip());
+        document.getElementById('export-exe-btn').addEventListener('click', () => App.modals.show('export-exe-modal'));
         document.getElementById('preview-btn').addEventListener('click', () => App.io.previewProject());
         document.getElementById('export-data-btn').addEventListener('click', () => App.modals.show('export-data-modal'));
+        // Add Validate Project button to project menu, if not present, add dynamically
+        (function ensureValidateButton(){
+            const menu = document.querySelector('#project-menu-modal .btn-group');
+            if (menu && !document.getElementById('validate-project-btn')) {
+                const btn = document.createElement('button');
+                btn.id = 'validate-project-btn';
+                btn.className = 'btn-secondary';
+                btn.textContent = 'Validate Project';
+                btn.addEventListener('click', App.io.openValidationReport);
+                menu.insertBefore(btn, document.getElementById('export-data-btn'));
+            }
+        })();
         App.elements['style-editor-btn'].addEventListener('click', () => App.styles.open());
         App.elements['batch-image-gen-btn'].addEventListener('click', () => App.batch.open());
         document.getElementById('about-editor-btn').addEventListener('click', () => App.modals.show('about-editor-modal'));
@@ -1387,9 +1450,10 @@ const App = {
                     }
                 }
                 activeTooltip.style.opacity = '0';
+                const tooltipRef = activeTooltip;
                 setTimeout(() => {
-                    if (activeTooltip.style.opacity === '0') {
-                        activeTooltip.style.display = 'none';
+                    if (tooltipRef && tooltipRef.style.opacity === '0') {
+                        tooltipRef.style.display = 'none';
                     }
                 }, 150);
                 activeTooltip = null;
@@ -1523,6 +1587,7 @@ const App = {
             document.getElementById('scene-search-btn').disabled = !isEnabled;
             App.elements['save-story-btn'].disabled = !isEnabled;
             document.getElementById('export-project-btn').disabled = !isEnabled;
+            document.getElementById('export-exe-btn').disabled = !isEnabled;
             document.getElementById('export-data-btn').disabled = !isEnabled;
             App.elements['style-editor-btn'].disabled = !isEnabled;
             document.getElementById('about-editor-btn').disabled = !isEnabled;
@@ -1598,7 +1663,7 @@ const App = {
             App.modals.show('fullscreen-viewer');
         },
         showNotification(message) {
-            App.elements['notification-message'].textContent = message;
+            App.elements['notification-message'].innerHTML = message;
             App.modals.show('notification-modal');
         },
         showIconThumbnail(data) {
@@ -1639,6 +1704,158 @@ const App = {
     },
 
     io: {
+        openValidationReport: async function() {
+            if (!App.state.projectDirectoryHandle) {
+                App.ui.showNotification('Please open a project first.');
+                return;
+            }
+            try {
+                const storyFileHandle = await App.state.projectDirectoryHandle.getFileHandle('story.json');
+                const file = await storyFileHandle.getFile();
+                const content = await file.text();
+                let raw;
+                try {
+                    raw = JSON.parse(content);
+                } catch (e) {
+                    App.ui.showNotification(`<b>Validation Error:</b><br>Malformed JSON in story.json<br><br><i>${e.message}</i>`);
+                    return;
+                }
+                const result = App.io.validateProjectData(raw, { autofix: false });
+                if (!result.ok) {
+                    App.ui.showNotification(`<b>Validation Failed:</b><br>${result.errors.join('<br>')}`);
+                    return;
+                }
+                const warnings = result.warnings && result.warnings.length ? ('<br><br><b>Warnings:</b><br>' + result.warnings.map(w => '• ' + w).join('<br>')) : '';
+                App.ui.showNotification(`<b>Validation OK</b>${warnings}`);
+            } catch (err) {
+                console.error('Validation error:', err);
+                App.ui.showNotification('Validation failed due to an unexpected error.');
+            }
+        },
+        validateProjectData(rawStoryData, { autofix = true } = {}) {
+            const messages = [];
+            const warnings = [];
+            const errors = [];
+
+            const defaultStory = App.getNewStoryObject();
+            let storyData = rawStoryData;
+
+            // Basic shape
+            if (typeof storyData !== 'object' || storyData === null) {
+                errors.push("Project root is not an object.");
+                return { ok: false, data: defaultStory, messages, warnings, errors };
+            }
+
+            // Meta merge
+            storyData.meta = { ...defaultStory.meta, ...(storyData.meta || {}) };
+            if (typeof storyData.meta !== 'object' || storyData.meta === null) {
+                warnings.push("'meta' was invalid. Reset to defaults.");
+                storyData.meta = { ...defaultStory.meta };
+            }
+
+            // Scenes normalization: allow array or object
+            const originalScenes = storyData.scenes;
+            if (Array.isArray(originalScenes)) {
+                const obj = {};
+                originalScenes.forEach((scene, index) => {
+                    if (scene && typeof scene === 'object') {
+                        const desiredId = typeof scene.id === 'string' && scene.id.trim() ? scene.id.trim() : `scene_${index + 1}`;
+                        obj[desiredId] = { ...scene, id: desiredId };
+                    }
+                });
+                warnings.push("Converted 'scenes' from array to object using scene ids.")
+                storyData.scenes = obj;
+            } else if (typeof originalScenes !== 'object' || originalScenes === null) {
+                warnings.push("'scenes' missing or invalid. Initialized with default 'start' scene.");
+                storyData.scenes = { ...defaultStory.scenes };
+            }
+
+            // Coerce each scene, detect duplicates and invalid ids
+            const sanitizedScenes = {};
+            const seenIds = new Set();
+            const invalidIdRegex = /[^A-Za-z0-9_\-]/;
+            Object.entries(storyData.scenes).forEach(([key, sceneObj]) => {
+                const scene = (typeof sceneObj === 'object' && sceneObj !== null) ? sceneObj : {};
+                let id = typeof scene.id === 'string' && scene.id.trim() ? scene.id.trim() : key;
+                if (!id || typeof id !== 'string') id = key;
+                if (!id) id = 'scene';
+
+                // Sanitize id: spaces to underscores
+                let sanitizedId = id.replace(/\s+/g, '_');
+                if (invalidIdRegex.test(sanitizedId)) {
+                    const fixed = sanitizedId.replace(invalidIdRegex, '_');
+                    warnings.push(`Scene id '${id}' contained invalid characters. Using '${fixed}'.`);
+                    sanitizedId = fixed;
+                }
+
+                // Ensure unique id
+                let uniqueId = sanitizedId;
+                let counter = 2;
+                while (seenIds.has(uniqueId)) {
+                    uniqueId = `${sanitizedId}_${counter++}`;
+                }
+                if (uniqueId !== sanitizedId) {
+                    warnings.push(`Duplicate scene id '${sanitizedId}' detected. Renamed to '${uniqueId}'.`);
+                }
+                seenIds.add(uniqueId);
+
+                const safeChoices = Array.isArray(scene.choices) ? scene.choices.filter(c => c && typeof c === 'object') : [];
+
+                sanitizedScenes[uniqueId] = {
+                    id: uniqueId,
+                    text: typeof scene.text === 'string' ? scene.text : '',
+                    image: typeof scene.image === 'string' ? scene.image : '',
+                    imagePrompt: typeof scene.imagePrompt === 'string' ? scene.imagePrompt : '',
+                    ambienceSound: typeof scene.ambienceSound === 'string' ? scene.ambienceSound : '',
+                    ambienceLoop: (scene.ambienceLoop === undefined ? true : !!scene.ambienceLoop),
+                    choices: safeChoices.map(c => ({
+                        text: typeof c.text === 'string' ? c.text : '',
+                        target: typeof c.target === 'string' ? c.target : ''
+                    })),
+                    lastModified: typeof scene.lastModified === 'number' ? scene.lastModified : Date.now()
+                };
+            });
+
+            if (Object.keys(sanitizedScenes).length === 0) {
+                errors.push("No valid scenes found.");
+                if (autofix) {
+                    warnings.push("Replaced with default 'start' scene.");
+                    storyData.scenes = { ...defaultStory.scenes };
+                } else {
+                    return { ok: false, data: defaultStory, messages, warnings, errors };
+                }
+            } else {
+                storyData.scenes = sanitizedScenes;
+            }
+
+            // Validate choice targets and collect missing
+            const allIds = new Set(Object.keys(storyData.scenes));
+            const missingTargets = new Map();
+            Object.values(storyData.scenes).forEach(scene => {
+                scene.choices.forEach(ch => {
+                    if (ch.target && !allIds.has(ch.target)) {
+                        const arr = missingTargets.get(scene.id) || [];
+                        arr.push(ch.target);
+                        missingTargets.set(scene.id, arr);
+                    }
+                });
+            });
+            if (missingTargets.size > 0) {
+                missingTargets.forEach((targets, fromId) => {
+                    warnings.push(`Scene '${fromId}' has choices pointing to missing targets: ${[...new Set(targets)].join(', ')}`);
+                });
+            }
+
+            // Start scene validity
+            if (!storyData.meta.startSceneId || !storyData.scenes[storyData.meta.startSceneId]) {
+                const old = storyData.meta.startSceneId;
+                const fallback = Object.keys(storyData.scenes)[0];
+                storyData.meta.startSceneId = fallback;
+                warnings.push(`Start scene '${old || '(none)'}' was invalid. Using '${fallback}'.`);
+            }
+
+            return { ok: true, data: storyData, messages, warnings, errors };
+        },
         async newProject() {
             try {
                 const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
@@ -1701,41 +1918,55 @@ const App = {
             try {
                 App.player.stop();
                 document.getElementById('scene-search-input').value = '';
+                if (App.state.missingAssetWarnings) App.state.missingAssetWarnings.clear();
                 
                 if (!dirHandle) {
                     dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
                 }
-                let storyFileHandle = await dirHandle.getFileHandle('story.json').catch(() => null);
-                
-                if (!storyFileHandle) {
-                    await dirHandle.getDirectoryHandle('images', { create: true });
-                    await dirHandle.getDirectoryHandle('sounds', { create: true });
-                    storyFileHandle = await dirHandle.getFileHandle('story.json', { create: true });
-                    const writable = await storyFileHandle.createWritable();
-                    const newStory = App.getNewStoryObject();
-                    newStory.meta.title = dirHandle.name;
-                    await writable.write(JSON.stringify(newStory, null, 2));
-                    await writable.close();
-                    App.state.storyData = newStory;
-                } else {
-                    const file = await storyFileHandle.getFile();
-                    const storyData = JSON.parse(await file.text());
-                    
-                    const defaultStory = App.getNewStoryObject();
-                    storyData.meta = { ...defaultStory.meta, ...storyData.meta };
-                    storyData.meta.styles = { ...defaultStory.meta.styles, ...storyData.meta.styles };
-                    Object.keys(storyData.scenes).forEach(id => {
-                        if (!storyData.scenes[id].id) {
-                            storyData.scenes[id].id = id;
-                        }
-                    });
 
-                    App.state.storyData = storyData;
+                let storyFileHandle;
+                let storyData;
+
+                try {
+                    storyFileHandle = await dirHandle.getFileHandle('story.json');
+                    const file = await storyFileHandle.getFile();
+                    const fileContent = await file.text();
+
+                    if (fileContent.trim() === '') {
+                        console.warn("story.json is empty. Initializing with default structure.");
+                        storyData = App.getNewStoryObject();
+                        storyData.meta.title = dirHandle.name;
+                    } else {
+                        try {
+                            storyData = JSON.parse(fileContent);
+                        } catch (e) {
+                            console.error("JSON Parsing Error in story.json:", e);
+                            App.ui.showNotification(`<b>Error Opening Project:</b><br>The 'story.json' file is malformed and could not be read.<br><br><i>Details: ${e.message}</i>`);
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    if (e.name === 'NotFoundError') {
+                        console.log("story.json not found. Creating a new project structure in the selected directory.");
+                        storyData = App.getNewStoryObject();
+                        storyData.meta.title = dirHandle.name;
+                    } else {
+                        throw e; // Re-throw other errors
+                    }
                 }
+                // Validate & sanitize
+                console.log("Validating and sanitizing project data...");
+                const result = App.io.validateProjectData(storyData, { autofix: false });
+                if (!result.ok && result.errors.length) {
+                    App.ui.showNotification(`<b>Error Opening Project:</b><br>${result.errors.join('<br>')}`);
+                    return;
+                }
+                storyData = result.data;
 
                 await dirHandle.getDirectoryHandle('images', { create: true });
                 await dirHandle.getDirectoryHandle('sounds', { create: true });
 
+                App.state.storyData = storyData;
                 App.state.projectDirectoryHandle = dirHandle;
                 App.state.pendingAssetCopies.clear();
                 App.modals.hideAll();
@@ -1744,15 +1975,32 @@ const App = {
                 App.ui.updateMetaInputs();
                 App.ui.invalidateNavViews();
                 App.ui.setViewMode(App.state.currentNavView);
-                App.ui.selectScene(App.state.storyData.meta.startSceneId || 'start');
-                App.ui.showNotification(`Project '${App.state.storyData.meta.title}' loaded successfully!`);
+                App.ui.selectScene(App.state.storyData.meta.startSceneId);
+
+                let finalNotification = `Project '${App.state.storyData.meta.title}' loaded successfully!`;
+                if (result.warnings && result.warnings.length) {
+                    finalNotification += `<br><br><b>Warnings:</b><br>` + result.warnings.map(w => `• ${w}`).join('<br>');
+                }
+                App.ui.showNotification(finalNotification);
+
+                // Show summarized missing assets shortly after initial render (if any collected)
+                setTimeout(() => {
+                    try {
+                        const missing = App.state.missingAssetWarnings ? Array.from(App.state.missingAssetWarnings) : [];
+                        if (missing.length > 0) {
+                            const preview = missing.slice(0, 10).map(p => `• ${p}`).join('<br>');
+                            const more = missing.length > 10 ? `<br>...and ${missing.length - 10} more.` : '';
+                            App.ui.showNotification(`<b>Missing Assets Detected:</b><br>${preview}${more}`);
+                        }
+                    } catch {}
+                }, 500);
 
             } catch (err) { 
                 if (err.name === 'SecurityError') {
                     App.ui.showNotification("This feature is not available in the current environment (e.g., a sandboxed iframe).\nPlease run this file from a local server or open it directly in a compatible browser (like Chrome or Edge).");
                 } else if (err.name !== 'AbortError') { 
-                    console.error(err); 
-                    App.ui.showNotification('Could not open the project.'); 
+                    console.error("Failed to open project:", err); 
+                    App.ui.showNotification('A critical error occurred while opening the project. Check the console for details.'); 
                 } 
             } finally {
                 App.ui.cursor.default();
@@ -2015,7 +2263,7 @@ const App = {
                             const button = document.createElement('button');
                             button.textContent = choice.text;
                             button.className = 'choice-btn fade-in';
-                            button.style.animationDelay = \`\${index * 0.2}s\`;
+                            button.style.animationDelay = (index * 0.2) + 's';
                             bindEvent(button, (e) => { e.stopPropagation(); renderScene(choice.target); });
                             choicesContainer.appendChild(button);
                         });
@@ -2151,7 +2399,7 @@ const App = {
                     try {
                         await preloadAssets(initialAssets);
                     } catch (failedUrl) {
-                        console.warn(\`Could not load an initial asset: \${failedUrl}. Starting anyway.\`);
+                        console.warn('Could not load an initial asset: ' + failedUrl + '. Starting anyway.');
                     } finally {
                         if(loader) loader.style.display = 'none';
                         setupGlobalStyles();
@@ -2224,6 +2472,250 @@ const App = {
             });
         },
         
+        async exportProjectExe() {
+            if (!App.state.projectDirectoryHandle) { 
+                App.ui.showNotification("Please open a project to export."); 
+                return; 
+            }
+            App.editor.saveCurrentScene(false);
+            App.ui.showNotification("Preparing standalone Windows build (ZIP)... This may take a moment.");
+
+            const safeTitle = App.state.storyData.meta.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+            // 1) Ask user to select their NW.js directory (contains nw.exe, dlls, locales/)
+            let nwDirHandle;
+            try {
+                nwDirHandle = await window.showDirectoryPicker({ mode: 'read' });
+            } catch (e) {
+                App.ui.showNotification("Export cancelled or directory picker unavailable.");
+                return;
+            }
+
+            // Helper: recursively add directory contents to JSZip
+            async function addDirectoryToZip(dirHandle, zipFolder) {
+                for await (const [name, handle] of dirHandle.entries()) {
+                    if (handle.kind === 'file') {
+                        const file = await handle.getFile();
+                        // Skip original nw.exe; we will add it back renamed to <safeTitle>.exe
+                        if (name.toLowerCase() === 'nw.exe') continue;
+                        zipFolder.file(name, file);
+                    } else if (handle.kind === 'directory') {
+                        const sub = zipFolder.folder(name);
+                        await addDirectoryToZip(handle, sub);
+                    }
+                }
+            }
+
+            // 2) Create main ZIP and copy NW runtime into it
+            const mainZip = new window.JSZip();
+            await addDirectoryToZip(nwDirHandle, mainZip);
+
+            // 3) Read nw.exe and add it renamed to <title>.exe
+            try {
+                const exeHandle = await nwDirHandle.getFileHandle('nw.exe');
+                const exeFile = await exeHandle.getFile();
+                mainZip.file(`${safeTitle}.exe`, exeFile);
+            } catch (e) {
+                App.ui.showNotification("Selected NW.js folder does not contain nw.exe.");
+                return;
+            }
+
+            // 4) Build package.nw: app files (index.html + assets)
+            //    Generate player HTML for export (with relative paths) and collect used assets.
+            const appZip = new window.JSZip();
+            const playerHtml = await App.io.getFormattedPlayerHTML(true);
+            appZip.file('index.html', playerHtml);
+
+            const usedAssetPaths = new Set();
+            Object.values(App.state.storyData.scenes).forEach(scene => {
+                if (scene.image) usedAssetPaths.add(scene.image);
+                if (scene.ambienceSound) usedAssetPaths.add(scene.ambienceSound);
+            });
+            const metaStyles = App.state.storyData.meta.styles;
+            if (metaStyles['--screen-bg-image']) usedAssetPaths.add(metaStyles['--screen-bg-image']);
+            if (metaStyles['--container-bg-image']) usedAssetPaths.add(metaStyles['--container-bg-image']);
+            if (metaStyles['--music-path']) usedAssetPaths.add(metaStyles['--music-path']);
+
+            // Copy assets into package.nw with their same relative paths
+            for (const path of usedAssetPaths) {
+                try {
+                    const file = await App.io.getAssetFile(path);
+                    if (file) appZip.file(path, file);
+                } catch {}
+            }
+
+            // Include a minimal package.json inside package.nw (optional but helpful)
+            const packageJson = {
+                name: safeTitle,
+                main: "index.html",
+                window: { title: App.state.storyData.meta.title, width: 1280, height: 720, resizable: true }
+            };
+            appZip.file('package.json', JSON.stringify(packageJson, null, 2));
+
+            const packageNwBlob = await appZip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+            mainZip.file('package.nw', packageNwBlob);
+
+            // 5) Generate final ZIP and download
+            const finalZipBlob = await mainZip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(finalZipBlob);
+            a.download = `${safeTitle}_windows_standalone.zip`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+
+            App.ui.showNotification("Standalone Windows build created. Unzip and run the EXE.");
+        },
+        
+        async exportProjectExe() {
+            if (!App.state.projectDirectoryHandle) { 
+                App.ui.showNotification("Please open a project to export."); 
+                return; 
+            }
+            App.editor.saveCurrentScene(false);
+            App.ui.showNotification("Preparing EXE export... This may take a moment.");
+
+            const zip = new window.JSZip();
+            const safeTitle = App.state.storyData.meta.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+            // 1. Create package.json for NW.js
+            const packageJson = {
+                name: safeTitle,
+                main: "index.html",
+                window: {
+                    title: App.state.storyData.meta.title,
+                    width: 1280,
+                    height: 720,
+                    resizable: true
+                }
+            };
+            zip.file("package.json", JSON.stringify(packageJson, null, 2));
+
+            // 2. Generate and add index.html
+            const playerHtml = await App.io.getFormattedPlayerHTML(true);
+            zip.file("index.html", playerHtml);
+
+            // 3. Collect and add all used assets
+            const usedAssetPaths = new Set();
+            Object.values(App.state.storyData.scenes).forEach(scene => {
+                if (scene.image) usedAssetPaths.add(scene.image);
+                if (scene.ambienceSound) usedAssetPaths.add(scene.ambienceSound);
+            });
+            const metaStyles = App.state.storyData.meta.styles;
+            if (metaStyles['--screen-bg-image']) usedAssetPaths.add(metaStyles['--screen-bg-image']);
+            if (metaStyles['--container-bg-image']) usedAssetPaths.add(metaStyles['--container-bg-image']);
+            if (metaStyles['--music-path']) usedAssetPaths.add(metaStyles['--music-path']);
+
+            const assetPromises = Array.from(usedAssetPaths).map(async (path) => {
+                try {
+                    const file = await App.io.getAssetFile(path);
+                    if (file) {
+                        zip.file(path, file);
+                    }
+                } catch(err) {
+                     console.warn(`Could not add asset "${path}" to zip:`, err);
+                }
+            });
+            await Promise.all(assetPromises);
+
+            try {
+                // 4. Generate the package zip blob
+                const packageZipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
+
+                // 5. Fetch the NW.js binary
+                const nwExeResponse = await fetch('./nwjs/nw.exe');
+                if (!nwExeResponse.ok) throw new Error("NW.js binary not found.");
+                const nwExeBlob = await nwExeResponse.blob();
+
+                // 6. Concatenate blobs
+                const finalExeBlob = new Blob([nwExeBlob, packageZipBlob]);
+
+                // 7. Trigger download
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(finalExeBlob);
+                a.download = `${safeTitle}.exe`;
+                a.click();
+                URL.revokeObjectURL(a.href);
+                App.ui.showNotification("EXE exported successfully!");
+
+            } catch (err) {
+                console.error("EXE Export failed:", err);
+                try {
+                    const packageZipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
+
+                    let exeFile = null;
+
+                    // Preferred: pick the nw.exe file directly
+                    if (window.showOpenFilePicker) {
+                        try {
+                            const [handle] = await window.showOpenFilePicker({
+                                multiple: false,
+                                types: [{
+                                    description: 'NW.js Executable',
+                                    accept: { 'application/vnd.microsoft.portable-executable': ['.exe'] }
+                                }]
+                            });
+                            const file = await handle.getFile();
+                            if (file && file.name.toLowerCase() === 'nw.exe') {
+                                exeFile = file;
+                            }
+                        } catch (e) {
+                            // continue to next fallback
+                        }
+                    }
+
+                    // Fallback: pick a directory and read nw.exe from it
+                    if (!exeFile && window.showDirectoryPicker) {
+                        try {
+                            const nwDir = await window.showDirectoryPicker({ mode: 'read' });
+                            const exeHandle = await nwDir.getFileHandle('nw.exe');
+                            exeFile = await exeHandle.getFile();
+                        } catch (e) {
+                            // continue to next fallback
+                        }
+                    }
+
+                    // Last-resort fallback: input[type=file]
+                    if (!exeFile) {
+                        exeFile = await new Promise((resolve) => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = '.exe';
+                            input.style.display = 'none';
+                            document.body.appendChild(input);
+                            input.addEventListener('change', () => {
+                                const file = input.files && input.files[0] ? input.files[0] : null;
+                                document.body.removeChild(input);
+                                if (file && file.name.toLowerCase() === 'nw.exe') {
+                                    resolve(file);
+                                } else {
+                                    resolve(null);
+                                }
+                            });
+                            input.click();
+                        });
+                    }
+
+                    if (!exeFile) {
+                        throw new Error('NW.js executable not provided.');
+                    }
+
+                    const finalExeBlob = new Blob([exeFile, packageZipBlob]);
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(finalExeBlob);
+                    a.download = `${safeTitle}.exe`;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                    App.ui.showNotification("EXE exported successfully!");
+                } catch (fallbackErr) {
+                    console.error('Fallback EXE export failed:', fallbackErr);
+                    App.ui.showNotification(`
+                        EXE export failed. Could not find <code>nwjs/nw.exe</code>.<br><br>
+                        Please ensure the <code>nwjs</code> folder from the Kinexus download is in the same directory as this HTML file, or select the <code>nw.exe</code> when prompted.
+                    `);
+                }
+            }
+        },
+
         async previewProject() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to preview."); return; }
             App.editor.saveCurrentScene(false);
@@ -2262,7 +2754,10 @@ const App = {
                 const fileHandle = await dirHandle.getFileHandle(fileName);
                 return await fileHandle.getFile();
             } catch (e) { 
-                console.warn(`Asset file not found in project: ${path}`); 
+                if (!App.state.missingAssetWarnings.has(path)) {
+                    App.state.missingAssetWarnings.add(path);
+                    console.warn(`Asset file not found in project: ${path}`);
+                }
                 return null; 
             }
         },
@@ -2288,6 +2783,112 @@ const App = {
             a.download = filename;
             a.click();
             URL.revokeObjectURL(a.href);
+        },
+        async exportStandaloneWithOptions({ nwFolder = null, iconBlob = null, logCallback = () => {} } = {}) {
+            if (!nwFolder) {
+                throw new Error('NW.js folder not provided.');
+            }
+            logCallback('Starting EXE export process...');
+            const safeTitle = App.state.storyData.meta.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+            logCallback(`Verifying selected NW.js folder...`);
+            try {
+                await nwFolder.getFileHandle('nw.exe');
+                logCallback('-> nw.exe found. Looks good.');
+            } catch {
+                throw new Error('Selected folder does not contain nw.exe.');
+            }
+            
+            async function addDirectoryToZip(dirHandle, zipFolder) {
+                for await (const [name, handle] of dirHandle.entries()) {
+                    if (handle.kind === 'file') {
+                        const file = await handle.getFile();
+                        if (name.toLowerCase() === 'nw.exe') continue;
+                        zipFolder.file(name, file);
+                    } else if (handle.kind === 'directory') {
+                        const sub = zipFolder.folder(name);
+                        await addDirectoryToZip(handle, sub);
+                    }
+                }
+            }
+
+            logCallback('Creating main application package...');
+            const mainZip = new window.JSZip();
+            logCallback('-> Copying NW.js runtime files (this may take a moment)...');
+            await addDirectoryToZip(nwFolder, mainZip);
+
+            const exeHandle = await nwFolder.getFileHandle('nw.exe');
+            const exeFile = await exeHandle.getFile();
+            mainZip.file(`${safeTitle}.exe`, exeFile);
+            logCallback('-> Runtime copied.');
+
+            logCallback('Creating game data package (package.nw)...');
+            const appZip = new window.JSZip();
+            const playerHtml = await App.io.getFormattedPlayerHTML(true);
+            appZip.file('index.html', playerHtml);
+
+            const usedAssetPaths = new Set();
+            Object.values(App.state.storyData.scenes).forEach(scene => {
+                if (scene.image) usedAssetPaths.add(scene.image);
+                if (scene.ambienceSound) usedAssetPaths.add(scene.ambienceSound);
+            });
+            const metaStyles = App.state.storyData.meta.styles;
+            if (metaStyles['--screen-bg-image']) usedAssetPaths.add(metaStyles['--screen-bg-image']);
+            if (metaStyles['--container-bg-image']) usedAssetPaths.add(metaStyles['--container-bg-image']);
+            if (metaStyles['--music-path']) usedAssetPaths.add(metaStyles['--music-path']);
+            
+            logCallback(`-> Found ${usedAssetPaths.size} assets to include.`);
+            for (const path of usedAssetPaths) {
+                try {
+                    const f = await App.io.getAssetFile(path);
+                    if (f) {
+                        appZip.file(path, f);
+                    }
+                } catch (err) {
+                    logCallback(`-> WARNING: Could not package asset '${path}'. It will be missing from the game.`);
+                }
+            }
+            logCallback('-> All project assets added to package.');
+            // ================================================================= //
+
+            let iconPath = '';
+            if (iconBlob) {
+                logCallback('-> Processing window icon...');
+                const pngBlob = await (async () => {
+                    const bmp = await createImageBitmap(iconBlob);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 256; canvas.height = 256;
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(bmp, 0, 0, 256, 256);
+                    return await new Promise(res => canvas.toBlob(res, 'image/png'));
+                })();
+                iconPath = 'icon.png';
+                appZip.file(iconPath, pngBlob);
+                logCallback('-> Window icon added.');
+            }
+
+            const packageJson = {
+                name: safeTitle,
+                main: 'index.html',
+                window: { title: App.state.storyData.meta.title, width: 1280, height: 720, resizable: true, icon: iconPath || undefined }
+            };
+            appZip.file('package.json', JSON.stringify(packageJson, null, 2));
+
+            const packageNwBlob = await appZip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+            mainZip.file('package.nw', packageNwBlob);
+            logCallback('-> Game data package complete.');
+
+            logCallback('Creating final ZIP file for download...');
+            const finalZipBlob = await mainZip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+            
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(finalZipBlob);
+            a.download = `${safeTitle}_windows_standalone.zip`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            logCallback('SUCCESS: Download initiated. Export complete!');
+            logCallback('Unzip the downloaded file and run the .exe to play.');
         }
     },
     
@@ -2400,7 +3001,8 @@ const App = {
                 orphanScenes.forEach(scene => container.appendChild(this.createCard(scene)));
             }
 
-            container.querySelectorAll('img[data-src-path]').forEach(async img => {
+            const imgs = Array.from(container.querySelectorAll('img[data-src-path]'));
+            imgs.forEach(async img => {
                 const path = img.dataset.srcPath;
                 const url = await App.io.getAssetDataUrl(path);
                 if (url) {
@@ -2523,7 +3125,8 @@ const App = {
                 treeView.innerHTML = `<li>No start scene set. Set a start scene to view the main story map.</li>`;
             } else {
                 const rootUl = document.createElement('ul');
-                this.buildNode(startSceneId, rootUl, [], collapsedState);
+                const visited = new Set();
+                this.buildNode(startSceneId, rootUl, [], collapsedState, visited);
                 treeView.appendChild(rootUl);
             }
 
@@ -2549,15 +3152,32 @@ const App = {
                 const orphanRoots = Array.from(App.state.orphanSceneIds).filter(id => !orphanTargets.has(id)).sort();
 
                 const orphanUl = document.createElement('ul');
+                const visitedOrphans = new Set();
                 orphanRoots.forEach(rootId => {
-                    this.buildNode(rootId, orphanUl, [], collapsedState);
+                    this.buildNode(rootId, orphanUl, [], collapsedState, visitedOrphans);
                 });
                 treeView.appendChild(orphanUl);
             }
         },
-        buildNode(sceneId, parentElement, path, collapsedState) {
+        buildNode(sceneId, parentElement, path, collapsedState, visitedSet) {
             const scene = App.state.storyData.scenes[sceneId];
             if (!scene) { parentElement.innerHTML += `<li><span style="color:red">Broken Link: ${sceneId}</span></li>`; return; }
+            if (visitedSet && visitedSet.has(sceneId)) {
+                const li = document.createElement('li');
+                li.dataset.sceneId = sceneId;
+                const sceneNode = document.createElement('div');
+                sceneNode.className = 'scene-node';
+                sceneNode.dataset.sceneId = sceneId;
+                const text = document.createElement('span');
+                text.className = 'scene-node-text';
+                text.textContent = `${sceneId} (already shown)`;
+                sceneNode.appendChild(text);
+                sceneNode.onclick = () => App.ui.selectScene(sceneId);
+                li.appendChild(sceneNode);
+                parentElement.appendChild(li);
+                return;
+            }
+            if (visitedSet) visitedSet.add(sceneId);
             const li = document.createElement('li');
             li.dataset.sceneId = sceneId;
             if (collapsedState[sceneId]) li.dataset.collapsed = 'true';
@@ -2608,6 +3228,8 @@ const App = {
                 li.querySelector('.scene-node').appendChild(document.createElement('span')).textContent = ' (LOOP)';
                 parentElement.appendChild(li); return;
             }
+
+            path.push(sceneId); // Add current scene to path for children
             if (hasChoices && li.dataset.collapsed !== 'true') {
                 const childUl = document.createElement('ul');
                 const choiceColor = this.getColorForScene(sceneId);
@@ -2623,10 +3245,12 @@ const App = {
                     choiceTextSpan.textContent = `"${choice.text}"`;
                     choiceLi.appendChild(choiceTextSpan);
                     childUl.appendChild(choiceLi);
-                    this.buildNode(choice.target, childUl, [...path, sceneId], collapsedState);
+                    this.buildNode(choice.target, childUl, path, collapsedState, visitedSet);
                 });
                 li.appendChild(childUl);
             }
+            path.pop(); // Remove current scene from path before returning
+
             parentElement.appendChild(li);
         },
         createNewScene() {
@@ -3084,7 +3708,7 @@ const App = {
                     const button = document.createElement('button');
                     button.textContent = choice.text;
                     button.className = 'choice-btn fade-in';
-                    button.style.animationDelay = `${index * 0.2}s`;
+                    button.style.animationDelay = (index * 0.2) + 's';
                     button.onclick = (e) => { e.stopPropagation(); onChoiceClick(choice.target); };
                     choicesEl.appendChild(button);
                 });
@@ -3690,11 +4314,196 @@ body {
                 this.logInfo(`Error: ${err.message}`);
                 return false;
             }
-        }
+        },
+
+                async exportExeWithConcatenation({ iconBlob = null, logCallback = () => {} }) {
+            logCallback('Using simplified export (file concatenation).');
+            logCallback('Note: This method is fast but may not work on other PCs. For a distributable game, manually select a full NW.js folder.');
+            
+            const safeTitle = App.state.storyData.meta.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+            // 1. Create the package.nw zip
+            logCallback('Creating game data package (package.nw)...');
+            const appZip = new window.JSZip();
+            appZip.file('index.html', await App.io.getFormattedPlayerHTML(true));
+
+            const usedAssetPaths = new Set();
+            Object.values(App.state.storyData.scenes).forEach(scene => {
+                if (scene.image) usedAssetPaths.add(scene.image);
+                if (scene.ambienceSound) usedAssetPaths.add(scene.ambienceSound);
+            });
+            const metaStyles = App.state.storyData.meta.styles;
+            if (metaStyles['--screen-bg-image']) usedAssetPaths.add(metaStyles['--screen-bg-image']);
+            if (metaStyles['--container-bg-image']) usedAssetPaths.add(metaStyles['--container-bg-image']);
+            if (metaStyles['--music-path']) usedAssetPaths.add(metaStyles['--music-path']);
+
+            for (const path of usedAssetPaths) { try { const f = await App.io.getAssetFile(path); if (f) appZip.file(path, f); } catch {} }
+            
+            let iconPath = '';
+            if (iconBlob) {
+                logCallback('-> Processing window icon...');
+                const pngBlob = await (async () => {
+                    const bmp = await createImageBitmap(iconBlob);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 256; canvas.height = 256;
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(bmp, 0, 0, 256, 256);
+                    return await new Promise(res => canvas.toBlob(res, 'image/png'));
+                })();
+                iconPath = 'icon.png';
+                appZip.file(iconPath, pngBlob);
+            }
+            
+            const packageJson = {
+                name: safeTitle,
+                main: 'index.html',
+                window: { title: App.state.storyData.meta.title, width: 1280, height: 720, resizable: true, icon: iconPath || undefined }
+            };
+            appZip.file('package.json', JSON.stringify(packageJson, null, 2));
+
+            const packageNwBlob = await appZip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+            logCallback('-> Game data package complete.');
+            
+            // 2. Fetch nw.exe from the app's relative folder
+            logCallback('Fetching nw.exe from local ./nwjs/ folder...');
+            const nwExeResponse = await fetch('./nwjs/nw.exe');
+            if (!nwExeResponse.ok) {
+                throw new Error("Failed to fetch './nwjs/nw.exe'. Make sure the folder and file exist next to your main HTML file.");
+            }
+            const nwExeBlob = await nwExeResponse.blob();
+            logCallback('-> nw.exe fetched.');
+
+            // 3. Concatenate and Download
+            logCallback('Combining files into final executable...');
+            const finalExeBlob = new Blob([nwExeBlob, packageNwBlob], { type: 'application/vnd.microsoft.portable-executable' });
+
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(finalExeBlob);
+            a.download = `${safeTitle}.exe`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            logCallback('SUCCESS: Download initiated.');
+        },
     }
 };
 
 document.addEventListener('DOMContentLoaded', () => App.init());
+
+// Export EXE Modal wiring
+(function wireExportExeModal(){
+    const exportModal = document.getElementById('export-exe-modal');
+    if (!exportModal) return;
+
+    const iconPreview = document.getElementById('export-icon-preview');
+    const iconInput = document.getElementById('export-icon-file-input');
+    const nwPathInput = document.getElementById('export-nw-path');
+    const logOutput = document.getElementById('export-exe-log');
+    const runBtn = document.getElementById('export-exe-run-btn');
+
+    let selectedIconBlob = null;
+    let selectedNwFolder = null;
+
+    function log(message) {
+        if (logOutput) {
+            logOutput.textContent += message + '\n';
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+        console.log(message);
+    }
+
+    // Reset the modal's state when it becomes visible
+    const observer = new MutationObserver(() => {
+        if (exportModal.classList.contains('visible')) {
+            // Reset state for a clean open
+            runBtn.disabled = false;
+            runBtn.textContent = 'Export';
+            selectedIconBlob = null;
+            selectedNwFolder = null;
+            nwPathInput.value = '';
+            iconPreview.innerHTML = '<span>Icon (Optional)</span>';
+            
+            // Provide clear instructions to the user
+            logOutput.textContent = 'Welcome to the exporter.\n';
+            log('Due to browser security, you must manually select your NW.js folder.\n');
+            log('Please select the folder containing nw.exe to begin.');
+        }
+    });
+    observer.observe(exportModal, { attributes: true, attributeFilter: ['class'] });
+
+    function updateIconPreviewFromBlob(blob){
+        const url = URL.createObjectURL(blob);
+        iconPreview.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = url;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
+        img.onload = () => URL.revokeObjectURL(url);
+        iconPreview.appendChild(img);
+    }
+
+    document.getElementById('select-export-icon-btn')?.addEventListener('click', () => iconInput.click());
+    iconInput?.addEventListener('change', () => {
+        const f = iconInput.files && iconInput.files[0];
+        if (f) { selectedIconBlob = f; updateIconPreviewFromBlob(f); }
+    });
+
+    // This is the primary action for the user.
+    document.getElementById('select-nw-btn')?.addEventListener('click', async () => {
+        try {
+            const dir = await window.showDirectoryPicker({ mode: 'read' });
+            await dir.getFileHandle('nw.exe'); // Verify it contains the executable
+            selectedNwFolder = dir;
+            nwPathInput.value = dir.name; // Display the selected folder name
+            log(`NW.js folder selected: ${dir.name}. Ready to export.`);
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                log('ERROR: The selected folder must contain nw.exe.');
+                App.ui.showNotification('Invalid Folder: The selected directory must contain the nw.exe file.');
+            }
+        }
+    });
+
+    runBtn?.addEventListener('click', async () => {
+        // Save any pending changes to the current scene before exporting
+        App.editor.saveCurrentScene(false);
+        
+        if (!selectedNwFolder) {
+            log('Export failed: Please manually select a valid NW.js folder first.');
+            App.ui.showNotification('Please select your NW.js folder before exporting.');
+            return;
+        }
+
+        runBtn.disabled = true;
+        runBtn.textContent = 'Exporting...';
+        logOutput.textContent = ''; // Clear log for the new run
+
+        try {
+            // Call the one reliable exporter function
+            await App.io.exportStandaloneWithOptions({
+                nwFolder: selectedNwFolder,
+                iconBlob: selectedIconBlob,
+                logCallback: log
+            });
+            
+            // On success, wait a moment then close the modal
+            setTimeout(() => {
+                App.modals.hide(exportModal);
+            }, 3000);
+
+        } catch (e) {
+            log(`FATAL ERROR: ${e.message}`);
+            App.ui.showNotification(`Export Failed: ${e.message}`);
+            runBtn.disabled = false;
+            runBtn.textContent = 'Export';
+        }
+    });
+
+    document.getElementById('nw-download-btn')?.addEventListener('click', () => {
+        window.open('https://nwjs.io/downloads/', '_blank');
+    });
+})();
 </script>
 </body>
 </html>

@@ -7,7 +7,7 @@
 
 **Kinexus** is a powerful zero-code tool for creating, styling, and exporting choice-based narrative games, interactive fiction, and interactive graphic novels. It runs entirely in your web browser, providing a complete workflow from writing your story to packaging a distributable ZIP file for platforms like [itch.io](https://itch.io/).
 
-<img width="1905" height="959" alt="image" src="https://github.com/user-attachments/assets/8a7c3d51-4abd-4d48-8a15-cb728ec17401" />
+<img width="1907" height="958" alt="image" src="https://github.com/user-attachments/assets/c9fb771f-5a07-4be4-aa73-8294e3c21879" />
 
 ## Try It
 
@@ -69,11 +69,11 @@ An example project. Unzip and open with Kinexus: [Example_The_Last_Broadcast](ht
 
 Style Template Editor
 
-<img width="1909" height="958" alt="image" src="https://github.com/user-attachments/assets/4b6d1bee-a579-4ad4-91f5-fafbd41d960b" />
+<img width="1905" height="957" alt="image" src="https://github.com/user-attachments/assets/b2fc925b-7f20-4211-86ee-560b6ab4a56a" />
 
 Play Current
 
-<img width="1919" height="956" alt="image" src="https://github.com/user-attachments/assets/3fea42fc-b729-43d8-aa4f-f832d7a90d5b" />
+<img width="1919" height="956" alt="image" src="https://github.com/user-attachments/assets/0a544a00-f62a-4ffc-a3c9-0bb05e63eef2" />
 
 Preview in Browser/Export as Standalone
 
@@ -97,7 +97,7 @@ AI Rewrite
 
 Project Menu
 
-<img width="641" height="400" alt="image" src="https://github.com/user-attachments/assets/5ec1328d-0501-4a6e-b8bb-751877a6a529" />
+<img width="639" height="566" alt="image" src="https://github.com/user-attachments/assets/6f484886-d95a-4a09-8451-fbbc8bbf9372" />
 
 Project Text Editor
 

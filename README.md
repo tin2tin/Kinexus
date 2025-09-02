@@ -19,7 +19,9 @@
   <a href="https://tintwotin.itch.io/cyoa-test?secret=G3dumLNBVgg2migNyde3jOYm8">Try the example game</a><br><br>
 </div>
 
-An example project. Unzip and open with Kinexus: [Example_The_Last_Broadcast](https://github.com/tin2tin/CYOA_Studio/raw/refs/heads/main/example_the_last_broadcast.zip)
+Library of Kinexus Games: [Itch](https://itch.io/c/6268695/interactive-cinematic-fiction-created-in-kinexus)
+
+An example project to download, unzip and open with Kinexus: [The_Last_Broadcast](https://github.com/tin2tin/CYOA_Studio/raw/refs/heads/main/example_the_last_broadcast.zip)
 
 ## Features
 

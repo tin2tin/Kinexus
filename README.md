@@ -1,4 +1,9 @@
-# Kinexus (Interactive Narrative Editor)
+<p align="center">
+    <a href="https://discord.gg/HMYpnPzbTm"><img src="https://img.shields.io/badge/Chat%20with%20us%20on%20Discord--blue?style=social&logo=discord" alt="Chat" title="Chat"></a>
+    <a href="https://twitter.com/tintwotin"><img src="https://img.shields.io/twitter/follow/tintwotin" alt="Follow us on X" title="Follow on X"></a>
+<p>
+
+<h1 align="center">KINEXUS</h1>
 
 **Kinexus** is a powerful zero-code tool for creating, styling, and exporting choice-based narrative games, interactive fiction, and interactive graphic novels. It runs entirely in your web browser, providing a complete workflow from writing your story to packaging a distributable ZIP file for platforms like [itch.io](https://itch.io/).
 

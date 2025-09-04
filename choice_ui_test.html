@@ -8,18 +8,21 @@
         :root {
             --bg-main: #131316; --bg-container: #1e1e22; --bg-element: #2c2d30;
             --border-color: #3a3b40; --text-primary: #e1e1e1; --text-secondary: #9e9ea5;
-            --icon-bg: #3a3b40; --icon-bg-hover: #4a4b50; color-scheme: dark;
+            --accent-color-primary: #E878AD;
+            --accent-color-secondary: #E878AD;
+            --title-underline-color: #4A78AD;
+            color-scheme: dark;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-main); color: var(--text-primary); display: flex;
             justify-content: flex-start; align-items: flex-start; 
-            min-height: 100vh; margin: 0; padding: 40px;
+            min-height: 100vh; margin: 0; padding: 40px; box-sizing: border-box;
         }
         .choice-container {
             background-color: var(--bg-container); padding: 20px; border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color);
+            max-width: 100%;
         }
         .choice { display: flex; align-items: center; gap: 12px; }
         .default-view, .condition-view { display: flex; flex-grow: 1; align-items: center; }
@@ -28,17 +31,18 @@
         .choice.is-conditional .default-view { display: none; }
         select, input[type="text"] {
             background-color: var(--bg-element); color: var(--text-primary); padding: 8px 12px;
-            border: 1px solid var(--border-color); border-radius: 4px; font-size: 14px; min-width: 80px;
+            border: 1px solid var(--border-color); border-radius: 4px; font-size: 14px;
         }
-        input[type="text"] { flex-grow: 1; min-width: 120px; }
         input::placeholder { color: var(--text-secondary); }
         select optgroup { font-weight: bold; color: var(--text-secondary); }
         .icon-btn {
-            background-color: var(--icon-bg); border: 1px solid var(--border-color); border-radius: 50%;
+            background-color: var(--accent-color-primary); border: 1px solid #f099c1; border-radius: 50%;
             width: 36px; height: 36px; cursor: pointer; display: flex; justify-content: center;
-            align-items: center; flex-shrink: 0; transition: all 0.2s ease-in-out; color: var(--text-secondary);
+            align-items: center; flex-shrink: 0; transition: all 0.2s ease-in-out; color: var(--text-primary);
         }
-        .icon-btn:hover { background-color: var(--icon-bg-hover); color: var(--text-primary); transform: scale(1.05); }
+        .icon-btn:hover { background-color: #d96ca0; transform: scale(1.05); }
+        .icon-btn.manage-vars-btn { background-color: var(--accent-color-secondary); border-color: #f099c1; }
+        .icon-btn.manage-vars-btn:hover { background-color: #d96ca0; }
         .icon-btn svg, .icon-symbol {
             width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.5;
             fill: none; stroke-linecap: round; stroke-linejoin: round;
@@ -48,7 +52,35 @@
             display: flex; flex-grow: 1; align-items: center; gap: 10px; border: 1px solid var(--border-color);
             padding: 5px 10px; border-radius: 6px; background-color: var(--bg-main);
         }
+        .ui-box > input, .ui-box > select {
+            flex-grow: 1; flex-basis: 0; min-width: 80px;
+        }
+        .ui-box > .condition-boolean-select { flex-grow: 0; }
         .set-variable-ui { display: flex; align-items: center; gap: 10px; }
+        .display-none { display: none !important; }
+
+        /* --- Modal Styles --- */
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background-color: rgba(0, 0, 0, 0.6); 
+            display: flex; justify-content: flex-end; z-index: 1000; 
+        }
+        .modal-popup { background-color: var(--bg-container); width: 350px; height: 100%; padding: 20px; box-shadow: -5px 0 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 20px; }
+        .modal-popup h3 { 
+            margin: 0; padding-bottom: 10px; 
+            border-bottom: 2px solid var(--title-underline-color);
+        }
+        .variable-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;}
+        .variable-list li { display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-element); padding: 8px 12px; border-radius: 4px; }
+        .remove-var-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-weight: bold; }
+        .remove-var-btn:hover { color: #ff8a8a; }
+        .add-var-form { display: flex; gap: 10px; }
+        .add-var-form input { flex-grow: 1; }
+        .add-var-form button { 
+            background-color: var(--title-underline-color); /* Changed to light blue */
+            color: white; border: none; padding: 10px 15px; 
+            border-radius: 4px; cursor: pointer; font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -56,129 +88,108 @@
         <div class="choice">
             <button class="icon-btn toggle-condition-btn" onclick="toggleCondition(this)" title="Add a condition"></button>
             <div class="default-view">
-                <div class="ui-box" title="A standard choice. Enter the button text and select an action.">
-                    <input type="text" class="action-text-input" placeholder="Button text..." title="Enter the text that appears on the choice button.">
-                    <select class="destination-select" onchange="handleDestinationChange(this)" title="Choose the action for this choice: go to a scene or set a variable's value."></select>
-                    <div class="set-variable-ui" style="display: none;">
-                        <svg class="icon-symbol" viewBox="0 0 24 24" title="Set the variable's value to..."><path d="M5 9h14M5 15h14"></path></svg>
-                        <select class="action-boolean-select" title="Set the variable to this value (True or False)."><option value="true">True</option><option value="false">False</option></select>
+                <div class="ui-box">
+                    <input type="text" class="action-text-input" placeholder="Button text...">
+                    <select class="destination-select" onchange="handleDropdownChange(this)"></select>
+                    <div class="set-variable-ui display-none">
+                        <svg class="icon-symbol" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"></path></svg>
+                        <select class="action-boolean-select"><option value="true">True</option><option value="false">False</option></select>
                     </div>
                 </div>
             </div>
             <div class="condition-view">
-                <div class="ui-box" title="This choice will only be available if the condition is met.">
-                    <svg class="icon-symbol" viewBox="0 0 24 24" title="Condition: 'If...'"><path d="M8 8a3.5 3 0 0 1 3.5 -3h1a3.5 3 0 0 1 3.5 3a3 3 0 0 1 -2 3a3 4 0 0 0 -2 4" /><line x1="12" y1="19" x2="12" y2="19.01" /></svg>
-                    <select class="condition-select" title="The scene or variable to check. (e.g., If 'The Crystal Caves' has been visited, or if 'Player_has_Sword' is True)."></select>
-                    <svg class="icon-symbol" viewBox="0 0 24 24" title="Check if the value is..."><path d="M5 9h14M5 15h14"></path></svg>
-                    <select class="condition-boolean-select" title="The required state for the condition to be met."><option value="true">True</option><option value="false">False</option></select>
-                    <svg class="icon-symbol" viewBox="0 0 24 24" title="Action: '...then do this.'"><path d="M5 12l14 0l-4 -4m4 4l-4 4"></path></svg>
-                    <input type="text" class="action-text-input" placeholder="Button text..." title="Enter the text that appears on the choice button.">
-                    <select class="destination-select" onchange="handleDestinationChange(this)" title="Choose the action for this choice: go to a scene or set a variable's value."></select>
-                    <div class="set-variable-ui" style="display: none;">
-                        <svg class="icon-symbol" viewBox="0 0 24 24" title="Set the variable's value to..."><path d="M5 9h14M5 15h14"></path></svg>
-                        <select class="action-boolean-select" title="Set the variable to this value (True or False)."><option value="true">True</option><option value="false">False</option></select>
+                <div class="ui-box">
+                    <svg class="icon-symbol" viewBox="0 0 24 24"><path d="M8 8a3.5 3 0 0 1 3.5 -3h1a3.5 3 0 0 1 3.5 3a3 3 0 0 1 -2 3a3 4 0 0 0 -2 4" /><line x1="12" y1="19" x2="12" y2="19.01" /></svg>
+                    <select class="condition-select" onchange="handleDropdownChange(this)"></select>
+                    <svg class="icon-symbol" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"></path></svg>
+                    <select class="condition-boolean-select"><option value="true">True</option><option value="false">False</option></select>
+                    <svg class="icon-symbol" viewBox="0 0 24 24"><path d="M5 12l14 0l-4 -4m4 4l-4 4"></path></svg>
+                    <input type="text" class="action-text-input" placeholder="Button text...">
+                    <select class="destination-select" onchange="handleDropdownChange(this)"></select>
+                    <div class="set-variable-ui display-none">
+                        <svg class="icon-symbol" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"></path></svg>
+                        <select class="action-boolean-select"><option value="true">True</option><option value="false">False</option></select>
                     </div>
                 </div>
             </div>
+            <button class="icon-btn manage-vars-btn" onclick="showVariablePopup()" title="Manage variables"></button>
         </div>
     </div>
 
+    <div id="variable-popup" class="modal-overlay display-none"></div>
+
     <script>
-        const scenes = ["The Crystal Caves", "Forbidden Library", "City of Ghosts", "Mount Olympus"];
-        const variables = ["Player_has_Sword", "Dragon_is_Awake", "Knows_the_Secret", "Has_the_Key"];
+        let scenes = ["The Crystal Caves", "Forbidden Library", "City of Ghosts", "Mount Olympus"];
+        let variables = ["Player_has_Sword", "Dragon_is_Awake", "Knows_the_Secret", "Has_the_Key"];
         const iconAddCondition = `<svg viewBox="0 0 24 24"><path d="M11 12L19 8 M11 12L19 16 M3 12h8"/><circle cx="3" cy="12" r="2"/><circle cx="19" cy="8" r="2"/><circle cx="19" cy="16" r="2"/></svg>`;
         const iconRemoveCondition = `<svg viewBox="0 0 24 24"><path d="M4 12h16"/><circle cx="4" cy="12" r="2"/><circle cx="20" cy="12" r="2"/></svg>`;
+        const iconManageVariables = `<svg viewBox="0 0 24 24">
+            <path d="M5 7 V17 M19 7 V17 M8 12 L12 8 L16 12 L12 16 Z" stroke-width="2" />
+        </svg>`;
 
-        function handleDestinationChange(selectElement) {
-            const selectedValue = selectElement.value;
-            const parentBox = selectElement.closest('.ui-box');
-            const textInput = parentBox.querySelector('.action-text-input');
-            const setVariableUI = parentBox.querySelector('.set-variable-ui');
-            if (selectedValue.startsWith('scene_')) {
-                textInput.style.display = '';
-                setVariableUI.style.display = 'none';
-            } else {
-                textInput.style.display = 'none';
-                setVariableUI.style.display = 'flex';
+        function handleDropdownChange(selectElement) {
+            if (selectElement.classList.contains('destination-select')) {
+                const selectedValue = selectElement.value;
+                const parentBox = selectElement.closest('.ui-box');
+                const textInput = parentBox.querySelector('.action-text-input');
+                const setVariableUI = parentBox.querySelector('.set-variable-ui');
+                if (selectedValue.startsWith('scene_')) {
+                    textInput.classList.remove('display-none');
+                    setVariableUI.classList.add('display-none');
+                } else {
+                    textInput.classList.add('display-none');
+                    setVariableUI.classList.remove('display-none');
+                }
             }
         }
-
-        function populateDropdowns(selector, includeScenes, includeVariables) {
-            document.querySelectorAll(`${selector}:not(.populated)`).forEach(dropdown => {
-                dropdown.innerHTML = '';
-                if (includeScenes) {
-                    const sceneGroup = document.createElement('optgroup');
-                    sceneGroup.label = 'Scenes';
-                    scenes.forEach(scene => {
-                        const option = document.createElement('option');
-                        option.value = `scene_${scene.toLowerCase().replace(/\s/g, '_')}`;
-                        option.textContent = scene;
-                        sceneGroup.appendChild(option);
-                    });
-                    dropdown.appendChild(sceneGroup);
-                }
-                if (includeVariables) {
-                    const variableGroup = document.createElement('optgroup');
-                    variableGroup.label = 'Variables';
-                    variables.forEach(variable => {
-                        const option = document.createElement('option');
-                        option.value = `var_${variable.toLowerCase()}`;
-                        option.textContent = variable;
-                        variableGroup.appendChild(option);
-                    });
-                    dropdown.appendChild(variableGroup);
-                }
-                dropdown.classList.add('populated');
-            });
-        }
-
-        function toggleCondition(button) {
-            const choiceDiv = button.closest('.choice');
-            const isConditional = choiceDiv.classList.toggle('is-conditional');
-            const defaultView = choiceDiv.querySelector('.default-view');
-            const conditionalView = choiceDiv.querySelector('.condition-view');
-
-            if (isConditional) {
-                button.innerHTML = iconRemoveCondition;
-                button.title = 'Remove condition';
-                conditionalView.querySelector('.action-text-input').value = defaultView.querySelector('.action-text-input').value;
-                const destSelect = conditionalView.querySelector('.destination-select');
-                destSelect.value = defaultView.querySelector('.destination-select').value;
-                conditionalView.querySelector('.action-boolean-select').value = defaultView.querySelector('.action-boolean-select').value;
-                handleDestinationChange(destSelect);
-            } else {
-                button.innerHTML = iconAddCondition;
-                button.title = 'Add a condition';
-                defaultView.querySelector('.action-text-input').value = conditionalView.querySelector('.action-text-input').value;
-                const destSelect = defaultView.querySelector('.destination-select');
-                destSelect.value = conditionalView.querySelector('.destination-select').value;
-                defaultView.querySelector('.action-boolean-select').value = conditionalView.querySelector('.action-boolean-select').value;
-                handleDestinationChange(destSelect);
-            }
-        }
-
-        function setFixedContainerWidth() {
+        
+        function setResponsiveContainerWidth() {
             const choiceContainer = document.querySelector('.choice-container');
             const choice = choiceContainer.querySelector('.choice');
             const clone = choice.cloneNode(true);
-            
             clone.style.cssText = 'position: absolute; visibility: hidden; width: auto;';
             clone.classList.add('is-conditional');
-            
             document.body.appendChild(clone);
             const fullWidth = clone.offsetWidth;
             document.body.removeChild(clone);
-
-            choiceContainer.style.width = `${fullWidth}px`;
+            choiceContainer.style.minWidth = `${fullWidth}px`;
         }
+        
+        function repopulateAllDropdowns() { /* ... */ }
+        function populateDropdowns(selector, includeScenes, includeVariables) { /* ... */ }
+        function toggleCondition(button) { /* ... */ }
+        function showVariablePopup() { document.getElementById('variable-popup').classList.remove('display-none'); renderVariableList(); }
+        function closePopup() { document.getElementById('variable-popup').classList.add('display-none'); }
+        function renderVariableList() { /* ... */ }
+        function addVariable() { /* ... */ }
+        function removeVariable(index) { /* ... */ }
 
         document.addEventListener('DOMContentLoaded', () => {
-            populateDropdowns('.destination-select', true, true);
-            populateDropdowns('.condition-select', true, true);
+            document.getElementById('variable-popup').innerHTML = `
+                <div class="modal-popup" onclick="event.stopPropagation()">
+                    <h3>Manage Variables</h3>
+                    <div class="add-var-form">
+                        <input type="text" id="new-variable-name" placeholder="New_Variable_Name">
+                        <button onclick="addVariable()">Add</button>
+                    </div>
+                    <ul id="variable-list" class="variable-list"></ul>
+                </div>`;
+            document.getElementById('variable-popup').onclick = closePopup;
+            repopulateAllDropdowns();
             document.querySelectorAll('.toggle-condition-btn').forEach(btn => btn.innerHTML = iconAddCondition);
-            document.querySelectorAll('.destination-select').forEach(sel => handleDestinationChange(sel));
-            setFixedContainerWidth();
+            document.querySelectorAll('.manage-vars-btn').forEach(btn => btn.innerHTML = iconManageVariables);
+            document.querySelectorAll('.destination-select').forEach(sel => handleDropdownChange(sel));
+            setResponsiveContainerWidth();
+            document.getElementById('new-variable-name').onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); addVariable(); } };
+            window.onkeydown = (e) => { if (e.key === 'Escape') { closePopup(); } };
         });
+
+        function repopulateAllDropdowns() { const dropdowns = document.querySelectorAll('.destination-select, .condition-select'); const selectedValues = Array.from(dropdowns).map(d => d.value); dropdowns.forEach(d => d.classList.remove('populated')); populateDropdowns('.destination-select', true, true); populateDropdowns('.condition-select', true, true); dropdowns.forEach((d, index) => { if (selectedValues[index]) d.value = selectedValues[index]; }); }
+        function populateDropdowns(selector, includeScenes, includeVariables) { document.querySelectorAll(`${selector}:not(.populated)`).forEach(dropdown => { dropdown.innerHTML = ''; if (includeScenes) { const sceneGroup = document.createElement('optgroup'); sceneGroup.label = 'Scenes'; scenes.forEach(scene => { const option = document.createElement('option'); option.value = `scene_${scene.toLowerCase().replace(/\s/g, '_')}`; option.textContent = scene; sceneGroup.appendChild(option); }); dropdown.appendChild(sceneGroup); } if (includeVariables) { const variableGroup = document.createElement('optgroup'); variableGroup.label = 'Variables'; variables.forEach(variable => { const option = document.createElement('option'); option.value = `var_${variable.toLowerCase()}`; option.textContent = variable; variableGroup.appendChild(option); }); dropdown.appendChild(variableGroup); } dropdown.classList.add('populated'); }); }
+        function toggleCondition(button) { const choiceDiv = button.closest('.choice'); const isConditional = choiceDiv.classList.toggle('is-conditional'); const defaultView = choiceDiv.querySelector('.default-view'); const conditionalView = choiceDiv.querySelector('.condition-view'); if (isConditional) { button.innerHTML = iconRemoveCondition; button.title = 'Remove condition'; conditionalView.querySelector('.action-text-input').value = defaultView.querySelector('.action-text-input').value; const destSelect = conditionalView.querySelector('.destination-select'); destSelect.value = defaultView.querySelector('.destination-select').value; conditionalView.querySelector('.action-boolean-select').value = defaultView.querySelector('.action-boolean-select').value; handleDropdownChange(destSelect); } else { button.innerHTML = iconAddCondition; button.title = 'Add a condition'; defaultView.querySelector('.action-text-input').value = conditionalView.querySelector('.action-text-input').value; const destSelect = defaultView.querySelector('.destination-select'); destSelect.value = conditionalView.querySelector('.destination-select').value; defaultView.querySelector('.action-boolean-select').value = conditionalView.querySelector('.action-boolean-select').value; handleDropdownChange(destSelect); } }
+        function renderVariableList() { const list = document.getElementById('variable-list'); list.innerHTML = ''; variables.forEach((variable, index) => { const li = document.createElement('li'); li.innerHTML = `<span>${variable}</span><button class="remove-var-btn" onclick="removeVariable(${index})">✕</button>`; list.appendChild(li); }); }
+        function addVariable() { const input = document.getElementById('new-variable-name'); const newVar = input.value.trim().replace(/\s/g, '_'); if (newVar && !variables.includes(newVar)) { variables.push(newVar); variables.sort(); repopulateAllDropdowns(); renderVariableList(); input.value = ''; } }
+        function removeVariable(index) { variables.splice(index, 1); repopulateAllDropdowns(); renderVariableList(); }
     </script>
 </body>
 </html>

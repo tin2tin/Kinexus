@@ -127,9 +127,9 @@ First, open Kinexus in your browser. From the **Menu**, you have two options:
 *   **Add Choices:** Click the **round blue '+' button** below the choices list. Write the text the player will see and select the target scene from the dropdown menu.
 
 ### 3. Create Dynamic Stories with Variables and Conditions
-*   **Manage Variables:** Click the `{...}` button next to "Add Choice". In the modal, add new true/false variables to track game state (e.g., `has_key`).
+*   **Manage Variables:** Click the turquoise `[X]` button next to "Add Choice". In the modal, add new true/false variables to track game state (e.g., `has_key`).
 *   **Set a Variable:** Create a choice and in its destination dropdown, select a variable (e.g., `var_has_key`). You can then set it to `true` or `false`. Leave the button text blank for a silent, automatic action.
-*   **Add a Condition:** Click the condition icon (`→`) on any choice. In the new view, you can set the choice to only appear if a variable is true/false or if a specific scene has been visited.
+*   **Add a Condition:** Click the turquoise condition icon (`→`) on any choice. In the new view, you can set the choice only to appear if a variable is true/false or if a specific scene has been visited.
 
 ### 4. Add Media (Image & Audio)
 You have multiple ways to add media:

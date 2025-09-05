@@ -96,15 +96,19 @@ Story Map Navigator
 
 Generate AI Image
 
-<img width="1902" height="956" alt="image" src="https://github.com/user-attachments/assets/a9675323-7d5e-4180-919f-6de44f6719b1" />
+<img width="1505" height="200" alt="image" src="https://github.com/user-attachments/assets/64efe0d2-c227-4887-93dc-66e8b4d66d69" />
 
 AI Rewrite
 
 <img width="1112" height="386" alt="image" src="https://github.com/user-attachments/assets/90ca296c-7d6e-4438-8eb8-c94dec5c84f5" />
 
+Batch AI Text to Prompt to Image:
+
+<img width="371" height="959" alt="image" src="https://github.com/user-attachments/assets/cf55f592-cba8-4160-ba92-b64d054ba950" />
+
 Project Menu
 
-<img width="639" height="566" alt="image" src="https://github.com/user-attachments/assets/6f484886-d95a-4a09-8451-fbbc8bbf9372" />
+<img width="639" height="508" alt="image" src="https://github.com/user-attachments/assets/9e5a3b18-ea33-4b5c-b223-8a8a2baa3909" />
 
 Project Text Editor
 

@@ -3100,7 +3100,7 @@ const App = {
         
         async generatePromptForScene(scene) {
             if (!scene.text) return null;
-            const instruction = "Analyze the text like a cinematographer. Create a vivid, cinematic image prompt. Structure: camera angle, subject, action, setting, location, year, lighting, colors, mood. Combine related details into evocative concepts. Output as comma-separated nouns and adjectives. No labels in the result.";
+            const instruction = "Analyze the text like a cinematographer. Create a vivid, cinematic image prompt. Structure: camera angle, subject, action, setting, location, year, lighting, colors, mood. Combine related details into evocative concepts. Output as comma-separated nouns and adjectives. No labels or comments in the result.";
             const combinedText = `${instruction}: ${scene.text}`;
             const url = "https://text.pollinations.ai/" + encodeURIComponent(combinedText);
             try {

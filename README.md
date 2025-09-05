@@ -1,7 +1,3 @@
-Of course. Here is the fully complete and updated README for Kinexus, including a detailed breakdown and a full example of the `story.json` file format.
-
-***
-
 <p align="center">
     <a href="https://discord.gg/HMYpnPzbTm"><img src="https://img.shields.io/badge/Chat%20with%20us%20on%20Discord--blue?style=social&logo=discord" alt="Chat" title="Chat"></a>
     <a href="https://twitter.com/tintwotin"><img src="https://img.shields.io/twitter/follow/tintwotin" alt="Follow us on X" title="Follow on X"></a>

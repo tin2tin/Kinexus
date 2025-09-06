@@ -186,7 +186,7 @@
         #scene-editor-preview.layout-image-as-bg { align-items: flex-end; }
         #scene-editor-preview, #scene-editor-preview #preview-player-inner-container { background-size: cover; background-position: center; }
         #scene-editor-preview #preview-player-inner-container { width: 100%; max-width: 800px; margin: 20px; box-shadow: 0 5px 20px rgba(0,0,0,.5); gap: 20px; padding: var(--padding); border-radius: 12px; box-sizing: border-box; background-color: var(--container-bg-color); display: flex; }
-        #scene-editor-preview .choice-btn { padding: 15px 20px; pointer-events: none; background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid var(--btn-color); text-align: left; border-radius: 6px; font-size: 1em; }
+        #scene-editor-preview .choice-btn { padding: 15px 20px; pointer-events: none; background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid var(--btn-color); text-align: left; border-radius: 6px; font-size: 1em; font-family: var(--font-family); }
         #scene-editor-preview #preview-player-image { max-width: 100%; max-height: 50vh; display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
         #scene-editor-preview #preview-player-text { white-space: pre-wrap; margin-bottom: 20px; line-height: 1.6; }
         #scene-editor-preview #preview-player-choices { display: flex; flex-direction: column; gap: 12px; }
@@ -245,7 +245,7 @@
         #player-text { white-space: pre-wrap; margin-bottom: 20px; line-height: 1.6; }
         #player-text a { color: #8ab4f8; }
         #player-choices { display: flex; flex-direction: column; gap: 12px; }
-        #player-choices .choice-btn { width: 100%; text-align: left; padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; transition: background-color .2s, transform .1s, border-color .2s; background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid transparent; }
+        #player-choices .choice-btn { width: 100%; text-align: left; padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; transition: background-color .2s, transform .1s, border-color .2s; background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid transparent; font-family: var(--font-family); }
         #player-choices .choice-btn:hover { transform: translateY(-2px); background-color: var(--btn-hover-color); }
         #player-choices .choice-btn:active { transform: translateY(1px); }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -622,12 +622,14 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>__STORY_TITLE__</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        __GOOGLE_FONT_LINK__
         <style>
             :root { --primary-color: #4a78ad; --secondary-color: #6c757d; }
             * { box-sizing: border-box; }
             body { 
                 margin: 0; 
-                font-family: sans-serif; 
                 display: flex; 
                 justify-content: center; 
                 min-height: 100vh; 
@@ -817,6 +819,40 @@ const App = {
         }
     },
     elements: {},
+    constants: {
+        GOOGLE_FONTS: [
+            { name: "Default System Font", value: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' },
+            { name: "Architects Daughter", value: "'Architects Daughter', cursive" },
+            { name: "Asset", value: "'Asset', cursive" },
+            { name: "Atma", value: "'Atma', cursive" },
+            { name: "Autour One", value: "'Autour One', cursive" },
+            { name: "Averia Libre", value: "'Averia Libre', cursive" },
+            { name: "Big Shoulders Text", value: "'Big Shoulders Text', cursive" },
+            { name: "Calistoga", value: "'Calistoga', cursive" },
+            { name: "Caveat Brush", value: "'Caveat Brush', cursive" },
+            { name: "Comic Neue", value: "'Comic Neue', cursive" },
+            { name: "Gamja Flower", value: "'Gamja Flower', cursive" },
+            { name: "Inconsolata", value: "'Inconsolata', monospace" },
+            { name: "Just Another Hand", value: "'Just Another Hand', cursive" },
+            { name: "Lato", value: "'Lato', sans-serif" },
+            { name: "Limelight", value: "'Limelight', cursive" },
+            { name: "Lora", value: "'Lora', serif" },
+            { name: "Merriweather", value: "'Merriweather', serif" },
+            { name: "Montserrat", value: "'Montserrat', sans-serif" },
+            { name: "Nothing You Could Do", value: "'Nothing You Could Do', cursive" },
+            { name: "Nunito", value: "'Nunito', sans-serif" },
+            { name: "Open Sans", value: "'Open Sans', sans-serif" },
+            { name: "Pirata One", value: "'Pirata One', cursive" },
+            { name: "Playfair Display", value: "'Playfair Display', serif" },
+            { name: "Poiret One", value: "'Poiret One', cursive" },
+            { name: "Road Rage", value: "'Road Rage', cursive" },
+            { name: "Roboto", value: "'Roboto', sans-serif" },
+            { name: "Smokum", value: "'Smokum', cursive" },
+            { name: "Snowburst One", value: "'Snowburst One', cursive" },
+            { name: "Source Code Pro", value: "'Source Code Pro', monospace" },
+            { name: "Special Elite", value: "'Special Elite', cursive" }
+        ]
+    },
 
     init() {
         this.cacheElements();
@@ -1562,6 +1598,7 @@ const App = {
                 // Populate the application with the new project data
                 App.state.storyData = storyData;
                 App.state.projectDirectoryHandle = dirHandle;
+                App.styles.loadGoogleFont(App.state.storyData.meta.styles['--font-family']);
                 App.modals.hideAll();
                 App.ui.enableEditor(true);
                 App.ui.updateMetaInputs();
@@ -1659,6 +1696,17 @@ const App = {
                 
                 storyJsonString = JSON.stringify(storyData);
             }
+
+            let googleFontLink = '';
+            const fontFamily = storyData.meta.styles['--font-family'] || App.styles.getDefaults()['--font-family'];
+            const fontName = fontFamily.split(',')[0].replace(/'/g, '').trim();
+            const isGoogleFont = App.constants.GOOGLE_FONTS.find(f => f.name === fontName && !f.value.startsWith('-'));
+
+            if (isGoogleFont) {
+                const formattedFontName = fontName.replace(/ /g, '+');
+                googleFontLink = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${formattedFontName}:wght@400;700&display=swap">`;
+            }
+
 
             const playerScript = `
         <script>
@@ -1914,6 +1962,7 @@ const App = {
             return document.getElementById('player-template').innerHTML
                 .replace(/__STORY_TITLE__/g, storyData.meta.title || 'My Story')
                 .replace(/__LAYOUT_CLASS__/g, storyData.meta.layout)
+                .replace('__GOOGLE_FONT_LINK__', googleFontLink)
                 .replace('__CUSTOM_STYLES__', App.styles.generateCSS(storyData.meta.styles))
                 .replace('__PLAYER_SCRIPT__', playerScript);
         },
@@ -2320,8 +2369,6 @@ const App = {
 
     editor: {
         render() { 
-            // FIX: Add optional chaining (?.) to safely access .scenes.
-            // This prevents a crash if storyData exists but .scenes does not (e.g., during project loading).
             const scenes = App.state.storyData?.scenes;
             const scene = scenes ? scenes[App.state.currentSceneId] : null; 
     
@@ -2458,7 +2505,6 @@ const App = {
         
             App.setDirty(true);
             App.ui.invalidateNavViews();
-            // App.ui.renderCurrentView();
         
             if (showAlert) console.log(`Scene '${App.state.currentSceneId}' changes saved to memory.`);
          },
@@ -2915,9 +2961,12 @@ const App = {
             const grid = document.getElementById('style-editor-grid');
             const styles = App.state.storyData.meta.styles;
             const defaults = this.getDefaults();
+            
+            const fontOptions = App.constants.GOOGLE_FONTS.map(font => `<option value="${font.value}">${font.name}</option>`).join('');
+
             grid.innerHTML = `
                 <div class="grid-full-width"> <label>Layout <select id="style-layout"><option value="layout-top-down">Image on Top</option><option value="layout-side-by-side">Image on Side</option><option value="layout-image-as-bg">Image as Background</option></select></label> </div>
-                <div class="grid-span-2"> <label>Font Family <select id="style-font-family"><option value="sans-serif">Sans-Serif</option><option value="serif">Serif</option><option value="monospace">Monospace</option></select></label> <label>Font Size (px) <input type="number" id="style-font-size" min="8" max="48" step="1"></label> </div>
+                <div class="grid-span-2"> <label>Font Family <select id="style-font-family">${fontOptions}</select></label> <label>Font Size (px) <input type="number" id="style-font-size" min="8" max="48" step="1"></label> </div>
                 <div class="grid-span-2"> <label>Text Color <input type="color" id="style-text-color"></label> <label>Typewriter Effect <select id="style-typewriter-effect"><option value="off">Off</option><option value="on">On</option></select></label> </div>
                 <hr class="grid-separator">
                 <label>Page BG Color <input type="color" id="style-bg-color"></label>
@@ -2959,6 +3008,7 @@ const App = {
 			else if (id === 'layout') { App.state.storyData.meta.layout = value; } 
 			else { App.state.storyData.meta.styles[`--${id}`] = (target.type === 'number') ? value + 'px' : value; }
 			
+            if (id === 'font-family') { this.loadGoogleFont(value); }
 			if (id === 'music-volume') App.elements['music-player'].volume = parseFloat(target.value);
 			else if (id === 'ambience-volume') App.elements['ambience-player'].volume = parseFloat(target.value);
 			
@@ -2966,6 +3016,30 @@ const App = {
 			if (App.elements['player-container'].style.display === 'flex') App.player.renderScene(App.state.currentSceneId);
 			if (!App.elements['editor-fieldset'].disabled) App.editor.renderPreview();
 		},
+        loadGoogleFont(fontFamily) {
+            const fontName = fontFamily.split(',')[0].replace(/'/g, '').trim();
+            const isGoogleFont = App.constants.GOOGLE_FONTS.find(f => f.name === fontName && !f.value.startsWith('-'));
+
+            const existingLink = document.getElementById('google-font-stylesheet');
+            if (!isGoogleFont) {
+                if (existingLink) existingLink.remove();
+                return;
+            }
+
+            const formattedFontName = fontName.replace(/ /g, '+');
+            const fontUrl = `https://fonts.googleapis.com/css2?family=${formattedFontName}:wght@400;700&display=swap`;
+
+            let link = existingLink;
+            if (!link) {
+                link = document.createElement('link');
+                link.id = 'google-font-stylesheet';
+                link.rel = 'stylesheet';
+                document.head.appendChild(link);
+            }
+            if (link.href !== fontUrl) {
+                link.href = fontUrl;
+            }
+        },
         applyToContainer(container) {
             const meta = App.state.storyData.meta; const styles = meta.styles; const defaults = this.getDefaults();
             const innerContainer = container.querySelector('#preview-player-inner-container, #player-inner-container');
@@ -3000,12 +3074,12 @@ const App = {
         generateCSS(stylesOverride) { 
             const styles = stylesOverride || App.state.storyData.meta.styles; const defaults = this.getDefaults(); let rootVars = '';
             Object.keys(defaults).forEach(key => { if (key.startsWith('--') && !key.includes('path') && !key.includes('image')) rootVars += `    ${key}: ${styles[key] || defaults[key]};\n`; });
-            let css = `:root {\n${rootVars}} body { background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family, sans-serif); } #game-container { background-color: var(--container-bg-color); font-size: var(--font-size); } .choice-btn { background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid transparent; } .choice-btn:hover { background-color: var(--btn-hover-color); }`;
+            let css = `:root {\n${rootVars}} body { background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); } #game-container { background-color: var(--container-bg-color); font-size: var(--font-size); } .choice-btn { font-family: var(--font-family); background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid transparent; } .choice-btn:hover { background-color: var(--btn-hover-color); }`;
             if (styles['--screen-bg-image']) css += `body { background-image: url('${styles['--screen-bg-image']}'); }\n`;
             if (styles['--container-bg-image']) css += `#game-container { background-image: url('${styles['--container-bg-image']}'); }\n`;
             return css;
         },
-        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': 'sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--music-path': '', '--music-volume': '0.4', '--ambience-volume': '0.4', '--typewriter-effect': 'on' }; }
+        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--music-path': '', '--music-volume': '0.4', '--ambience-volume': '0.4', '--typewriter-effect': 'on' }; }
     },
     
     modals: {

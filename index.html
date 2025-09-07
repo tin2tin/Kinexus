@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -312,6 +311,11 @@
         #variable-manager-modal .add-var-form input { flex-grow: 1; }
         #variable-manager-modal .add-var-form button { background-color: var(--title-underline-color); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
+        /* --- Debug Modal Styles --- */
+        #debug-modal .modal-content { max-width: 80vw; width: 100%; height: 80vh; display: flex; flex-direction: column; }
+        #debug-log { background-color: #000; flex-grow: 1; font-family: monospace; font-size: 14px; white-space: pre; overflow: auto; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; color: #ccc; }
+        #debug-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        #debug-modal-header h2 { margin: 0; border: none; }
     </style>
 </head>
 <body>
@@ -611,6 +615,18 @@
     </div>
 </div>
 
+<!-- DEBUG MODAL -->
+<div id="debug-modal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <div id="debug-modal-header">
+            <h2>Import Log</h2>
+            <button id="copy-debug-log-btn" class="btn-secondary">Copy Log</button>
+        </div>
+        <pre id="debug-log"></pre>
+    </div>
+</div>
+
 <!-- JSZip Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
@@ -816,7 +832,8 @@ const App = {
         player: {
             gameState: null,
 			typewriter: { intervalId: null, skipListener: null }
-        }
+        },
+        debugMode: false // Secret debug mode flag
     },
     elements: {},
     constants: {
@@ -857,6 +874,7 @@ const App = {
     init() {
         this.cacheElements();
         this.bindEvents();
+        this.debug.init(); // Initialize debugging features
         this.ui.enableEditor(false);
         this.ui.displayWelcomeMessage();
         this.modals.show('project-menu-modal');
@@ -893,7 +911,8 @@ const App = {
             'pollinations-text-modal', 'pollinations-instruction', 'pollinations-submit-btn', 'process-text-ai-btn',
             'style-editor-btn', 'batch-image-modal', 'batch-image-gen-btn',
             'scene-list-view', 'toggle-tree-view-btn', 'toggle-scene-view-btn',
-            'scene-list-view-wrapper', 'scene-list-sort', 'variable-manager-modal', 'manage-variables-btn'
+            'scene-list-view-wrapper', 'scene-list-sort', 'variable-manager-modal', 'manage-variables-btn',
+            'debug-modal', 'debug-log', 'copy-debug-log-btn'
         ];
         ids.forEach(id => this.elements[id] = document.getElementById(id));
     },
@@ -1165,14 +1184,16 @@ const App = {
                 App.state.navViewsDirty = true;
             }
         },
-        setViewMode(mode) {
+        async setViewMode(mode) {
             if (App.state.navViewsDirty) {
                 this.cursor.wait();
+                App.debug.log('UI view is dirty. Re-rendering navigation views...', 'INFO');
                 try {
                     const filterTerm = document.getElementById('scene-search-input').value;
-                    App.tree.render(filterTerm);
-                    App.sceneList.render(filterTerm);
+                    await App.tree.render(filterTerm);
+                    await App.sceneList.render(filterTerm);
                     App.state.navViewsDirty = false;
+                    App.debug.log('Navigation views re-rendered successfully.', 'SUCCESS');
                 } finally {
                     this.cursor.default();
                 }
@@ -1188,27 +1209,27 @@ const App = {
             App.elements['toggle-tree-view-btn'].classList.toggle('active', isTreeView);
             App.elements['toggle-scene-view-btn'].classList.toggle('active', !isTreeView);
         },
-        renderCurrentView() {
+        async renderCurrentView() {
             if (!App.state.projectDirectoryHandle) {
                 this.displayWelcomeMessage();
                 return;
             }
             const filterTerm = document.getElementById('scene-search-input').value;
             if (App.state.currentNavView === 'tree') {
-                App.tree.render(filterTerm);
+                await App.tree.render(filterTerm);
             } else {
-                App.sceneList.render(filterTerm);
+                await App.sceneList.render(filterTerm);
             }
         },
 
-        selectScene(sceneId) {
+        async selectScene(sceneId) {
             if (!sceneId || !App.state.storyData.scenes[sceneId]) {
                 console.error(`Attempted to select non-existent scene: ${sceneId}`);
                 return;
             }
 
             if (App.elements['player-container'].style.display === 'flex') {
-                App.player.renderScene(sceneId);
+                await App.player.renderScene(sceneId);
                 return;
             }
 
@@ -1231,7 +1252,6 @@ const App = {
 			if (newTreeNode) newTreeNode.classList.add('active');
 			if (newCardNode) newCardNode.classList.add('active');
 
-			// Always re-render the editor to ensure UI consistency.
 			App.editor.render(); 
 
 			requestAnimationFrame(() => {
@@ -1335,6 +1355,32 @@ const App = {
             tooltip.style.display = 'flex';
             requestAnimationFrame(() => { tooltip.style.opacity = '1'; });
         },
+        // *** NEW FUNCTION: Displays a progress modal ***
+        showProgress(message) {
+            let progressModal = document.getElementById('progress-modal');
+            if (!progressModal) {
+                progressModal = document.createElement('div');
+                progressModal.id = 'progress-modal';
+                progressModal.className = 'modal';
+                progressModal.style.backgroundColor = 'rgba(0,0,0,0.7)';
+                progressModal.innerHTML = `
+                    <div class="modal-content" style="max-width: 400px; text-align: center;">
+                        <h3 style="margin-top:0;">Loading Project</h3>
+                        <p id="progress-message"></p>
+                    </div>
+                `;
+                document.body.appendChild(progressModal);
+            }
+            progressModal.classList.add('visible');
+            document.getElementById('progress-message').innerHTML = message;
+        },
+        // *** NEW FUNCTION: Hides the progress modal ***
+        hideProgress() {
+            const progressModal = document.getElementById('progress-modal');
+            if (progressModal) {
+                progressModal.classList.remove('visible');
+            }
+        },
         iconThumbnails: {
             'icon-start': {
                 icon: `<svg class="icon-start" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>`,
@@ -1379,7 +1425,18 @@ const App = {
     },
 
     io: {
-        openValidationReport: async function() {
+        async verifyPermission(directoryHandle) {
+            const options = { mode: 'readwrite' };
+            if ((await directoryHandle.queryPermission(options)) === 'granted') {
+                return true;
+            }
+            if ((await directoryHandle.requestPermission(options)) === 'granted') {
+                return true;
+            }
+            return false;
+        },
+
+        async openValidationReport() {
             if (!App.state.projectDirectoryHandle) {
                 App.ui.showNotification('Please open a project first.');
                 return;
@@ -1395,7 +1452,7 @@ const App = {
                     App.ui.showNotification(`<b>Validation Error:</b><br>Malformed JSON in story.json<br><br><i>${e.message}</i>`);
                     return;
                 }
-                const result = App.io.validateProjectData(raw, { autofix: false });
+                const result = await App.io.validateProjectData(raw, { autofix: false });
                 if (!result.ok) {
                     App.ui.showNotification(`<b>Validation Failed:</b><br>${result.errors.join('<br>')}`);
                     return;
@@ -1407,89 +1464,111 @@ const App = {
                 App.ui.showNotification('Validation failed due to an unexpected error.');
             }
         },
-        validateProjectData(rawStoryData, { autofix = true } = {}) {
-            const warnings = [];
-            const errors = [];
-            const defaultStory = App.getNewStoryObject();
-            let storyData = rawStoryData;
+        
+        // *** REFACTORED FUNCTION: Asynchronous, non-blocking validation and migration ***
+        async validateProjectData(rawStoryData, { autofix = true, onProgress = null } = {}) {
+            return new Promise(async (resolve) => {
+                const warnings = [];
+                const errors = [];
+                const defaultStory = App.getNewStoryObject();
+                let storyData = rawStoryData;
 
-            if (typeof storyData !== 'object' || storyData === null) {
-                errors.push("Project root is not an object.");
-                return { ok: false, data: defaultStory, warnings, errors };
-            }
+                if (typeof storyData !== 'object' || storyData === null) {
+                    errors.push("Project root is not an object.");
+                    return resolve({ ok: false, data: defaultStory, warnings, errors });
+                }
 
-            storyData.meta = { ...defaultStory.meta, ...(storyData.meta || {}) };
-            if (typeof storyData.meta !== 'object' || storyData.meta === null) {
-                warnings.push("'meta' was invalid. Reset to defaults.");
-                storyData.meta = { ...defaultStory.meta };
-            }
-            if (!Array.isArray(storyData.meta.variables)) {
-                warnings.push("'meta.variables' was not an array. Reset to empty array.");
-                storyData.meta.variables = [];
-            }
+                storyData.meta = { ...defaultStory.meta, ...(storyData.meta || {}) };
+                if (typeof storyData.meta.variables === 'object' && !Array.isArray(storyData.meta.variables) && storyData.meta.variables !== null) {
+                    warnings.push("'meta.variables' was an object. Converting to an array of keys.");
+                    storyData.meta.variables = Object.keys(storyData.meta.variables);
+                } else if (!Array.isArray(storyData.meta.variables)) {
+                    warnings.push("'meta.variables' was not an array. Reset to empty array.");
+                    storyData.meta.variables = [];
+                }
 
+                if (typeof storyData.scenes !== 'object' || storyData.scenes === null) {
+                    warnings.push("'scenes' missing or invalid. Initialized with default 'start' scene.");
+                    storyData.scenes = { ...defaultStory.scenes };
+                }
 
-            const originalScenes = storyData.scenes;
-            if (typeof originalScenes !== 'object' || originalScenes === null) {
-                warnings.push("'scenes' missing or invalid. Initialized with default 'start' scene.");
-                storyData.scenes = { ...defaultStory.scenes };
-            }
+                const sanitizedScenes = {};
+                const sceneEntries = Object.entries(storyData.scenes);
+                const totalScenes = sceneEntries.length;
+                let currentIndex = 0;
+                const CHUNK_SIZE = 25; // Process scenes in small batches
 
-            const sanitizedScenes = {};
-            Object.entries(storyData.scenes).forEach(([key, sceneObj]) => {
-                const scene = (typeof sceneObj === 'object' && sceneObj !== null) ? sceneObj : {};
-                
-                // Sanitize choices, upgrading old format if necessary
-                const safeChoices = (Array.isArray(scene.choices) ? scene.choices : []).map(c => {
-                    if (!c || typeof c !== 'object') return null; // Remove invalid choice entries
-                    // If it doesn't have an 'action' property, it's the old format
-                    if (c.action === undefined) {
-                         warnings.push(`Upgraded choice in scene '${key}' to new format.`);
-                         return {
-                            condition: null,
-                            action: { text: c.text || '', target: c.target || '', set_variable: null, set_value: false }
-                         };
+                const processChunk = async () => {
+                    const limit = Math.min(currentIndex + CHUNK_SIZE, totalScenes);
+
+                    for (let i = currentIndex; i < limit; i++) {
+                        const [key, sceneObj] = sceneEntries[i];
+                        const scene = (typeof sceneObj === 'object' && sceneObj !== null) ? sceneObj : {};
+                        
+                        const safeChoices = (Array.isArray(scene.choices) ? scene.choices : []).map(c => {
+                            if (!c || typeof c !== 'object') return null;
+                            if (c.action === undefined) {
+                                if (i === currentIndex) { // Log this warning only once per chunk
+                                    warnings.push(`Upgraded old choice format in scene '${key}'.`);
+                                }
+                                return {
+                                    condition: null,
+                                    action: { text: c.text || '', target: c.target || '', set_variable: null, set_value: false }
+                                };
+                            }
+                            // Sanitize modern choice format
+                            return {
+                                condition: (c.condition && typeof c.condition.variable === 'string') ? { variable: c.condition.variable, value: c.condition.value === true } : null,
+                                action: {
+                                    text: typeof c.action?.text === 'string' ? c.action.text : '',
+                                    target: typeof c.action?.target === 'string' ? c.action.target : null,
+                                    set_variable: typeof c.action?.set_variable === 'string' ? c.action.set_variable : null,
+                                    set_value: c.action?.set_value === true
+                                }
+                            };
+                        }).filter(Boolean);
+
+                        sanitizedScenes[key] = {
+                            id: key,
+                            text: typeof scene.text === 'string' ? scene.text : '',
+                            image: typeof scene.image === 'string' ? scene.image : '',
+                            imagePrompt: typeof scene.imagePrompt === 'string' ? scene.imagePrompt : '',
+                            ambienceSound: typeof scene.ambienceSound === 'string' ? scene.ambienceSound : '',
+                            ambienceLoop: scene.ambienceLoop ?? true,
+                            choices: safeChoices,
+                            visited: scene.visited === true,
+                            lastModified: typeof scene.lastModified === 'number' ? scene.lastModified : Date.now()
+                        };
                     }
-                    // It's the new format, just ensure all keys exist
-                    return {
-                        condition: (c.condition && typeof c.condition.variable === 'string') ? { variable: c.condition.variable, value: c.condition.value === true } : null,
-                        action: {
-                            text: typeof c.action?.text === 'string' ? c.action.text : '',
-                            target: typeof c.action?.target === 'string' ? c.action.target : null,
-                            set_variable: typeof c.action?.set_variable === 'string' ? c.action.set_variable : null,
-                            set_value: c.action?.set_value === true
+
+                    currentIndex = limit;
+
+                    if (onProgress) {
+                        onProgress(currentIndex / totalScenes, `Processing scene ${currentIndex} of ${totalScenes}...`);
+                    }
+
+                    if (currentIndex < totalScenes) {
+                        await App.debug.yieldToMain(); // Yield to main thread
+                        await processChunk();
+                    } else {
+                        // All scenes processed, finalize
+                        storyData.scenes = sanitizedScenes;
+                        if (Object.keys(storyData.scenes).length === 0) {
+                            warnings.push("No valid scenes found. Added default 'start' scene.");
+                            storyData.scenes = { ...defaultStory.scenes };
                         }
-                    };
-                }).filter(Boolean);
-
-
-                sanitizedScenes[key] = {
-                    id: key,
-                    text: typeof scene.text === 'string' ? scene.text : '',
-                    image: typeof scene.image === 'string' ? scene.image : '',
-                    imagePrompt: typeof scene.imagePrompt === 'string' ? scene.imagePrompt : '',
-                    ambienceSound: typeof scene.ambienceSound === 'string' ? scene.ambienceSound : '',
-                    ambienceLoop: scene.ambienceLoop ?? true,
-                    choices: safeChoices,
-                    visited: scene.visited === true, // Keep if true, otherwise default to false
-                    lastModified: typeof scene.lastModified === 'number' ? scene.lastModified : Date.now()
+                        if (!storyData.meta.startSceneId || !storyData.scenes[storyData.meta.startSceneId]) {
+                            const old = storyData.meta.startSceneId;
+                            const fallback = Object.keys(storyData.scenes)[0];
+                            storyData.meta.startSceneId = fallback;
+                            warnings.push(`Start scene '${old || '(none)'}' was invalid. Using '${fallback}'.`);
+                        }
+                        resolve({ ok: errors.length === 0, data: storyData, warnings, errors });
+                    }
                 };
+
+                await processChunk(); // Start the async processing
             });
-            storyData.scenes = sanitizedScenes;
-            
-            if (Object.keys(storyData.scenes).length === 0) {
-                 warnings.push("No valid scenes found. Added default 'start' scene.");
-                 storyData.scenes = { ...defaultStory.scenes };
-            }
-
-            if (!storyData.meta.startSceneId || !storyData.scenes[storyData.meta.startSceneId]) {
-                const old = storyData.meta.startSceneId;
-                const fallback = Object.keys(storyData.scenes)[0];
-                storyData.meta.startSceneId = fallback;
-                warnings.push(`Start scene '${old || '(none)'}' was invalid. Using '${fallback}'.`);
-            }
-
-            return { ok: errors.length === 0, data: storyData, warnings, errors };
         },
         async newProject() {
             try {
@@ -1500,17 +1579,16 @@ const App = {
                 projectName = projectName.trim().replace(/[\s/\\?%*:|"<>]/g, '_');
 
                 let projectHandle;
-                try { // Check if the directory already exists and contains a project
+                try { 
                     projectHandle = await dirHandle.getDirectoryHandle(projectName);
                     await projectHandle.getFileHandle('story.json');
                     if (confirm(`Project '${projectName}' already exists. Do you want to open it instead?`)) {
                         await App.io.openProject(projectHandle);
                         return;
                     } else {
-                         return; // User cancelled
+                         return;
                     }
                 } catch (e) {
-                    // If not found, create it. Otherwise, re-throw error.
                     if (e.name === 'NotFoundError') {
                         projectHandle = await dirHandle.getDirectoryHandle(projectName, { create: true });
                     } else {
@@ -1536,7 +1614,7 @@ const App = {
                 App.setDirty(false);
                 App.ui.updateMetaInputs();
                 App.ui.invalidateNavViews();
-                App.ui.setViewMode(App.state.currentNavView);
+                await App.ui.setViewMode(App.state.currentNavView);
                 App.ui.selectScene('start');
                 App.ui.showNotification(`Project '${projectName}' created successfully!`);
 
@@ -1548,18 +1626,33 @@ const App = {
             }
         },
 
+        // *** REFACTORED FUNCTION: Manages the async migration and UI feedback ***
         async openProject(dirHandle = null) {
+            if (App.state.debugMode) {
+                App.debug.clear();
+                App.debug.log('--- Starting Project Import ---', 'INFO');
+                App.modals.show('debug-modal');
+            }
+            App.ui.showProgress('Opening project...');
             App.ui.cursor.wait();
             try {
-                // Stop ongoing processes and get the directory handle from the user.
-                // This is done first so the user can cancel without affecting the current project.
                 App.player.stop();
                 if (!dirHandle) {
+                    App.debug.log('Opening directory picker...');
                     dirHandle = await window.showDirectoryPicker({ mode: 'readwrite', startIn: App.state.projectDirectoryHandle || 'documents' });
+                    App.debug.log('Directory handle acquired.', 'SUCCESS');
                 }
         
-                // --- RESET STATE AND UI ---
-                // Now that we have a valid handle, commit to loading and reset everything.
+                App.debug.log(`Verifying permissions for directory: ${dirHandle.name}...`, 'INFO');
+                const hasPermission = await this.verifyPermission(dirHandle);
+                if (!hasPermission) {
+                    App.debug.log('Permission to access directory was denied.', 'ERROR');
+                    App.ui.showNotification('Permission to access the project folder was denied. Please try opening the project again.');
+                    return; 
+                }
+                App.debug.log('Permissions verified successfully.', 'SUCCESS');
+
+                App.debug.log('Resetting application state...');
                 App.ui.enableEditor(false);
                 App.state.storyData = {};
                 App.state.currentSceneId = null;
@@ -1567,59 +1660,94 @@ const App = {
                 App.state.pendingAssetCopies.clear();
                 App.state.missingAssetWarnings.clear();
                 App.setDirty(false);
-                
                 App.elements['tree-view'].innerHTML = '';
                 App.elements['scene-list-view'].innerHTML = '';
                 document.getElementById('scene-search-input').value = '';
-                App.editor.render(); // Hides the editor panel
-                App.ui.updateMetaInputs(); // Clears meta fields like title
-                // --- END RESET ---
+                App.editor.render();
+                App.ui.updateMetaInputs();
+                App.debug.log('State reset complete.', 'SUCCESS');
         
-                // Load and validate the new project data
                 let storyData;
+                let fileContent = '';
                 try {
+                    App.debug.log('Attempting to get handle for "story.json"...');
                     const storyFileHandle = await dirHandle.getFileHandle('story.json');
+                    App.debug.log('"story.json" handle acquired.', 'SUCCESS');
+                    
+                    App.debug.log('Attempting to get file object from handle...');
                     const file = await storyFileHandle.getFile();
-                    const fileContent = await file.text();
+                    App.debug.log(`File object acquired. Size: ${file.size} bytes.`, 'SUCCESS');
+                    
+                    App.debug.log('Reading file content as text...');
+                    fileContent = await file.text();
+                    App.debug.log(`File content read (${fileContent.length} chars). Parsing JSON...`, 'SUCCESS');
+                    
                     storyData = fileContent.trim() ? JSON.parse(fileContent) : App.getNewStoryObject();
+                    App.debug.log('JSON parsed successfully.', 'SUCCESS');
+
                 } catch (e) {
+                    App.debug.log(`Error during file processing: ${e.name} - ${e.message}`, 'ERROR');
+                    if (e instanceof SyntaxError) {
+                        App.debug.log(`Malformed JSON detected. Raw content:\n${fileContent}`, 'ERROR');
+                    }
                     if (e.name === 'NotFoundError') {
+                        App.debug.log('"story.json" not found, creating new default story object.');
                         storyData = App.getNewStoryObject();
                     } else { throw e; }
                 }
                 
-                const result = App.io.validateProjectData(storyData, { autofix: true });
+                App.debug.log('Validating and migrating project data asynchronously...');
+                const onProgress = (percent, message) => {
+                    const progressMessage = `Upgrading project structure... (${Math.round(percent * 100)}%)<br><small>${message}</small>`;
+                    App.ui.showProgress(progressMessage);
+                    if (App.state.debugMode) {
+                        App.debug.log(`Migration progress: ${Math.round(percent * 100)}% - ${message}`, 'INFO');
+                    }
+                };
+                const result = await App.io.validateProjectData(storyData, { autofix: true, onProgress });
+
                 storyData = result.data;
-        
-                // Ensure asset folders exist
-                await dirHandle.getDirectoryHandle('images', { create: true });
-                await dirHandle.getDirectoryHandle('sounds', { create: true });
-        
-                // Populate the application with the new project data
+                App.debug.log(`Validation complete. Warnings: ${result.warnings.length}. Errors: ${result.errors.length}.`, 'INFO');
+                if (result.warnings.length > 0) {
+                     App.debug.log('Validation Warnings:\n' + result.warnings.join('\n'), 'WARN');
+                }
+                
+                App.ui.showProgress('Finishing up...');
+                App.debug.log('Populating application with project data...');
                 App.state.storyData = storyData;
                 App.state.projectDirectoryHandle = dirHandle;
                 App.styles.loadGoogleFont(App.state.storyData.meta.styles['--font-family']);
-                App.modals.hideAll();
+                if(!App.state.debugMode) App.modals.hideAll();
                 App.ui.enableEditor(true);
                 App.ui.updateMetaInputs();
                 App.ui.invalidateNavViews();
-                App.ui.setViewMode(App.state.currentNavView);
-                App.ui.selectScene(App.state.storyData.meta.startSceneId);
+                await App.ui.setViewMode(App.state.currentNavView);
+                await App.ui.selectScene(App.state.storyData.meta.startSceneId);
+                
+                App.debug.log('Ensuring asset folders exist...');
+                await dirHandle.getDirectoryHandle('images', { create: true });
+                await dirHandle.getDirectoryHandle('sounds', { create: true });
+                App.debug.log('Asset folders checked/created.', 'SUCCESS');
+
+                App.debug.log('--- Project Loaded Successfully ---', 'SUCCESS');
         
-                // Notify user of success and any warnings
                 let finalNotification = `Project '${App.state.storyData.meta.title}' loaded successfully!`;
                 if (result.warnings.length) {
-                    finalNotification += `<br><br><b>Warnings:</b><br>` + result.warnings.map(w => `• ${w}`).join('<br>');
+                    finalNotification += `<br><br><b>Note:</b> The project format was updated. Please save the project to make this change permanent and ensure faster loading in the future.`;
                 }
                 App.ui.showNotification(finalNotification);
         
             } catch (err) { 
                 if (err.name !== 'AbortError') { 
                     console.error("Failed to open project:", err); 
+                    App.debug.log(`CRITICAL FAILURE: ${err.name} - ${err.message}\n${err.stack}`, 'ERROR');
                     App.ui.showNotification(`A critical error occurred while opening the project: ${err.name}`); 
-                } 
+                } else {
+                     App.debug.log('User aborted directory picker.', 'INFO');
+                }
             } finally {
                 App.ui.cursor.default();
+                App.ui.hideProgress();
             }
         },
         
@@ -1966,7 +2094,7 @@ const App = {
                 .replace('__CUSTOM_STYLES__', App.styles.generateCSS(storyData.meta.styles))
                 .replace('__PLAYER_SCRIPT__', playerScript);
         },
-
+        
         async exportProjectZip() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to export."); return; }
             App.editor.saveCurrentScene(false);
@@ -2086,11 +2214,15 @@ const App = {
     sceneList: {
         ICONS: {
             start: `<svg class="scene-card-icon icon-start" title="Start Scene" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>`,
+			
             audio: `<svg class="scene-card-icon icon-sound" title="Has Audio" viewBox="0 0 16 16"><path d="M9.707,2.293a1,1,0,0,0-1.414,0L4.6,6H2.5A1.5,1.5,0,0,0,1,7.5v1A1.5,1.5,0,0,0,2.5,10H4.6l3.69,3.707a1,1,0,0,0,1.414,0V2.293Z"/></svg>`,
-            loop: `<svg class="scene-card-icon icon-sound" title="Audio Loops" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>`,
-            orphan: `<svg class="scene-card-icon icon-orphan" viewBox="0 0 24 24" stroke-width="2.5"><rect x="7" y="2" width="2" height="12" fill="currentColor" /><rect x="2" y="7" width="12" height="2" fill="currentColor" /></svg>`,
-            end: `<svg class="scene-card-icon icon-deadend" viewBox="0 0 24 24" stroke-width="2"><circle cx="8" cy="8" r="7.5" fill="red" stroke="white" stroke-width="1" /><rect x="3" y="6.5" width="10" height="3" fill="white" /></svg>`,
-            condition: `<svg class="scene-card-icon icon-condition" viewBox="0 0 24 24"><path d="M11 12L19 8 M11 12L19 16 M3 12h8"/><circle cx="3" cy="12" r="2"/><circle cx="19" cy="8" r="2"/><circle cx="19" cy="16" r="2"/></svg>`
+			
+            loop: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>`,
+
+            orphan: `<svg width="16" height="16" viewBox="0 0 16 16" class="scene-card-icon icon-orphan" viewBox="0 0 16 16" stroke-width="1.5"><rect x="7" y="2" width="2" height="12"/><rect x="3" y="5" width="10" height="2"/></svg>`,
+			
+            end: `<svg class="scene-card-icon icon-deadend" viewBox="0 0 16 16" stroke-width="2"><circle cx="8" cy="8" r="7.5" fill="red" stroke="white" stroke-width="1" /><rect x="3" y="6.5" width="10" height="3" fill="white" /></svg>`,
+            condition: `<svg class="scene-card-icon icon-condition" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.33 8L12.67 5.33M7.33 8L12.67 10.67M2 8h5.33"/><circle cx="2" cy="8" r="1.33"/><circle cx="12.67" cy="5.33" r="1.33"/><circle cx="12.67" cy="10.67" r="1.33"/></svg>`
         },
         
         createCard(scene) {
@@ -2139,7 +2271,7 @@ const App = {
             return card;
         },
 
-        render(filterTerm = '') {
+        async render(filterTerm = '') {
             if (!App.state.storyData.meta) return;
             App.tree.findOrphans();
             const container = App.elements['scene-list-view'];
@@ -2164,15 +2296,24 @@ const App = {
             const connectedScenes = scenes.filter(s => !App.state.orphanSceneIds.has(s.id));
             const orphanScenes = scenes.filter(s => App.state.orphanSceneIds.has(s.id));
 
-            if (connectedScenes.length > 0) {
-                const header = document.createElement('div'); header.className = 'scene-list-group-header'; header.textContent = 'Connected Scenes'; container.appendChild(header);
-                connectedScenes.forEach(scene => container.appendChild(this.createCard(scene)));
-            }
-
-            if (orphanScenes.length > 0) {
-                 const header = document.createElement('div'); header.className = 'scene-list-group-header'; header.textContent = 'Orphan Scenes'; container.appendChild(header);
-                orphanScenes.forEach(scene => container.appendChild(this.createCard(scene)));
-            }
+            let count = 0;
+            const CHUNK_SIZE = 50;
+            const renderGroup = async (group, title) => {
+                if (group.length > 0) {
+                    const header = document.createElement('div'); header.className = 'scene-list-group-header'; header.textContent = title; container.appendChild(header);
+                    for (const scene of group) {
+                        container.appendChild(this.createCard(scene));
+                        count++;
+                        if (count % CHUNK_SIZE === 0) {
+                             App.debug.log(`Rendering scene list chunk ${count}/${scenes.length}...`, 'INFO');
+                             await App.debug.yieldToMain();
+                        }
+                    }
+                }
+            };
+            
+            await renderGroup(connectedScenes, 'Connected Scenes');
+            await renderGroup(orphanScenes, 'Orphan Scenes');
 
             container.querySelectorAll('img[data-src-path]').forEach(async img => {
                 const url = await App.io.getAssetDataUrl(img.dataset.srcPath);
@@ -2223,7 +2364,7 @@ const App = {
             allSceneIds.forEach(id => { if (!reachableSceneIds.has(id)) App.state.orphanSceneIds.add(id); });
         },
 
-        render(filterTerm = '') {
+        async render(filterTerm = '') {
             if (!App.state.storyData.meta) return;
             this.findOrphans();
             const treeView = App.elements['tree-view'];
@@ -2252,14 +2393,17 @@ const App = {
             }
 
             const collapsedState = {};
-            treeView.querySelectorAll('li[data-scene-id]').forEach(li => { if (li.dataset.collapsed === 'true') collapsedState[li.dataset.sceneId] = true; });
+            document.querySelectorAll('#tree-view li[data-scene-id]').forEach(li => { if (li.dataset.collapsed === 'true') collapsedState[li.dataset.sceneId] = true; });
 
             const scenes = App.state.storyData.scenes;
             const { startSceneId } = App.state.storyData.meta;
+            const counter = { count: 0 };
+            const CHUNK_SIZE = 50;
+
             if (startSceneId && scenes[startSceneId]) {
                 const rootUl = document.createElement('ul');
-                this.buildNode(startSceneId, rootUl, [], collapsedState, new Set());
                 treeView.appendChild(rootUl);
+                await this.buildNode(startSceneId, rootUl, collapsedState, new Set(), counter, CHUNK_SIZE);
             } else {
                 treeView.innerHTML = `<li>No start scene set. Set a start scene to view the main story map.</li>`;
             }
@@ -2270,61 +2414,109 @@ const App = {
                 App.state.orphanSceneIds.forEach(id => scenes[id]?.choices?.forEach(c => { if (c.action?.target && App.state.orphanSceneIds.has(c.action.target)) orphanTargets.add(c.action.target); }));
                 const orphanRoots = Array.from(App.state.orphanSceneIds).filter(id => !orphanTargets.has(id)).sort();
                 const orphanUl = document.createElement('ul');
-                orphanRoots.forEach(rootId => this.buildNode(rootId, orphanUl, [], collapsedState, new Set()));
                 treeView.appendChild(orphanUl);
+                for (const rootId of orphanRoots) {
+                     await this.buildNode(rootId, orphanUl, collapsedState, new Set(), counter, CHUNK_SIZE);
+                }
             }
         },
-        buildNode(sceneId, parentElement, path, collapsedState, visitedSet) {
-            const scene = App.state.storyData.scenes[sceneId];
-            if (!scene) { parentElement.innerHTML += `<li><span style="color:red">Broken Link: ${sceneId}</span></li>`; return; }
-            if (visitedSet.has(sceneId)) { parentElement.innerHTML += `<li><div class="scene-node" onclick="App.ui.selectScene('${sceneId}')"><span class="scene-node-text">${sceneId} (LOOP)</span></div></li>`; return; }
-            visitedSet.add(sceneId);
 
-            const li = document.createElement('li'); li.dataset.sceneId = sceneId;
-            if (collapsedState[sceneId]) li.dataset.collapsed = 'true';
-            
-            const sceneNode = document.createElement('div'); sceneNode.className = 'scene-node';
-            if (sceneId === App.state.currentSceneId) sceneNode.classList.add('active');
-            sceneNode.title = (scene.text || 'Empty scene').split('\n')[0].substring(0, 150);
+		async buildNode(sceneId, parentElement, collapsedState, visitedSet, counter, CHUNK_SIZE) {
+			const scene = App.state.storyData.scenes[sceneId];
+			if (!scene) {
+				parentElement.innerHTML += `<li><span style="color:red">Broken Link: ${sceneId}</span></li>`;
+				return;
+			}
+			// THE CRITICAL CHECK: If this scene has been rendered ANYWHERE before in this session,
+			// immediately mark it as a loop and STOP recursion. This prevents the combinatorial explosion.
+			if (visitedSet.has(sceneId)) {
+				parentElement.innerHTML += `<li><div class="scene-node" onclick="App.ui.selectScene('${sceneId}')"><span class="scene-node-text">${sceneId} (LOOP)</span></div></li>`;
+				return;
+			}
+			
+			counter.count++;
+			if (counter.count % CHUNK_SIZE === 0) {
+				App.debug.log(`Rendering tree chunk ${counter.count}...`, 'INFO');
+				await App.debug.yieldToMain();
+			}
 
-            const toggle = document.createElement('span'); toggle.className = 'tree-toggle';
-            const hasChoices = scene.choices?.length > 0;
-            if (hasChoices) {
-                toggle.textContent = li.dataset.collapsed === 'true' ? '[+]' : '[-]';
-                toggle.onclick = (e) => { e.stopPropagation(); li.dataset.collapsed = li.dataset.collapsed !== 'true'; this.render(); };
-            } else { toggle.classList.add('empty'); }
+			visitedSet.add(sceneId); // Add the scene to the set of globally visited nodes.
 
-            const iconsDiv = document.createElement('div'); iconsDiv.className = 'scene-node-icons';
-            let iconsHTML = '';
-            if (App.state.orphanSceneIds.has(sceneId)) iconsHTML += this.ICONS.orphan;
-            if (sceneId === App.state.storyData.meta.startSceneId) iconsHTML += this.ICONS.start;
-            if (scene.image) iconsHTML += this.ICONS.image;
-            if (scene.ambienceSound) iconsHTML += this.ICONS.sound;
-            if (scene.choices?.some(c => c.condition)) iconsHTML += this.ICONS.condition;
-            if (!scene.choices?.some(c => c.action.text)) iconsHTML += this.ICONS.deadEnd;
-            iconsDiv.innerHTML = iconsHTML;
+			const li = document.createElement('li');
+			li.dataset.sceneId = sceneId;
+			if (collapsedState[sceneId]) {
+				li.dataset.collapsed = 'true';
+			}
+			
+			const sceneNode = document.createElement('div');
+			sceneNode.className = 'scene-node';
+			if (sceneId === App.state.currentSceneId) {
+				sceneNode.classList.add('active');
+			}
+			sceneNode.title = (scene.text || 'Empty scene').split('\n')[0].substring(0, 150);
 
-            const text = document.createElement('span'); text.className = 'scene-node-text'; text.textContent = sceneId;
-            sceneNode.append(toggle, iconsDiv, text);
-            sceneNode.onclick = () => App.ui.selectScene(sceneId);
-            sceneNode.oncontextmenu = (e) => { e.preventDefault(); App.state.contextSceneId = sceneId; const menu = App.elements['tree-context-menu']; menu.style.display = 'block'; menu.style.left = `${e.pageX}px`; menu.style.top = `${e.pageY}px`; };
-            li.appendChild(sceneNode);
+			const toggle = document.createElement('span');
+			toggle.className = 'tree-toggle';
+			const hasChoices = scene.choices?.length > 0;
+			if (hasChoices) {
+				toggle.textContent = li.dataset.collapsed === 'true' ? '[+]' : '[-]';
+				toggle.onclick = async (e) => {
+					e.stopPropagation();
+					li.dataset.collapsed = li.dataset.collapsed !== 'true';
+					await this.render();
+				};
+			} else {
+				toggle.classList.add('empty');
+			}
 
-            if (hasChoices && li.dataset.collapsed !== 'true') {
-                const childUl = document.createElement('ul'); const choiceColor = this.getColorForScene(sceneId); childUl.style.borderLeftColor = choiceColor;
-                scene.choices.forEach(choice => {
-                    const choiceLi = document.createElement('li'); choiceLi.className = 'choice-node'; choiceLi.style.setProperty('--choice-color', choiceColor);
-                    choiceLi.innerHTML = `<span class="choice-node-text">"${choice.action.text || '(Silent Action)'}"</span>`;
-                    childUl.appendChild(choiceLi);
-                    if (choice.action.target) {
-                        this.buildNode(choice.action.target, childUl, [...path, sceneId], collapsedState, new Set(visitedSet));
-                    }
-                });
-                li.appendChild(childUl);
-            }
-            parentElement.appendChild(li);
-        },
-        createNewScene() {
+			const iconsDiv = document.createElement('div');
+			iconsDiv.className = 'scene-node-icons';
+			let iconsHTML = '';
+			if (App.state.orphanSceneIds.has(sceneId)) iconsHTML += this.ICONS.orphan;
+			if (sceneId === App.state.storyData.meta.startSceneId) iconsHTML += this.ICONS.start;
+			if (scene.image) iconsHTML += this.ICONS.image;
+			if (scene.ambienceSound) iconsHTML += this.ICONS.sound;
+			if (scene.choices?.some(c => c.condition)) iconsHTML += this.ICONS.condition;
+			if (!scene.choices?.some(c => c.action.text)) iconsHTML += this.ICONS.deadEnd;
+			iconsDiv.innerHTML = iconsHTML;
+
+			const text = document.createElement('span');
+			text.className = 'scene-node-text';
+			text.textContent = sceneId;
+			sceneNode.append(toggle, iconsDiv, text);
+			sceneNode.onclick = () => App.ui.selectScene(sceneId);
+			sceneNode.oncontextmenu = (e) => {
+				e.preventDefault();
+				App.state.contextSceneId = sceneId;
+				const menu = App.elements['tree-context-menu'];
+				menu.style.display = 'block';
+				menu.style.left = `${e.pageX}px`;
+				menu.style.top = `${e.pageY}px`;
+			};
+			li.appendChild(sceneNode);
+			parentElement.appendChild(li);
+
+			if (hasChoices && li.dataset.collapsed !== 'true') {
+				const childUl = document.createElement('ul');
+				const choiceColor = this.getColorForScene(sceneId);
+				childUl.style.borderLeftColor = choiceColor;
+				li.appendChild(childUl);
+				for (const choice of scene.choices) {
+					const choiceLi = document.createElement('li');
+					choiceLi.className = 'choice-node';
+					choiceLi.style.setProperty('--choice-color', choiceColor);
+					choiceLi.innerHTML = `<span class="choice-node-text">"${choice.action.text || '(Silent Action)'}"</span>`;
+					childUl.appendChild(choiceLi);
+					if (choice.action.target) {
+						// Pass the same visitedSet down to all children
+						await this.buildNode(choice.action.target, childUl, collapsedState, visitedSet, counter, CHUNK_SIZE);
+					}
+				}
+			}
+			// *** The problematic backtracking line has been REMOVED. We do not delete from the set. ***
+			// visitedSet.delete(sceneId); 
+		},
+        async createNewScene() {
             let newId = prompt("Enter a unique ID for the new scene:");
             if (!newId) return; newId = newId.trim().replace(/\s+/g, '_');
             if (!newId.length) return;
@@ -2333,9 +2525,9 @@ const App = {
                 return;
             }
             App.state.storyData.scenes[newId] = { id: newId, text: `This is the new scene '${newId}'.`, choices: [], ambienceLoop: true, visited: false, lastModified: Date.now() };
-            App.setDirty(true); App.ui.invalidateNavViews(); App.ui.setViewMode(App.state.currentNavView); App.ui.selectScene(newId);
+            App.setDirty(true); App.ui.invalidateNavViews(); await App.ui.setViewMode(App.state.currentNavView); App.ui.selectScene(newId);
         },
-        renameScene() {
+        async renameScene() {
             const oldId = App.state.currentSceneId;
             if (!oldId) { App.ui.showNotification("No scene selected to rename."); return; }
             let newId = prompt("Enter the new ID for this scene:", oldId);
@@ -2349,9 +2541,9 @@ const App = {
             Object.values(App.state.storyData.scenes).forEach(scene => scene.choices?.forEach(choice => { if (choice.action?.target === oldId) choice.action.target = newId; }));
             if (App.state.storyData.meta.startSceneId === oldId) App.state.storyData.meta.startSceneId = newId;
             
-            App.state.currentSceneId = newId; App.setDirty(true); App.ui.invalidateNavViews(); App.ui.setViewMode(App.state.currentNavView); App.editor.render();
+            App.state.currentSceneId = newId; App.setDirty(true); App.ui.invalidateNavViews(); await App.ui.setViewMode(App.state.currentNavView); App.editor.render();
         },
-        deleteCurrentScene() {
+        async deleteCurrentScene() {
             const sceneId = App.state.currentSceneId;
             if (!sceneId) { App.ui.showNotification("No scene selected to delete."); return; }
             if (sceneId === App.state.storyData.meta.startSceneId) { App.ui.showNotification("Cannot delete the start scene. Set another scene as the start scene first."); return; }
@@ -2360,10 +2552,10 @@ const App = {
             delete App.state.storyData.scenes[sceneId];
             Object.values(App.state.storyData.scenes).forEach(scene => scene.choices?.forEach(choice => { if (choice.action?.target === sceneId) choice.action.target = ''; }));
             
-            App.setDirty(true); App.state.currentSceneId = null; App.ui.invalidateNavViews(); App.ui.setViewMode(App.state.currentNavView); App.ui.selectScene(App.state.storyData.meta.startSceneId);
+            App.setDirty(true); App.state.currentSceneId = null; App.ui.invalidateNavViews(); await App.ui.setViewMode(App.state.currentNavView); App.ui.selectScene(App.state.storyData.meta.startSceneId);
         },
-        setAsStartScene() {
-            if (App.state.contextSceneId) { App.state.storyData.meta.startSceneId = App.state.contextSceneId; App.setDirty(true); App.ui.invalidateNavViews(); App.ui.setViewMode(App.state.currentNavView); }
+        async setAsStartScene() {
+            if (App.state.contextSceneId) { App.state.storyData.meta.startSceneId = App.state.contextSceneId; App.setDirty(true); App.ui.invalidateNavViews(); await App.ui.setViewMode(App.state.currentNavView); }
         }
     },
 
@@ -2762,7 +2954,7 @@ const App = {
                 App.setDirty(true); 
                 App.editor.saveCurrentScene(false); 
                 App.ui.invalidateNavViews(); 
-                App.ui.setViewMode(App.state.currentNavView);
+                await App.ui.setViewMode(App.state.currentNavView);
                 App.ui.updateAiImagePreview(null, 'Ready');
             } catch (err) { 
                 console.error("Error adding AI image:", err); 
@@ -2866,7 +3058,7 @@ const App = {
         async renderScene(sceneId) {
             App.state.currentSceneId = sceneId;
             this.gameState.visited[sceneId] = true;
-            App.ui.setViewMode(App.state.currentNavView);
+            await App.ui.setViewMode(App.state.currentNavView);
 
             const scene = App.state.storyData.scenes[sceneId];
             const { 'player-text': textEl, 'player-choices': choicesEl, 'ambience-player': audio } = App.elements;
@@ -3112,7 +3304,7 @@ const App = {
             logEl.textContent += `[${new Date().toLocaleTimeString()}] ${message}\n`;
             logEl.scrollTop = logEl.scrollHeight;
         },
-        removeAllImages() {
+                removeAllImages() {
             App.editor.saveCurrentScene(false);
             if (!confirm("Delete image paths from ALL scenes? This cannot be undone.")) return;
             let count = 0; Object.values(App.state.storyData.scenes).forEach(scene => { if (scene.image) { scene.image = ''; count++; } });
@@ -3169,7 +3361,7 @@ const App = {
             
             this.isGenerating = false; this.abortRequested = false; fieldset.disabled = false; btn.disabled = false;
             btn.innerHTML = `<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg> Generate`;
-            App.editor.render(); App.ui.invalidateNavViews(); App.ui.setViewMode(App.state.currentNavView);
+            App.editor.render(); App.ui.invalidateNavViews(); await App.ui.setViewMode(App.state.currentNavView);
         },
         
         async generatePromptForScene(scene) {
@@ -3222,6 +3414,100 @@ const App = {
                 this.logInfo(`Error: ${err.message}`);
                 return false;
             }
+        }
+    },
+    
+    debug: {
+        init: function() {
+            // Override console methods to also log to our debug window
+            const originalConsole = {
+                log: console.log.bind(console),
+                warn: console.warn.bind(console),
+                error: console.error.bind(console),
+            };
+
+            const override = (method, level) => {
+                console[method] = (...args) => {
+                    originalConsole[method](...args);
+                    if (App.state.debugMode) {
+                        const message = args.map(arg => {
+                            try {
+                                return typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg);
+                            } catch (e) {
+                                return `[Unserializable Object]`;
+                            }
+                        }).join(' ');
+                        this.log(`[CONSOLE] ${message}`, level);
+                    }
+                };
+            };
+
+            override('log', 'INFO');
+            override('warn', 'WARN');
+            override('error', 'ERROR');
+
+            // Bind keyboard shortcut for toggling debug mode
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'd') {
+                    e.preventDefault();
+                    this.toggle();
+                }
+            });
+            
+            // Bind the copy button in the debug modal
+            if(App.elements['copy-debug-log-btn']) {
+                 App.elements['copy-debug-log-btn'].addEventListener('click', this.copyLog);
+            }
+        },
+
+        toggle: function() {
+            App.state.debugMode = !App.state.debugMode;
+            App.ui.showNotification(`Debug Mode ${App.state.debugMode ? 'Enabled' : 'Disabled'}.`);
+            console.log(`Debug mode toggled ${App.state.debugMode ? 'ON' : 'OFF'}.`);
+        },
+
+        log: function(message, level) {
+            const currentLevel = level || 'INFO'; // Handle default parameter manually
+            const logEl = App.elements['debug-log'];
+            if (!logEl) return;
+            
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const logEntry = document.createElement('span');
+            logEntry.textContent = `[${timestamp}] [${currentLevel}] ${message}\n`;
+
+            switch(currentLevel.toUpperCase()) {
+                case 'ERROR': logEntry.style.color = '#ff8a8a'; break;
+                case 'WARN': logEntry.style.color = '#ffd180'; break;
+                case 'SUCCESS': logEntry.style.color = '#b9f6ca'; break;
+                case 'INFO':
+                default: logEntry.style.color = '#80d8ff'; break;
+            }
+            
+            logEl.appendChild(logEntry);
+            logEl.scrollTop = logEl.scrollHeight;
+        },
+
+        clear: function() {
+            const logEl = App.elements['debug-log'];
+            if (logEl) logEl.textContent = '';
+        },
+        
+        copyLog: function() {
+            const logEl = App.elements['debug-log'];
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(logEl.innerText).then(() => {
+                    App.ui.showNotification('Debug log copied to clipboard.');
+                }).catch(err => {
+                    console.error('Failed to copy log:', err);
+                    App.ui.showNotification('Failed to copy log.');
+                });
+            }
+        },
+
+        yieldToMain: function() {
+            return new Promise(resolve => {
+                setTimeout(resolve, 0);
+            });
         }
     }
 };

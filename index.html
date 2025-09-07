@@ -181,6 +181,21 @@
         #media-paths-container .media-icon-label { margin-bottom: 0; flex-shrink: 0; width: 24px; height: 24px; color: var(--secondary-color); display: inline-flex; align-items: center; justify-content: center; }
 
         #scene-editor-preview-wrapper { position: relative; width: 100%; max-width: 720px; margin: 0 auto 25px auto; aspect-ratio: 16 / 9; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background-color: #000; }
+        #scene-editor-preview-wrapper.is-loading::after {
+            content: 'Loading...';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 1.2em;
+            z-index: 10;
+        }
         #scene-editor-preview { position: absolute; top: 0; left: 0; width: 200%; height: 200%; transform: scale(0.5); transform-origin: top left; overflow: auto; background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); font-size: var(--font-size); display: flex; justify-content: center; align-items: center; }
         #scene-editor-preview.layout-image-as-bg { align-items: flex-end; }
         #scene-editor-preview, #scene-editor-preview #preview-player-inner-container { background-size: cover; background-position: center; }
@@ -829,6 +844,8 @@ const App = {
         currentNavView: 'tree', // 'tree' or 'list'
         navViewsDirty: true,
         missingAssetWarnings: new Set(),
+        previewLoadId: 0,
+        thumbnailLoadId: 0,
         player: {
             gameState: null,
 			typewriter: { intervalId: null, skipListener: null }
@@ -930,7 +947,6 @@ const App = {
         
         document.getElementById('select-image-btn').addEventListener('click', () => App.assets.selectFile('images', 'scene-image'));
         document.getElementById('select-sound-btn').addEventListener('click', () => App.assets.selectFile('sounds', 'scene-sound'));
-        App.elements['scene-image'].addEventListener('change', (e) => App.ui.updateImageThumbnail(e.target.value));
         App.elements['scene-sound'].addEventListener('input', (e) => {
             const hasSound = !!e.target.value;
             const btn = App.elements['toggle-ambience-btn'];
@@ -947,8 +963,11 @@ const App = {
             App.setDirty(true);
         });
 
-        ['scene-text', 'scene-image'].forEach(id => {
-            App.elements[id].addEventListener('input', () => App.editor.renderPreview());
+        App.elements['scene-text'].addEventListener('input', () => App.editor.renderPreview());
+        App.elements['scene-image'].addEventListener('input', (e) => {
+            // This now correctly triggers updates for BOTH preview and thumbnail on every input change.
+            App.editor.renderPreview();
+            App.ui.updateImageThumbnail(e.target.value);
         });
         App.elements['choices-container'].addEventListener('input', () => { App.editor.renderPreview(); App.setDirty(true); });
 
@@ -1308,6 +1327,10 @@ const App = {
             }
         },
         async updateImageThumbnail(path) {
+            // 1. Cancellation Token Logic
+            App.state.thumbnailLoadId++;
+            const currentLoadId = App.state.thumbnailLoadId;
+
             const preview = App.elements['image-preview'];
             const icon = preview.querySelector('.thumbnail-fullscreen-icon');
             preview.innerHTML = '';
@@ -1318,7 +1341,15 @@ const App = {
 
             if (!path) return;
             try {
+                // Show loading state
+                defaultSpan.textContent = 'Loading...';
                 const url = await App.io.getAssetDataUrl(path);
+
+                // 2. Check if the request is still valid
+                if (currentLoadId !== App.state.thumbnailLoadId) {
+                    return; // Abort if a newer request has started
+                }
+
                 if (url) {
                     preview.innerHTML = '';
                     if(icon) preview.appendChild(icon);
@@ -1329,7 +1360,9 @@ const App = {
                      defaultSpan.textContent = 'Invalid Path';
                 }
             } catch (e) {
-                defaultSpan.textContent = 'Invalid Path';
+                if (currentLoadId === App.state.thumbnailLoadId) {
+                    defaultSpan.textContent = 'Invalid Path';
+                }
                 console.warn('Thumbnail load failed:', e);
             }
         },
@@ -2621,31 +2654,56 @@ const App = {
             this.updatePreviewImage();
         },
         async updatePreviewImage() {
+            // 1. Cancellation Token Logic
+            App.state.previewLoadId++;
+            const currentLoadId = App.state.previewLoadId;
+            
+            const previewWrapper = App.elements['scene-editor-preview-wrapper'];
             const imageEl = document.getElementById('preview-player-image');
             const imageContainerEl = document.getElementById('preview-player-image-container');
             const innerContainer = document.getElementById('preview-player-inner-container');
             const previewContainer = App.elements['scene-editor-preview'];
 
-            const sceneImage = App.elements['scene-image'].value;
-            const meta = App.state.storyData.meta;
-            const styles = meta.styles;
+            // 2. Add loading state feedback
+            previewWrapper.classList.add('is-loading');
 
-            const sceneImageUrl = await App.io.getAssetDataUrl(sceneImage);
-            const globalScreenBgUrl = await App.io.getAssetDataUrl(styles['--screen-bg-image']);
-            const containerBgUrl = await App.io.getAssetDataUrl(styles['--container-bg-image']);
+            try {
+                const sceneImage = App.elements['scene-image'].value;
+                const meta = App.state.storyData.meta;
+                const styles = meta.styles;
 
-            innerContainer.style.backgroundImage = containerBgUrl ? `url("${containerBgUrl}")` : 'none';
+                // Await all asset URLs
+                const [sceneImageUrl, globalScreenBgUrl, containerBgUrl] = await Promise.all([
+                    App.io.getAssetDataUrl(sceneImage),
+                    App.io.getAssetDataUrl(styles['--screen-bg-image']),
+                    App.io.getAssetDataUrl(styles['--container-bg-image'])
+                ]);
+                
+                // 3. Check if the request is still valid before updating the DOM
+                if (currentLoadId !== App.state.previewLoadId) {
+                    return; // Abort if a newer request has started
+                }
 
-            if (meta.layout === 'layout-image-as-bg') {
-                imageContainerEl.style.display = 'none';
-                previewContainer.style.backgroundImage = sceneImageUrl ? `url("${sceneImageUrl}")` : (globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none');
-            } else {
-                previewContainer.style.backgroundImage = globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none';
-                if (sceneImageUrl) {
-                    imageEl.src = sceneImageUrl;
-                    imageContainerEl.style.display = 'block';
-                } else {
+                innerContainer.style.backgroundImage = containerBgUrl ? `url("${containerBgUrl}")` : 'none';
+
+                if (meta.layout === 'layout-image-as-bg') {
                     imageContainerEl.style.display = 'none';
+                    previewContainer.style.backgroundImage = sceneImageUrl ? `url("${sceneImageUrl}")` : (globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none');
+                } else {
+                    previewContainer.style.backgroundImage = globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none';
+                    if (sceneImageUrl) {
+                        imageEl.src = sceneImageUrl;
+                        imageContainerEl.style.display = 'block';
+                    } else {
+                        imageContainerEl.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to update preview image:", error);
+            } finally {
+                // 4. Always remove loading state, but only if this is the latest request
+                if (currentLoadId === App.state.previewLoadId) {
+                    previewWrapper.classList.remove('is-loading');
                 }
             }
         },
@@ -3117,7 +3175,7 @@ const App = {
             App.elements['ambience-player'].src = ''; App.elements['music-player'].src = '';
             if (App.state.currentSceneId) App.editor.render();
         },
-        async toggleAmbienceSound() {
+                async toggleAmbienceSound() {
             const audio = App.elements['ambience-player'];
             const soundPath = App.elements['scene-sound'].value;
             if (!soundPath) return;

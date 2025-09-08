@@ -55,7 +55,17 @@
         .header h1 { white-space: nowrap; }
         .header h2 { margin-bottom: 0; }
         .header h3 { border-bottom: none; }
-        #main-title-dirty-indicator { color: var(--danger-color); font-size: 0.7em; margin-left: 5px; display: none; }
+        #save-project-dirty-btn {
+            display: none; /* JS toggles this to inline-flex */
+            padding: 6px;
+            margin-left: 10px;
+            line-height: 1;
+            min-width: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            vertical-align: middle;
+        }
         
         hr { border: none; border-top: 1px solid var(--border-color); margin: 15px 0; }
         #tree-view, #scene-list-view { list-style-type: none; padding-left: 0; flex-grow: 1; overflow: auto; min-height: 100px; margin-top: 10px; }
@@ -153,9 +163,11 @@
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
         .btn-group button { margin-top: 0; }
         .btn-success { background-color: var(--success-color); }
-        .btn-success.dirty { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(90, 143, 102, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(90, 143, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(90, 143, 102, 0); } }
+        #save-story-btn.dirty { animation: pulse-success 1.5s infinite; }
+        @keyframes pulse-success { 0% { box-shadow: 0 0 0 0 rgba(90, 143, 102, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(90, 143, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(90, 143, 102, 0); } }
         .btn-warning { background-color: var(--warning-color); color: var(--warning-text); }
+        .btn-warning.dirty { animation: pulse-warning 1.5s infinite; }
+        @keyframes pulse-warning { 0% { box-shadow: 0 0 0 0 rgba(199, 146, 26, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(199, 146, 26, 0); } 100% { box-shadow: 0 0 0 0 rgba(199, 146, 26, 0); } }
         .btn-danger { background-color: var(--danger-color); }
         .btn-secondary { background-color: var(--secondary-color); }
         .btn-purple { background-color: var(--purple-color); }
@@ -391,7 +403,12 @@
 <div id="editor-container">
     <fieldset id="editor-fieldset">
         <div class="header">
-            <h1>Scene Editor <span id="main-title-dirty-indicator">(unsaved)</span></h1>
+            <h1>
+                Scene Editor
+                <button id="save-project-dirty-btn" class="btn-warning" title="Save Project (Ctrl+S)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.5 0h-2A1.5 1.5 0 0 0 1 1.5V15a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2.5A1.5 1.5 0 0 0 13.5 1h-2a.5.5 0 0 1 0-1h-2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H4.5zM3 14V2.5A.5.5 0 0 1 3.5 2H5v1.5A1.5 1.5 0 0 0 6.5 5h3A1.5 1.5 0 0 0 11 3.5V2h1.5a.5.5 0 0 1 .5.5V14a.5.5 0 0 1-.5-.5H3.5a.5.5 0 0 1-.5-.5z"/></svg>
+                </button>
+            </h1>
             <div style="flex-grow: 1; display: flex; justify-content: center; align-items: center;">
                 <div class="form-group inline" id="scene-id-group" style="margin-bottom: 0; min-width: 250px;">
                     <label for="scene-id" style="margin-bottom: 0; white-space: nowrap;">Scene ID</label>
@@ -411,9 +428,6 @@
                 </button>
                  <button id="preview-btn" class="btn-success" title="Preview Project in New Tab">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445z"/></svg>
-                </button>
-                <button id="save-scene-btn" class="btn-warning" title="Save Changes to Memory (Ctrl+S)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.5 0h-2A1.5 1.5 0 0 0 1 1.5V15a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2.5A1.5 1.5 0 0 0 13.5 1h-2a.5.5 0 0 1 0-1h-2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H4.5zM3 14V2.5A.5.5 0 0 1 3.5 2H5v1.5A1.5 1.5 0 0 0 6.5 5h3A1.5 1.5 0 0 0 11 3.5V2h1.5a.5.5 0 0 1 .5.5V14a.5.5 0 0 1-.5-.5H3.5a.5.5 0 0 1-.5-.5z"/></svg>
                 </button>
                 <button id="delete-scene-btn" class="btn-danger" title="Delete Current Scene">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
@@ -869,6 +883,7 @@ const App = {
             { name: "Inconsolata", value: "'Inconsolata', monospace" },
             { name: "Just Another Hand", value: "'Just Another Hand', cursive" },
             { name: "Lato", value: "'Lato', sans-serif" },
+            { name: "Libre Baskerville", value: "'Libre Baskerville', serif" },
             { name: "Limelight", value: "'Limelight', cursive" },
             { name: "Lora", value: "'Lora', serif" },
             { name: "Merriweather", value: "'Merriweather', serif" },
@@ -918,7 +933,7 @@ const App = {
             'tree-view', 'editor-container', 'player-container', 'scene-id', 'scene-image',
             'scene-image-prompt', 'scene-sound', 'scene-text', 'choices-container',
             'ambience-player', 'music-player', 'export-data-modal', 'style-editor-modal', 'about-editor-modal',
-            'tree-context-menu', 'main-title-dirty-indicator',
+            'tree-context-menu', 'save-project-dirty-btn',
             'save-story-btn', 'player-image', 'player-text', 'player-choices', 'player-inner-container',
             'editor-fieldset', 'ai-image-preview', 'render-ai-image-btn', 'add-ai-image-btn', 'image-preview',
             'story-title', 'creator-name', 'about-text',
@@ -938,12 +953,12 @@ const App = {
         document.getElementById('new-project-btn').addEventListener('click', () => App.io.newProject());
         document.getElementById('open-project-btn').addEventListener('click', () => App.io.openProject());
         App.elements['save-story-btn'].addEventListener('click', () => App.io.saveProject());
+        this.elements['save-project-dirty-btn'].addEventListener('click', () => App.io.saveProject());
         
         document.getElementById('new-scene-btn').addEventListener('click', () => App.tree.createNewScene());
         document.getElementById('rename-scene-btn').addEventListener('click', () => App.tree.renameScene());
         document.getElementById('delete-scene-btn').addEventListener('click', () => App.tree.deleteCurrentScene());
         document.getElementById('add-choice-btn').addEventListener('click', () => App.editor.addChoiceToDOM());
-        document.getElementById('save-scene-btn').addEventListener('click', () => App.editor.saveCurrentScene(true));
         
         document.getElementById('select-image-btn').addEventListener('click', () => App.assets.selectFile('images', 'scene-image'));
         document.getElementById('select-sound-btn').addEventListener('click', () => App.assets.selectFile('sounds', 'scene-sound'));
@@ -960,17 +975,22 @@ const App = {
 
         App.elements['toggle-loop-btn'].addEventListener('click', (e) => {
             e.currentTarget.classList.toggle('active');
-            App.setDirty(true);
+            App.editor.saveCurrentScene(false);
         });
 
-        App.elements['scene-text'].addEventListener('input', () => App.editor.renderPreview());
-        App.elements['scene-image'].addEventListener('input', (e) => {
-            // This now correctly triggers updates for BOTH preview and thumbnail on every input change.
-            App.editor.renderPreview();
-            App.ui.updateImageThumbnail(e.target.value);
-        });
-        App.elements['choices-container'].addEventListener('input', () => { App.editor.renderPreview(); App.setDirty(true); });
-
+        // Automatic saving listeners
+        App.elements['scene-text'].addEventListener('input', () => { App.editor.renderPreview(); App.editor.saveCurrentScene(false); });
+		App.elements['scene-image'].addEventListener('input', async (e) => {
+			App.editor.renderPreview();
+			App.ui.updateImageThumbnail(e.target.value);
+			App.editor.saveCurrentScene(false);
+			// This is the crucial added line that forces the scene list to update.
+			await App.ui.renderCurrentView(); 
+		});
+		App.elements['scene-sound'].addEventListener('input', () => App.editor.saveCurrentScene(false));
+		document.getElementById('scene-image-prompt').addEventListener('input', () => App.editor.saveCurrentScene(false));
+		App.elements['choices-container'].addEventListener('input', () => { App.editor.renderPreview(); App.editor.saveCurrentScene(false); });
+		App.elements['choices-container'].addEventListener('change', () => { App.editor.renderPreview(); App.editor.saveCurrentScene(false); });
 
         ['story-title', 'creator-name', 'about-text'].forEach(id => {
             App.elements[id].addEventListener('input', (e) => {
@@ -990,8 +1010,8 @@ const App = {
         App.elements['process-text-ai-btn'].addEventListener('click', () => App.modals.show('pollinations-text-modal'));
         App.elements['pollinations-submit-btn'].addEventListener('click', () => App.assets.processTextWithPollinations());
 
-        document.getElementById('play-from-start-btn').addEventListener('click', () => { App.editor.saveCurrentScene(false); App.player.play(App.state.storyData.meta.startSceneId, true); });
-        document.getElementById('play-from-current-btn').addEventListener('click', () => { App.editor.saveCurrentScene(false); App.player.play(App.state.currentSceneId); });
+        document.getElementById('play-from-start-btn').addEventListener('click', () => { App.player.play(App.state.storyData.meta.startSceneId, true); });
+        document.getElementById('play-from-current-btn').addEventListener('click', () => { App.player.play(App.state.currentSceneId); });
         document.getElementById('stop-play-x')?.addEventListener('click', () => App.player.stop());
         document.getElementById('restart-play')?.addEventListener('click', () => App.player.play(App.state.storyData.meta.startSceneId, true));
         
@@ -1082,7 +1102,6 @@ const App = {
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
                 if (App.state.projectDirectoryHandle && App.elements['editor-container'].style.display !== 'none') {
-                    App.editor.saveCurrentScene(true);
                     App.io.saveProject();
                 }
             }
@@ -1159,35 +1178,24 @@ const App = {
     
     setDirty(isDirty) {
         this.state.isDirty = isDirty;
-        this.elements['main-title-dirty-indicator'].style.display = isDirty ? 'inline' : 'none';
+        this.elements['save-project-dirty-btn'].style.display = isDirty ? 'inline-flex' : 'none';
+        this.elements['save-project-dirty-btn'].classList.toggle('dirty', isDirty);
         this.elements['save-story-btn'].classList.toggle('dirty', isDirty);
     },
 
     markdown: {
         parse(text) {
             if (!text) return '';
-            // A simple parser for basic inline markdown.
-            // It's not exhaustive but covers the most common cases without external libraries.
-            // It intentionally does not parse block elements like lists or headings to avoid complexity
-            // and potential layout breaks in previews. Users can use raw HTML for those.
             let html = text
-                // First, escape any existing HTML to prevent conflicts and XSS.
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
-                // Now, apply markdown rules.
-                // Links: [text](url)
                 .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-                // Bold: **text** or __text__
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/__(.*?)__/g, '<strong>$1</strong>')
-                // Italic: *text* or _text_
                 .replace(/\*(.*?)\*/g, '<em>$1</em>')
                 .replace(/_(.*?)_/g, '<em>$1</em>')
-                // Strikethrough: ~~text~~
                 .replace(/~~(.*?)~~/g, '<s>$1</s>')
-                // Inline code: `text`
                 .replace(/`(.*?)`/g, '<code>$1</code>')
-                // Finally, convert newlines to <br> tags for display.
                 .replace(/\n/g, '<br>');
             return html;
         }
@@ -1251,8 +1259,7 @@ const App = {
                 await App.player.renderScene(sceneId);
                 return;
             }
-
-            App.editor.saveCurrentScene(false);
+            
             const needsSelectionChange = App.state.currentSceneId !== sceneId;
             
             if (needsSelectionChange) {
@@ -1327,7 +1334,6 @@ const App = {
             }
         },
         async updateImageThumbnail(path) {
-            // 1. Cancellation Token Logic
             App.state.thumbnailLoadId++;
             const currentLoadId = App.state.thumbnailLoadId;
 
@@ -1341,13 +1347,11 @@ const App = {
 
             if (!path) return;
             try {
-                // Show loading state
                 defaultSpan.textContent = 'Loading...';
                 const url = await App.io.getAssetDataUrl(path);
 
-                // 2. Check if the request is still valid
                 if (currentLoadId !== App.state.thumbnailLoadId) {
-                    return; // Abort if a newer request has started
+                    return; 
                 }
 
                 if (url) {
@@ -1388,7 +1392,6 @@ const App = {
             tooltip.style.display = 'flex';
             requestAnimationFrame(() => { tooltip.style.opacity = '1'; });
         },
-        // *** NEW FUNCTION: Displays a progress modal ***
         showProgress(message) {
             let progressModal = document.getElementById('progress-modal');
             if (!progressModal) {
@@ -1407,7 +1410,6 @@ const App = {
             progressModal.classList.add('visible');
             document.getElementById('progress-message').innerHTML = message;
         },
-        // *** NEW FUNCTION: Hides the progress modal ***
         hideProgress() {
             const progressModal = document.getElementById('progress-modal');
             if (progressModal) {
@@ -1498,7 +1500,6 @@ const App = {
             }
         },
         
-        // *** REFACTORED FUNCTION: Asynchronous, non-blocking validation and migration ***
         async validateProjectData(rawStoryData, { autofix = true, onProgress = null } = {}) {
             return new Promise(async (resolve) => {
                 const warnings = [];
@@ -1659,7 +1660,6 @@ const App = {
             }
         },
 
-        // *** REFACTORED FUNCTION: Manages the async migration and UI feedback ***
         async openProject(dirHandle = null) {
             if (App.state.debugMode) {
                 App.debug.clear();
@@ -1788,9 +1788,6 @@ const App = {
             App.ui.cursor.wait();
             try {
                 if (!App.state.projectDirectoryHandle) { App.ui.showNotification("No project is open."); return; }
-                if (App.elements['editor-container'].style.display !== 'none') {
-                    App.editor.saveCurrentScene(false);
-                }
                 
                 if (App.state.pendingAssetCopies.size > 0) {
                     for (const [relativePath, fileObject] of App.state.pendingAssetCopies.entries()) {
@@ -2106,7 +2103,6 @@ const App = {
 						const imageAssets = initialAssets.filter(url => /\.(jpe?g|png|gif|webp)$/i.test(url));
 						await Promise.all(imageAssets.map(url => new Promise((res) => { 
 							const img = new Image(); 
-							// We use res for both onload and onerror so one failed image doesn't stop others
 							img.onload = res; 
 							img.onerror = res; 
 							img.src = url; 
@@ -2130,7 +2126,6 @@ const App = {
         
         async exportProjectZip() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to export."); return; }
-            App.editor.saveCurrentScene(false);
             App.ui.showNotification("Collecting used assets and preparing export...");
 
             const zip = new window.JSZip();
@@ -2176,7 +2171,6 @@ const App = {
         
         async previewProject() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to preview."); return; }
-            App.editor.saveCurrentScene(false);
             try {
                 const playerHtml = await App.io.getFormattedPlayerHTML(false);
                 const blob = new Blob([playerHtml], { type: 'text/html' });
@@ -2252,7 +2246,7 @@ const App = {
 			
             loop: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>`,
 
-            orphan: `<svg width="16" height="16" viewBox="0 0 16 16" class="scene-card-icon icon-orphan" viewBox="0 0 16 16" stroke-width="1.5"><rect x="7" y="2" width="2" height="12"/><rect x="3" y="5" width="10" height="2"/></svg>`,
+            orphan: `<svg width="16" height="16" viewBox="0 0 16 16" class="scene-card-icon icon-orphan" stroke-width="1.5"><rect x="7" y="2" width="2" height="12"/><rect x="3" y="5" width="10" height="2"/></svg>`,
 			
             end: `<svg class="scene-card-icon icon-deadend" viewBox="0 0 16 16" stroke-width="2"><circle cx="8" cy="8" r="7.5" fill="red" stroke="white" stroke-width="1" /><rect x="3" y="6.5" width="10" height="3" fill="white" /></svg>`,
             condition: `<svg class="scene-card-icon icon-condition" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.33 8L12.67 5.33M7.33 8L12.67 10.67M2 8h5.33"/><circle cx="2" cy="8" r="1.33"/><circle cx="12.67" cy="5.33" r="1.33"/><circle cx="12.67" cy="10.67" r="1.33"/></svg>`
@@ -2460,8 +2454,6 @@ const App = {
 				parentElement.innerHTML += `<li><span style="color:red">Broken Link: ${sceneId}</span></li>`;
 				return;
 			}
-			// THE CRITICAL CHECK: If this scene has been rendered ANYWHERE before in this session,
-			// immediately mark it as a loop and STOP recursion. This prevents the combinatorial explosion.
 			if (visitedSet.has(sceneId)) {
 				parentElement.innerHTML += `<li><div class="scene-node" onclick="App.ui.selectScene('${sceneId}')"><span class="scene-node-text">${sceneId} (LOOP)</span></div></li>`;
 				return;
@@ -2473,7 +2465,7 @@ const App = {
 				await App.debug.yieldToMain();
 			}
 
-			visitedSet.add(sceneId); // Add the scene to the set of globally visited nodes.
+			visitedSet.add(sceneId);
 
 			const li = document.createElement('li');
 			li.dataset.sceneId = sceneId;
@@ -2541,13 +2533,10 @@ const App = {
 					choiceLi.innerHTML = `<span class="choice-node-text">"${choice.action.text || '(Silent Action)'}"</span>`;
 					childUl.appendChild(choiceLi);
 					if (choice.action.target) {
-						// Pass the same visitedSet down to all children
 						await this.buildNode(choice.action.target, childUl, collapsedState, visitedSet, counter, CHUNK_SIZE);
 					}
 				}
 			}
-			// *** The problematic backtracking line has been REMOVED. We do not delete from the set. ***
-			// visitedSet.delete(sceneId); 
 		},
         async createNewScene() {
             let newId = prompt("Enter a unique ID for the new scene:");
@@ -2654,7 +2643,6 @@ const App = {
             this.updatePreviewImage();
         },
         async updatePreviewImage() {
-            // 1. Cancellation Token Logic
             App.state.previewLoadId++;
             const currentLoadId = App.state.previewLoadId;
             
@@ -2664,7 +2652,6 @@ const App = {
             const innerContainer = document.getElementById('preview-player-inner-container');
             const previewContainer = App.elements['scene-editor-preview'];
 
-            // 2. Add loading state feedback
             previewWrapper.classList.add('is-loading');
 
             try {
@@ -2672,16 +2659,14 @@ const App = {
                 const meta = App.state.storyData.meta;
                 const styles = meta.styles;
 
-                // Await all asset URLs
                 const [sceneImageUrl, globalScreenBgUrl, containerBgUrl] = await Promise.all([
                     App.io.getAssetDataUrl(sceneImage),
                     App.io.getAssetDataUrl(styles['--screen-bg-image']),
                     App.io.getAssetDataUrl(styles['--container-bg-image'])
                 ]);
                 
-                // 3. Check if the request is still valid before updating the DOM
                 if (currentLoadId !== App.state.previewLoadId) {
-                    return; // Abort if a newer request has started
+                    return; 
                 }
 
                 innerContainer.style.backgroundImage = containerBgUrl ? `url("${containerBgUrl}")` : 'none';
@@ -2701,13 +2686,12 @@ const App = {
             } catch (error) {
                 console.error("Failed to update preview image:", error);
             } finally {
-                // 4. Always remove loading state, but only if this is the latest request
                 if (currentLoadId === App.state.previewLoadId) {
                     previewWrapper.classList.remove('is-loading');
                 }
             }
         },
-        saveCurrentScene(showAlert = false) {
+        saveCurrentScene() {
             if (!App.state.currentSceneId) return;
             const scene = App.state.storyData.scenes[App.state.currentSceneId];
             if (!scene) return;
@@ -2755,8 +2739,6 @@ const App = {
         
             App.setDirty(true);
             App.ui.invalidateNavViews();
-        
-            if (showAlert) console.log(`Scene '${App.state.currentSceneId}' changes saved to memory.`);
          },
         addChoiceToDOM(choice = {}) {
             const container = App.elements['choices-container'];
@@ -2824,7 +2806,7 @@ const App = {
                         </div>
                     </div>
                     <button class="btn-success go-to-scene-btn display-none" title="Go to selected scene">▶</button>
-                    <button class="icon-btn delete-choice-btn" onclick="this.parentElement.remove(); App.editor.renderPreview();" title="Delete Choice">&times;</button>
+                    <button class="icon-btn delete-choice-btn" onclick="this.parentElement.remove(); App.editor.renderPreview(); App.editor.saveCurrentScene(false);" title="Delete Choice">&times;</button>
                 `;
             },
             populateDropdowns(selectElement, includeScenes, includeVariables, includeVisited) {
@@ -2886,8 +2868,8 @@ const App = {
                 choiceDiv.classList.toggle('is-conditional');
                 button.innerHTML = choiceDiv.classList.contains('is-conditional') ? this.iconRemoveCondition : this.iconAddCondition;
                 button.title = choiceDiv.classList.contains('is-conditional') ? 'Remove condition' : 'Add a condition';
+                App.editor.saveCurrentScene(false);
                 App.editor.renderPreview();
-                App.setDirty(true);
             },
         },
         variables: {
@@ -2930,7 +2912,7 @@ const App = {
     assets: {
         async selectFile(assetType, targetInputId) {
             const fileInput = document.getElementById(assetType === 'images' ? 'image-file-input' : 'sound-file-input');
-            const handleFile = (file) => {
+            const handleFile = async (file) => {
                 if (!file) return;
                 const destinationPath = `${assetType}/${file.name}`;
                 App.state.pendingAssetCopies.set(destinationPath, file);
@@ -2938,7 +2920,10 @@ const App = {
                 if (inputElement) {
                     inputElement.value = destinationPath;
                     inputElement.dispatchEvent(new Event('input', { bubbles: true })); 
-                    if (targetInputId === 'scene-image') App.ui.updateImageThumbnail(destinationPath);
+                    if (targetInputId === 'scene-image') {
+                        App.ui.updateImageThumbnail(destinationPath);
+                        await App.ui.renderCurrentView(); 
+                    }
                 }
                 App.setDirty(true);
             };
@@ -2956,12 +2941,12 @@ const App = {
                     const [fileHandle] = await window.showOpenFilePicker(options);
                     App.state.lastAssetHandles[assetType] = fileHandle; 
                     const file = await fileHandle.getFile();
-                    handleFile(file);
+                    await handleFile(file);
                 } catch (err) {
                     if (err.name !== 'AbortError') console.error('Error picking file:', err);
                 }
             } else {
-                fileInput.onchange = (e) => handleFile(e.target.files[0]);
+                fileInput.onchange = async (e) => await handleFile(e.target.files[0]);
                 fileInput.click();
             }
         },
@@ -2977,7 +2962,10 @@ const App = {
                 App.state.pendingAssetCopies.set(destinationPath, file);
                 targetInput.value = destinationPath;
                 targetInput.dispatchEvent(new Event('input', { bubbles: true })); 
-                if (targetInput.id === 'scene-image') App.ui.updateImageThumbnail(destinationPath);
+                if (targetInput.id === 'scene-image') {
+                    App.ui.updateImageThumbnail(destinationPath);
+                    App.ui.renderCurrentView();
+                }
                 App.setDirty(true);
             }
         },
@@ -3010,7 +2998,6 @@ const App = {
                 App.ui.updateImageThumbnail(destinationPath);
                 App.elements['scene-image'].dispatchEvent(new Event('input', { bubbles: true }));
                 App.setDirty(true); 
-                App.editor.saveCurrentScene(false); 
                 App.ui.invalidateNavViews(); 
                 await App.ui.setViewMode(App.state.currentNavView);
                 App.ui.updateAiImagePreview(null, 'Ready');
@@ -3039,8 +3026,7 @@ const App = {
             } catch (error) { console.error("Error processing text:", error); App.ui.showNotification("Failed to process text. Check console."); }
         }
     },
-
-    player: {
+	player: {
         async play(sceneId, fromStart = false) {
             if (!sceneId || !App.state.storyData.scenes[sceneId]) { App.ui.showNotification("Cannot play. Invalid start scene."); return; }
             if (fromStart || !this.gameState) this.initializeGameState();
@@ -3175,7 +3161,7 @@ const App = {
             App.elements['ambience-player'].src = ''; App.elements['music-player'].src = '';
             if (App.state.currentSceneId) App.editor.render();
         },
-                async toggleAmbienceSound() {
+        async toggleAmbienceSound() {
             const audio = App.elements['ambience-player'];
             const soundPath = App.elements['scene-sound'].value;
             if (!soundPath) return;
@@ -3362,14 +3348,12 @@ const App = {
             logEl.textContent += `[${new Date().toLocaleTimeString()}] ${message}\n`;
             logEl.scrollTop = logEl.scrollHeight;
         },
-                removeAllImages() {
-            App.editor.saveCurrentScene(false);
+        removeAllImages() {
             if (!confirm("Delete image paths from ALL scenes? This cannot be undone.")) return;
             let count = 0; Object.values(App.state.storyData.scenes).forEach(scene => { if (scene.image) { scene.image = ''; count++; } });
             App.setDirty(true); App.editor.render(); App.ui.invalidateNavViews(); App.ui.setViewMode(App.state.currentNavView); App.ui.showNotification(`${count} image paths deleted.`);
         },
         removeAllImagePrompts() {
-            App.editor.saveCurrentScene(false);
             if (!confirm("Delete image prompts from ALL scenes? This cannot be undone.")) return;
             let count = 0; Object.values(App.state.storyData.scenes).forEach(scene => { if (scene.imagePrompt) { scene.imagePrompt = ''; count++; } });
             App.setDirty(true); App.editor.render(); App.ui.showNotification(`${count} image prompts deleted.`);
@@ -3381,7 +3365,7 @@ const App = {
             let confirmMsg = overwrite ? (rewrite ? "Overwrite existing prompts AND images for all scenes?" : "Overwrite existing images for all scenes with prompts?") : null;
             if (confirmMsg && !confirm(confirmMsg + "\nAre you sure?")) { this.logInfo("Overwrite cancelled."); return; }
             
-            App.editor.saveCurrentScene(false); this.isGenerating = true; this.abortRequested = false;
+            this.isGenerating = true; this.abortRequested = false;
             const btn = document.getElementById('batch-generate-btn'); const fieldset = document.getElementById('batch-fieldset');
             document.getElementById('batch-info-log').textContent = ''; this.logInfo("Starting batch generation...");
             fieldset.disabled = true; btn.innerHTML = `<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"/></svg> Abort`;
@@ -3477,7 +3461,6 @@ const App = {
     
     debug: {
         init: function() {
-            // Override console methods to also log to our debug window
             const originalConsole = {
                 log: console.log.bind(console),
                 warn: console.warn.bind(console),
@@ -3504,7 +3487,6 @@ const App = {
             override('warn', 'WARN');
             override('error', 'ERROR');
 
-            // Bind keyboard shortcut for toggling debug mode
             document.addEventListener('keydown', (e) => {
                 if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'd') {
                     e.preventDefault();
@@ -3512,7 +3494,6 @@ const App = {
                 }
             });
             
-            // Bind the copy button in the debug modal
             if(App.elements['copy-debug-log-btn']) {
                  App.elements['copy-debug-log-btn'].addEventListener('click', this.copyLog);
             }
@@ -3525,7 +3506,7 @@ const App = {
         },
 
         log: function(message, level) {
-            const currentLevel = level || 'INFO'; // Handle default parameter manually
+            const currentLevel = level || 'INFO';
             const logEl = App.elements['debug-log'];
             if (!logEl) return;
             

@@ -185,7 +185,8 @@
         input[type="text"], input[type="search"], input[type="number"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #444444; border-radius: 4px; font-size: 1em; background-color: #1e1e1e; color: var(--dark-text); }
         input[type="text"]:disabled { background-color: #333333; cursor: not-allowed; }
         textarea { height: 120px; resize: vertical; }
-        input.drag-over { border: 2px dashed var(--primary-color) !important; box-shadow: 0 0 10px var(--primary-color); }
+        #image-preview.drag-over,
+		input.drag-over { border: 2px dashed var(--primary-color) !important; box-shadow: 0 0 10px var(--primary-color); }
 
         #media-hub { display: flex; gap: 15px; align-items: center; }
         #media-paths-container { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
@@ -1065,7 +1066,38 @@ const App = {
             el.addEventListener('dragleave', App.assets.handleDragLeave);
             el.addEventListener('drop', App.assets.handleFileDrop);
         });
+		
+		const imagePreviewEl = document.getElementById('image-preview');
+        const sceneImageInput = document.getElementById('scene-image');
 
+        imagePreviewEl.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            imagePreviewEl.classList.add('drag-over');
+        });
+        
+        imagePreviewEl.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            imagePreviewEl.classList.remove('drag-over');
+        });
+
+        imagePreviewEl.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            imagePreviewEl.classList.remove('drag-over');
+            
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                if (file.type.startsWith('image/')) {
+                    const destinationPath = `images/${file.name}`;
+                    App.state.pendingAssetCopies.set(destinationPath, file);
+                    sceneImageInput.value = destinationPath;
+                    sceneImageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    App.setDirty(true);
+                }
+            }
+        });	
 
         window.addEventListener('beforeunload', (e) => { if (App.state.isDirty) { e.preventDefault(); e.returnValue = ''; } });
         
@@ -1970,7 +2002,7 @@ const App = {
                     
                     document.getElementById('about-title').textContent = storyData.meta.title;
                     document.getElementById('about-creator').textContent = storyData.meta.creatorName ? 'By ' + storyData.meta.creatorName : '';
-                    document.getElementById('about-text').innerHTML = linkify(storyData.meta.aboutText);
+                    document.getElementById('about-text').innerHTML = parseMarkdown(storyData.meta.aboutText || '');
                 }
 
                 function setupGlobalStyles() {
@@ -2320,27 +2352,17 @@ const App = {
 
             if (scenes.length === 0) { container.innerHTML = `<li style="padding:10px;">No scenes found.</li>`; return; }
             
-            const connectedScenes = scenes.filter(s => !App.state.orphanSceneIds.has(s.id));
-            const orphanScenes = scenes.filter(s => App.state.orphanSceneIds.has(s.id));
-
             let count = 0;
             const CHUNK_SIZE = 50;
-            const renderGroup = async (group, title) => {
-                if (group.length > 0) {
-                    const header = document.createElement('div'); header.className = 'scene-list-group-header'; header.textContent = title; container.appendChild(header);
-                    for (const scene of group) {
-                        container.appendChild(this.createCard(scene));
-                        count++;
-                        if (count % CHUNK_SIZE === 0) {
-                             App.debug.log(`Rendering scene list chunk ${count}/${scenes.length}...`, 'INFO');
-                             await App.debug.yieldToMain();
-                        }
-                    }
+
+            for (const scene of scenes) {
+                container.appendChild(this.createCard(scene));
+                count++;
+                if (count % CHUNK_SIZE === 0) {
+                    // This part helps the browser stay responsive when loading very large projects.
+                    await App.debug.yieldToMain();
                 }
-            };
-            
-            await renderGroup(connectedScenes, 'Connected Scenes');
-            await renderGroup(orphanScenes, 'Orphan Scenes');
+            }
 
             container.querySelectorAll('img[data-src-path]').forEach(async img => {
                 const url = await App.io.getAssetDataUrl(img.dataset.srcPath);

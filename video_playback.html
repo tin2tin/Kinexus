@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Background with Playback and Sound Options</title>
+    <style>
+        /* Basic CSS reset to remove default margins and padding */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* Prevents scrollbars from appearing */
+            font-family: Arial, sans-serif;
+        }
+
+        /* Container for the video to ensure it covers the entire background */
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Places the video behind other content */
+        }
+
+        /* The video element itself */
+        #bg-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures the video covers the area without distortion */
+        }
+
+        /* Container for all the control buttons */
+        .controls {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.5); /* Add a background to the container for better readability */
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        /* Styling for the buttons */
+        .controls button {
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            background-color: transparent;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .controls button:hover {
+            background-color: white;
+            color: black;
+        }
+
+        /* A simple container to group related buttons */
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="video-container">
+        <!-- The 'muted' attribute is necessary for autoplay in most modern browsers -->
+        <video id="bg-video" autoplay muted poster="https://via.placeholder.com/1920x1080.png?text=Video+Loading...">
+            <!-- You can replace this source with your own video file -->
+            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <button id="loop-btn">Loop Video</button>
+            <button id="play-once-btn">Play Once & Freeze</button>
+        </div>
+        <div class="control-group">
+            <button id="unmute-btn">Unmute</button>
+            <button id="mute-btn">Mute</button>
+        </div>
+    </div>
+
+    <script>
+        // Get the video and all button elements from the document
+        const video = document.getElementById('bg-video');
+        const loopBtn = document.getElementById('loop-btn');
+        const playOnceBtn = document.getElementById('play-once-btn');
+        const unmuteBtn = document.getElementById('unmute-btn');
+        const muteBtn = document.getElementById('mute-btn');
+
+        // --- Playback Controls ---
+
+        // Function to handle freezing on the last frame
+        const freezeOnEnd = () => {
+            video.pause();
+        };
+
+        // Event listener for the "Loop Video" button
+        loopBtn.addEventListener('click', () => {
+            console.log("Looping video");
+            video.loop = true; // Set the video to loop
+            video.play();
+            // Remove the 'ended' event listener if it was previously added to prevent conflicts
+            video.removeEventListener('ended', freezeOnEnd);
+        });
+
+        // Event listener for the "Play Once & Freeze" button
+        playOnceBtn.addEventListener('click', () => {
+            console.log("Playing once");
+            video.loop = false; // Ensure the video does not loop
+            video.currentTime = 0; // Rewind to the start
+            video.play();
+            // When the video ends, call the freezeOnEnd function
+            video.addEventListener('ended', freezeOnEnd);
+        });
+
+
+        // --- Sound Controls ---
+
+        // Event listener for the "Unmute" button
+        unmuteBtn.addEventListener('click', () => {
+            console.log("Unmuting video");
+            video.muted = false;
+        });
+
+        // Event listener for the "Mute" button
+        muteBtn.addEventListener('click', () => {
+            console.log("Muting video");
+            video.muted = true;
+        });
+
+
+        // --- Initial State ---
+
+        // By default, set the video to loop when the page loads
+        video.loop = true;
+
+    </script>
+
+</body>
+</html>

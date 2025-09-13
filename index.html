@@ -188,7 +188,11 @@
         #image-preview.drag-over,
 		input.drag-over { border: 2px dashed var(--primary-color) !important; box-shadow: 0 0 10px var(--primary-color); }
 
-        #media-hub { display: flex; gap: 15px; align-items: center; }
+        #media-hub {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
         #media-paths-container { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
         #media-paths-container .form-group.inline { margin: 0; }
         #media-paths-container .media-icon-label { margin-bottom: 0; flex-shrink: 0; width: 24px; height: 24px; color: var(--secondary-color); display: inline-flex; align-items: center; justify-content: center; }
@@ -344,6 +348,25 @@
         #debug-log { background-color: #000; flex-grow: 1; font-family: monospace; font-size: 14px; white-space: pre; overflow: auto; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; color: #ccc; }
         #debug-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         #debug-modal-header h2 { margin: 0; border: none; }
+
+        /* --- Custom Styles for About Editor --- */
+        #about-editor-modal .modal-content {
+            font-size: 14px;
+            max-width: 700px;
+            background-color: var(--bg-container);
+        }
+        #about-editor-modal .modal-content h2 {
+            border-bottom-color: var(--title-underline-color);
+        }
+        #about-editor-modal .modal-close {
+            top: 15px;
+            right: 15px;
+            font-size: 2em;
+            width: 36px;
+            height: 36px;
+            line-height: 36px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -417,6 +440,9 @@
                     <button id="rename-scene-btn" title="Rename Scene ID" class="file-icon-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
                     </button>
+                    <button id="delete-scene-btn" class="btn-danger file-icon-btn" title="Delete Current Scene">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
+                    </button>
                     <button id="new-scene-btn" class="btn-round" title="Create New Scene">+</button>
                 </div>
             </div>
@@ -429,9 +455,6 @@
                 </button>
                  <button id="preview-btn" class="btn-success" title="Preview Project in New Tab">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445z"/></svg>
-                </button>
-                <button id="delete-scene-btn" class="btn-danger" title="Delete Current Scene">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
                 </button>
             </div>
         </div>
@@ -462,7 +485,6 @@
                  <div style="flex-grow:1;"></div>
                  <button id="add-choice-btn" class="btn-round" title="Add New Choice">+</button>
             </div>
-            <hr>
 
             <div class="form-group" id="media-hub">
                 <div id="image-preview">
@@ -742,7 +764,25 @@
             #player-menu-modal .player-modal-content { background-color: #202124; width: 100%; max-width: 360px; height: 100%; max-height: 100vh; border-radius: 0; margin: 0; transform: translateX(-100%); transition: transform 0.3s ease-out; padding: 0; display: flex; flex-direction: column; }
             #player-menu-modal.visible .player-modal-content { transform: translateX(0); }
             #about-modal { justify-content: center; align-items: center; }
-            #about-modal .player-modal-content { width: 90%; max-width: 500px; border-radius: 8px; }
+            #about-modal .player-modal-content { 
+                width: 90%; 
+                max-width: 700px; 
+                border-radius: 8px;
+                font-size: 14px; /* Smaller font size for about text */
+            }
+            #about-modal .player-modal-close {
+                position: absolute;
+                top: 10px;
+                right: 15px;
+                font-size: 2em;
+                line-height: 1;
+                cursor: pointer;
+                color: #aaa;
+                transition: color 0.2s;
+            }
+            #about-modal .player-modal-close:hover {
+                color: #fff;
+            }
             .menu-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; flex-shrink: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
             .menu-header h2 { margin: 0; border: none; font-size: 1.1em; color: #e8eaed; }
             .menu-header .player-modal-close { position: static; font-size: 1.8em; line-height: 1; }
@@ -3184,7 +3224,7 @@ const App = {
             if (App.state.currentSceneId) App.editor.render();
         },
         async toggleAmbienceSound() {
-            const audio = App.elements['ambience-player'];
+			const audio = App.elements['ambience-player'];
             const soundPath = App.elements['scene-sound'].value;
             if (!soundPath) return;
 
@@ -3577,3 +3617,4 @@ document.addEventListener('DOMContentLoaded', () => App.init());
 </script>
 </body>
 </html>
+            

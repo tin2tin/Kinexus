@@ -41,7 +41,14 @@
         #editor-container { flex-grow: 1; padding: 0 20px 20px; overflow-y: auto; background-color: var(--light-bg); }
         #editor-container fieldset { border: none; padding: 0; margin: 0; }
         #editor-container fieldset:disabled { opacity: 0.5; pointer-events: none; }
-        #player-container { display: none; flex-grow: 1; overflow-y: auto; position: relative; justify-content: center; align-items: center; }
+        #player-container { 
+            display: none; 
+            flex-grow: 1; 
+            overflow: auto; 
+            position: relative;
+            justify-content: center; 
+            align-items: center; 
+        }
         #player-container.layout-image-as-bg {
             align-items: flex-end;
             padding: 20px;
@@ -135,7 +142,7 @@
         .scene-card.active { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
         .scene-card-thumbnail { width: 96px; height: 54px; flex-shrink: 0; background-color: #111; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-size: 0.7em; color: var(--secondary-color); overflow: hidden; border: 1px solid #444; }
         .scene-card.active .scene-card-thumbnail { border-color: rgba(255,255,255,0.5); }
-        .scene-card-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .scene-card-thumbnail img, .scene-card-thumbnail canvas { width: 100%; height: 100%; object-fit: cover; }
         .scene-card-content { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; overflow: hidden; }
         .scene-card-header { display: flex; justify-content: space-between; align-items: center; }
         .scene-card-id { font-weight: bold; font-size: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -151,6 +158,7 @@
         .scene-card.active .icon-orphan, .scene-card.active .icon-deadend { color: white; background-color: rgba(0,0,0,0.2); border-radius: 3px; padding: 1px; }
         .scene-card-text { font-size: 0.85em; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .scene-card.active .scene-card-text { color: #ddd; }
+        .scene-card-icon.icon-video { width: 16px; height: 16px; }
 
         /* View Toggler Styles */
         #view-mode-toggle { display: flex; gap: 5px; margin-bottom: 10px; }
@@ -179,7 +187,7 @@
         .form-group.choice-group { margin-bottom: 8px; }
         .form-group.inline { display: flex; align-items: center; gap: 10px; }
         .form-group.inline input, .form-group.inline select { flex-grow: 1; }
-        .form-group label.checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: normal; }
+        .form-group label.checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer; }
         .form-group label.checkbox-label input { width: auto; flex-grow: 0; }
         label { display: block; font-weight: bold; margin-bottom: 5px; }
         input[type="text"], input[type="search"], input[type="number"], textarea, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #444444; border-radius: 4px; font-size: 1em; background-color: #1e1e1e; color: var(--dark-text); }
@@ -196,8 +204,21 @@
         #media-paths-container { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
         #media-paths-container .form-group.inline { margin: 0; }
         #media-paths-container .media-icon-label { margin-bottom: 0; flex-shrink: 0; width: 24px; height: 24px; color: var(--secondary-color); display: inline-flex; align-items: center; justify-content: center; }
+        #video-controls { display: none; } /* Hide video controls by default */
+        .form-group.inline .video-control-btn { flex-shrink: 0; }
 
-        #scene-editor-preview-wrapper { position: relative; width: 100%; max-width: 720px; margin: 0 auto 25px auto; aspect-ratio: 16 / 9; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background-color: #000; }
+
+        #scene-editor-preview-wrapper { 
+            position: relative; 
+            width: 100%; 
+            max-width: 720px; 
+            margin: 0 auto 25px auto; 
+            aspect-ratio: 16 / 9; 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            overflow: hidden; 
+            background-color: #000; 
+        }
         #scene-editor-preview-wrapper.is-loading::after {
             content: 'Loading...';
             position: absolute;
@@ -216,9 +237,11 @@
         #scene-editor-preview { position: absolute; top: 0; left: 0; width: 200%; height: 200%; transform: scale(0.5); transform-origin: top left; overflow: auto; background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); font-size: var(--font-size); display: flex; justify-content: center; align-items: center; }
         #scene-editor-preview.layout-image-as-bg { align-items: flex-end; }
         #scene-editor-preview, #scene-editor-preview #preview-player-inner-container { background-size: cover; background-position: center; }
-        #scene-editor-preview #preview-player-inner-container { width: 100%; max-width: 800px; margin: 20px; box-shadow: 0 5px 20px rgba(0,0,0,.5); gap: 20px; padding: var(--padding); border-radius: 12px; box-sizing: border-box; background-color: var(--container-bg-color); display: flex; }
+        #scene-editor-preview #preview-player-inner-container { width: 100%; max-width: 800px; margin: 20px; box-shadow: 0 5px 20px rgba(0,0,0,.5); gap: 20px; padding: var(--padding); border-radius: 12px; box-sizing: border-box; background-color: var(--container-bg-color); display: flex; position: relative; z-index: 1;}
         #scene-editor-preview .choice-btn { padding: 15px 20px; pointer-events: none; background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid var(--btn-color); text-align: left; border-radius: 6px; font-size: 1em; font-family: var(--font-family); }
-        #scene-editor-preview #preview-player-image { max-width: 100%; max-height: 50vh; display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
+        #scene-editor-preview #preview-player-image,
+		#scene-editor-preview #preview-player-video-fg { max-width: 100%; max-height: 50vh; display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
+        #scene-editor-preview #preview-player-video { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
         #scene-editor-preview #preview-player-text { white-space: pre-wrap; margin-bottom: 20px; line-height: 1.6; }
         #scene-editor-preview #preview-player-choices { display: flex; flex-direction: column; gap: 12px; }
         .layout-top-down { flex-direction: column; } .layout-top-down #player-image-container, .layout-top-down #preview-player-image-container { width: 100%; margin-bottom: 20px; } .layout-top-down #player-image, .layout-top-down #preview-player-image { width: 100%; height: auto; }
@@ -271,8 +294,32 @@
         #tree-context-menu button { width: 100%; text-align: left; background: none; color: var(--dark-text); margin: 0; padding: 8px 15px; border-radius: 0; }
         #tree-context-menu button:hover { background-color: var(--primary-color); color: white; }
         #player-container { background-size: cover; background-position: center; background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); font-size: var(--font-size); }
-        #player-inner-container { width: 100%; max-width: 800px; padding: var(--padding); border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); display:flex; gap: 20px; margin: 20px; background-size: cover; background-position: center; background-color: var(--container-bg-color);}
-        #player-image { max-width: 100%; max-height: 50vh; display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
+        #player-video-bg {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+        }
+        #player-inner-container { 
+            width: 100%;
+            max-width: 800px;
+            padding: var(--padding);
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            display:flex;
+            gap: 20px;
+            margin: 20px;
+            background-size: cover;
+            background-position: center;
+            background-color: var(--container-bg-color);
+            position: relative;
+            z-index: 1;
+        }
+        #player-image, #player-video-fg { max-width: 100%; max-height: 50vh; display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
         #player-text { white-space: pre-wrap; margin-bottom: 20px; line-height: 1.6; }
         #player-text a { color: #8ab4f8; }
         #player-choices { display: flex; flex-direction: column; gap: 12px; }
@@ -285,7 +332,7 @@
         #stop-play-x { position: absolute; top: 10px; right: 10px; background: var(--danger-color); color: white; border: none; font-size: 1.5em; padding: 5px 10px; cursor: pointer; z-index: 10; }
         #restart-play { position: absolute; top: 10px; right: 60px; z-index: 10; }
         #image-preview { width: 150px; height: 150px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; position: relative; }
-        #image-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        #image-preview img, #image-preview canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
         #fullscreen-viewer { flex-direction: column; }
         #fullscreen-image { max-width: 90vw; max-height: 80vh; object-fit: contain; }
         #fullscreen-minimize { margin-top: 15px; }
@@ -295,7 +342,8 @@
         .thumbnail-fullscreen-icon svg { width: 16px; height: 16px; }
         .play-pause-icon.hidden { display: none; }
         #style-editor-grid #style-font-size, #style-editor-grid #style-padding { background-color: #1E1E1E; color: white; border: 1px solid #444444; border-radius: 4px; height: 40px; box-sizing: border-box; }
-        #toggle-loop-btn.active { background-color: var(--primary-color); }
+        #toggle-loop-btn.active, #toggle-video-loop-btn.active { background-color: var(--primary-color); }
+        #toggle-video-mute-btn:not(.active) { background-color: var(--primary-color); } /* Active means MUTED, so when NOT active, it's colored */
         #custom-tooltip { display: none; position: fixed; z-index: 9999; background-color: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 5px 10px; font-size: 14px; max-width: 350px; word-wrap: break-word; white-space: pre-wrap; pointer-events: none; opacity: 0; transition: opacity 0.1s linear; }
         #icon-thumbnail-tooltip { display: none; position: fixed; z-index: 9999; background-color: #2a2a2e; color: #fff; border: 1px solid #555; border-radius: 6px; padding: 12px; font-size: 14px; width: 280px; pointer-events: none; opacity: 0; transition: opacity 0.1s linear; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: flex; gap: 12px; align-items: center; }
         #icon-thumbnail-tooltip .thumbnail-icon { flex-shrink: 0; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
@@ -366,6 +414,12 @@
             height: 36px;
             line-height: 36px;
             text-align: center;
+        }
+		
+		#preview-player-video[src]:not([src=""]) + #preview-player-inner-container,
+        #player-video-bg[src]:not([src=""]) ~ #player-inner-container {
+            background-color: transparent !important;
+            box-shadow: none !important;
         }
     </style>
 </head>
@@ -462,8 +516,9 @@
             
             <div id="scene-editor-preview-wrapper">
                 <div id="scene-editor-preview">
+                    <video id="preview-player-video" playsinline></video>
                     <div id="preview-player-inner-container" class="layout-top-down">
-                        <div id="preview-player-image-container"><img id="preview-player-image" src="" alt="Preview image"></div>
+                        <div id="preview-player-image-container"><img id="preview-player-image" src="" alt="Preview image"><video id="preview-player-video-fg" playsinline style="display: none;"></video></div>
                         <div id="preview-player-content-container">
                             <div id="preview-player-text"></div>
                             <div id="preview-player-choices"></div>
@@ -495,16 +550,32 @@
                 </div>
                 <div id="media-paths-container">
                     <div class="form-group inline">
-                        <span class="media-icon-label" title="Image Path">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
+                        <span class="media-icon-label" title="Image or Video Path">
+                            <svg id="media-icon-image" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>
+                            <svg id="media-icon-video" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm5.5 3v6l5-3-5-3z"></path></svg>
                         </span>
-                        <input type="text" id="scene-image" data-asset-type="images" placeholder="e.g., images/trench.jpg">
-                        <button id="select-image-btn" class="btn-warning file-icon-btn" title="Select Image File">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
+                        <input type="text" id="scene-image" data-asset-type="images" placeholder="e.g., images/trench.jpg or videos/intro.mp4">
+                        
+                        <!-- Video Controls -->
+                        <div id="video-controls" style="display: none; gap: 10px;">
+                            <button id="toggle-video-mute-btn" class="btn-secondary file-icon-btn video-control-btn" title="Toggle Video Mute">
+                                <svg class="play-pause-icon" id="video-unmute-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z"/><path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z"/><path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z"/></svg>
+                                <svg class="play-pause-icon hidden" id="video-mute-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06zm7.137 2.096a.5.5 0 0 1 0 .708L12.207 8l1.647 1.646a.5.5 0 0 1-.708.708L11.5 8.707l-1.646 1.647a.5.5 0 0 1-.708-.708L10.793 8 9.146 6.354a.5.5 0 1 1 .708-.708L11.5 7.293l1.646-1.647a.5.5 0 0 1 .708 0z"/></svg>
+                            </button>
+                             <button id="toggle-video-loop-btn" class="btn-secondary file-icon-btn video-control-btn" title="Toggle Video Loop">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>
+                            </button>
+                            <button id="toggle-video-playback-btn" class="btn-secondary file-icon-btn video-control-btn" title="Play/Pause Video">
+                                <svg class="play-pause-icon" id="video-play-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734L10.804 8z"/></svg>
+                                <svg class="play-pause-icon hidden" id="video-pause-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z"/></svg>
+                            </button>
+                        </div>
+                         <button id="select-image-btn" class="btn-warning file-icon-btn" title="Select Image/Video File">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
                         </button>
                     </div>
                     <div class="form-group inline">
-                         <span class="media-icon-label" title="Sound Path">
+                         <span class="media-icon-label" title="Ambience Sound Path">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 3zm-2 2a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 1 .5-.5zm-6 1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zm8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2a.5.5 0 0 1 .5-.5zm-10 1a.5.5 0 0 1 .5.5v0a.5.5 0 0 1-1 0v0a.5.5 0 0 1 .5-.5zm12 0a.5.5 0 0 1 .5.5v0a.5.5 0 0 1-1 0v0a.5.5 0 0 1 .5-.5z"/></svg>
                         </span>
                         <input type="text" id="scene-sound" data-asset-type="sounds" placeholder="e.g., sounds/wind.mp3">
@@ -554,11 +625,27 @@
 </div>
 
 <!-- Hidden Inputs for File Selection -->
-<input type="file" id="image-file-input" accept="image/*">
+<input type="file" id="image-file-input" accept="image/*,video/*">
 <input type="file" id="sound-file-input" accept="audio/*">
 
 <!-- Player and Context Menu -->
-<div id="player-container"><button id="stop-play-x" class="btn-danger">X</button><button id="restart-play" class="btn-secondary" title="Restart Game"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg></button><div id="player-inner-container"><div id="player-image-container"><img id="player-image" src=""></div><div id="player-content-container"><div id="player-text"></div><div id="player-choices"></div></div></div><audio id="ambience-player"></audio><audio id="music-player" loop></audio></div>
+<div id="player-container">
+    <video id="player-video-bg" playsinline></video>
+    <button id="stop-play-x" class="btn-danger">X</button>
+    <button id="restart-play" class="btn-secondary" title="Restart Game"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg></button>
+    <div id="player-inner-container">
+        <div id="player-image-container">
+            <img id="player-image" src="">
+            <video id="player-video-fg" playsinline></video>
+        </div>
+        <div id="player-content-container">
+            <div id="player-text"></div>
+            <div id="player-choices"></div>
+        </div>
+    </div>
+    <audio id="ambience-player"></audio>
+    <audio id="music-player" loop></audio>
+</div>
 <div id="tree-context-menu"><button id="set-start-scene-btn">Set as Start Scene</button></div>
 
 <!-- Tooltips -->
@@ -705,9 +792,29 @@
                 background-size: cover; 
                 background-position: center; 
                 padding: 20px;
+                position: relative;
+                overflow: hidden;
             }
             body:not(.layout-image-as-bg) { align-items: center; }
             body.layout-image-as-bg { align-items: flex-end; }
+
+            #background-video {
+				display: none;
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 0;
+				object-fit: cover;
+				background-size: cover;
+				transition: opacity 1s;
+				opacity: 0;
+			}
+            #background-video.visible {
+                display: block;
+                opacity: 1;
+            }
 
             #game-container { 
                 width: 100%; 
@@ -720,9 +827,15 @@
                 background-size: cover; 
                 background-position: center; 
                 padding: var(--padding);
+                z-index: 1;
             }
             #image-container { flex-shrink: 0; }
-            #scene-image { display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
+            #scene-image, #scene-video { 
+                display: block; 
+                margin: 0 auto; 
+                border-radius: 8px; 
+                object-fit: cover; 
+            }
             #scene-text { white-space: pre-wrap; margin-bottom: 20px; line-height: 1.6; }
             #scene-text a { color: #8ab4f8; }
             #choices-container { display: flex; flex-direction: column; gap: 12px; }
@@ -734,22 +847,31 @@
 
             #game-container.layout-top-down { flex-direction: column; }
             #game-container.layout-top-down #image-container { width: 100%; margin-bottom: 20px; }
-            #game-container.layout-top-down #scene-image { width: 100%; height: auto; max-height: 50vh; }
+            #game-container.layout-top-down #scene-image, 
+            #game-container.layout-top-down #scene-video { width: 100%; height: auto; max-height: 50vh; }
+            
             #game-container.layout-side-by-side { flex-direction: row; align-items: flex-start; }
             #game-container.layout-side-by-side #image-container { width: 40%; }
-            #game-container.layout-side-by-side #scene-image { width: 100%; height: auto; }
+            #game-container.layout-side-by-side #scene-image,
+            #game-container.layout-side-by-side #scene-video { width: 100%; height: auto; }
             #game-container.layout-side-by-side #content-container { width: 60%; }
+            
             #game-container.layout-image-as-bg #image-container { display: none; }
             #game-container.layout-image-as-bg #content-container { width: 100%; }
             body.layout-image-as-bg .choice-btn { text-align: center; }
 
             .player-top-bar { position: fixed; top: 0; left: 0; width: 100%; padding: 10px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; }
             .player-top-bar-left, .player-top-bar-right { display: flex; gap: 10px; }
-            .player-ui-btn { pointer-events: auto; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.5); border-radius: 50%; width: 40px; height: 40px; padding: 0; font-size: 24px; line-height: 40px; text-align: center; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+            .player-ui-btn { pointer-events: auto; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.5); border-radius: 50%; width: 40px; height: 40px; padding: 0; font-size: 24px; line-height: 40px; text-align: center; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background-color 0.2s; }
+            .player-ui-btn.active { background-color: var(--primary-color); }
             .player-ui-btn svg { width: 22px; height: 22px; fill: currentColor; }
             .player-ui-btn .icon-off { display: none; }
             #fullscreen-btn { position: fixed; bottom: 15px; right: 15px; z-index: 100; }
             #exit-message { display: none; width: 100%; text-align: center; font-size: 1.2em; color: var(--text-color, #f0f0f0); }
+
+            #player-video-controls { display: none; gap: 10px; pointer-events: auto; }
+            #player-video-controls .player-ui-btn { font-size: 18px; }
+            #player-video-controls .player-ui-btn svg { width: 18px; height: 18px; }
 
             @media (max-width: 600px) {
                 body { padding: 10px; }
@@ -805,6 +927,10 @@
             .loading-spinner { border: 8px solid #f3f3f3; border-top: 8px solid var(--primary-color); border-radius: 50%; width: 60px; height: 60px; animation: spin 1.5s linear infinite; margin-bottom: 20px; }
             @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
             __CUSTOM_STYLES__
+			
+			.hidden {
+            display: none !important;
+			}
         </style>
     </head>
     <body class="__LAYOUT_CLASS__">
@@ -813,12 +939,17 @@
             <p>Loading...</p>
         </div>
 
+        <video id="background-video" playsinline></video>
+
         <div id="exit-message">
             <p>Thanks for playing!</p>
             <p>You can now close this window.</p>
         </div>
         <div id="game-container" class="__LAYOUT_CLASS__">
-            <div id="image-container"><img id="scene-image" src=""></div>
+            <div id="image-container">
+                <img id="scene-image" src="">
+                <video id="scene-video" playsinline></video>
+            </div>
             <div id="content-container">
                 <div id="scene-text"></div>
                 <div id="choices-container"></div>
@@ -834,6 +965,19 @@
                     <svg class="icon-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
                     <svg class="icon-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
                 </button>
+                <div id="player-video-controls">
+                    <button id="player-video-play-btn" class="player-ui-btn" title="Play/Pause Video">
+                        <svg class="icon-on" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                        <svg class="icon-off" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>
+                    </button>
+                    <button id="player-video-mute-btn" class="player-ui-btn" title="Mute/Unmute Video">
+                        <svg class="icon-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+                        <svg class="icon-off" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
+                    </button>
+                    <button id="player-video-loop-btn" class="player-ui-btn" title="Toggle Video Loop">
+                        <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"></path></svg>
+                    </button>
+                </div>
             </div>
             <div class="player-top-bar-right">
                 <button id="player-close-btn" class="player-ui-btn" title="Exit Game">
@@ -903,7 +1047,8 @@ const App = {
         thumbnailLoadId: 0,
         player: {
             gameState: null,
-			typewriter: { intervalId: null, skipListener: null }
+			typewriter: { intervalId: null, skipListener: null },
+            activeVideoElement: null,
         },
         debugMode: false // Secret debug mode flag
     },
@@ -941,7 +1086,8 @@ const App = {
             { name: "Snowburst One", value: "'Snowburst One', cursive" },
             { name: "Source Code Pro", value: "'Source Code Pro', monospace" },
             { name: "Special Elite", value: "'Special Elite', cursive" }
-        ]
+        ],
+        VIDEO_EXTENSIONS: ['.mp4', '.webm', '.ogv']
     },
 
     init() {
@@ -965,7 +1111,12 @@ const App = {
                 styles: App.styles.getDefaults(), 
                 layout: 'layout-image-as-bg' 
             },
-            scenes: { "start": { id: "start", text: "Start here.", image: "", imagePrompt: "", ambienceSound: "", ambienceLoop: true, choices: [], visited: false, lastModified: Date.now() } } 
+            scenes: { "start": { 
+                id: "start", text: "Start here.", image: "", imagePrompt: "", 
+                videoLoop: true, videoMuted: true,
+                ambienceSound: "", ambienceLoop: true, choices: [], visited: false, 
+                lastModified: Date.now() 
+            } } 
         };
     },
     
@@ -976,11 +1127,15 @@ const App = {
             'ambience-player', 'music-player', 'export-data-modal', 'style-editor-modal', 'about-editor-modal',
             'tree-context-menu', 'save-project-dirty-btn',
             'save-story-btn', 'player-image', 'player-text', 'player-choices', 'player-inner-container',
+            'player-video-bg', 'player-video-fg',
             'editor-fieldset', 'ai-image-preview', 'render-ai-image-btn', 'add-ai-image-btn', 'image-preview',
             'story-title', 'creator-name', 'about-text',
             'notification-modal', 'notification-message', 'notification-close-btn',
             'toggle-ambience-btn', 'ambience-play-icon', 'ambience-pause-icon', 'toggle-loop-btn',
-            'scene-editor-preview', 'scene-editor-preview-wrapper',
+            'scene-editor-preview', 'scene-editor-preview-wrapper', 'preview-player-video',
+            'video-controls', 'toggle-video-loop-btn', 'toggle-video-mute-btn', 'toggle-video-playback-btn',
+            'video-play-icon', 'video-pause-icon', 'video-unmute-icon', 'video-mute-icon',
+            'media-icon-image', 'media-icon-video',
             'pollinations-text-modal', 'pollinations-instruction', 'pollinations-submit-btn', 'process-text-ai-btn',
             'style-editor-btn', 'batch-image-modal', 'batch-image-gen-btn',
             'scene-list-view', 'toggle-tree-view-btn', 'toggle-scene-view-btn',
@@ -1010,28 +1165,52 @@ const App = {
             btn.classList.toggle('btn-secondary', !hasSound);
         });
 
+        // Ambience Controls
         App.elements['toggle-ambience-btn'].addEventListener('click', () => App.player.toggleAmbienceSound());
         App.elements['ambience-player'].addEventListener('play', () => App.player.updateAmbienceButton(true));
         App.elements['ambience-player'].addEventListener('pause', () => App.player.updateAmbienceButton(false));
-
         App.elements['toggle-loop-btn'].addEventListener('click', (e) => {
             e.currentTarget.classList.toggle('active');
-            App.editor.saveCurrentScene(false);
+            App.editor.saveCurrentScene();
         });
 
+        // Video Controls
+        App.elements['toggle-video-loop-btn'].addEventListener('click', (e) => {
+            e.currentTarget.classList.toggle('active');
+            App.editor.saveCurrentScene();
+            App.editor.renderPreview();
+        });
+        App.elements['toggle-video-mute-btn'].addEventListener('click', (e) => {
+            const btn = e.currentTarget;
+            btn.classList.toggle('active');
+            App.editor.ui.updateVideoMuteButton(btn.classList.contains('active'));
+            App.editor.saveCurrentScene();
+            App.editor.renderPreview();
+        });
+        App.elements['toggle-video-playback-btn'].addEventListener('click', () => {
+            const video = App.elements['preview-player-video'];
+            if (video.paused) video.play(); else video.pause();
+        });
+        App.elements['preview-player-video'].addEventListener('play', () => App.editor.ui.updateVideoPlaybackButton(true));
+        App.elements['preview-player-video'].addEventListener('pause', () => App.editor.ui.updateVideoPlaybackButton(false));
+
+
         // Automatic saving listeners
-        App.elements['scene-text'].addEventListener('input', () => { App.editor.renderPreview(); App.editor.saveCurrentScene(false); });
-		App.elements['scene-image'].addEventListener('input', async (e) => {
-			App.editor.renderPreview();
-			App.ui.updateImageThumbnail(e.target.value);
-			App.editor.saveCurrentScene(false);
-			// This is the crucial added line that forces the scene list to update.
-			await App.ui.renderCurrentView(); 
+        const saveAndPreview = () => { App.editor.saveCurrentScene(); App.editor.renderPreview(); };
+        App.elements['scene-text'].addEventListener('input', saveAndPreview);
+        App.elements['choices-container'].addEventListener('input', saveAndPreview);
+        App.elements['choices-container'].addEventListener('change', saveAndPreview);
+        document.getElementById('scene-image-prompt').addEventListener('input', () => App.editor.saveCurrentScene());
+
+		App.elements['scene-image'].addEventListener('input', (e) => {
+            App.editor.saveCurrentScene(); // Save first
+            App.editor.ui.updateVideoControlsVisibility();
+			App.ui.updateImageThumbnail(e.target.value); // This will trigger preview render
+            App.ui.invalidateNavViews();
+            App.ui.renderCurrentView(); 
 		});
-		App.elements['scene-sound'].addEventListener('input', () => App.editor.saveCurrentScene(false));
-		document.getElementById('scene-image-prompt').addEventListener('input', () => App.editor.saveCurrentScene(false));
-		App.elements['choices-container'].addEventListener('input', () => { App.editor.renderPreview(); App.editor.saveCurrentScene(false); });
-		App.elements['choices-container'].addEventListener('change', () => { App.editor.renderPreview(); App.editor.saveCurrentScene(false); });
+		App.elements['scene-sound'].addEventListener('input', () => App.editor.saveCurrentScene());
+		
 
         ['story-title', 'creator-name', 'about-text'].forEach(id => {
             App.elements[id].addEventListener('input', (e) => {
@@ -1051,13 +1230,13 @@ const App = {
         App.elements['process-text-ai-btn'].addEventListener('click', () => App.modals.show('pollinations-text-modal'));
         App.elements['pollinations-submit-btn'].addEventListener('click', () => App.assets.processTextWithPollinations());
 
-        document.getElementById('play-from-start-btn').addEventListener('click', () => { App.player.play(App.state.storyData.meta.startSceneId, true); });
-        document.getElementById('play-from-current-btn').addEventListener('click', () => { App.player.play(App.state.currentSceneId); });
+        document.getElementById('play-from-start-btn').addEventListener('click', () => { App.editor.saveCurrentScene(); App.player.play(App.state.storyData.meta.startSceneId, true); });
+        document.getElementById('play-from-current-btn').addEventListener('click', () => { App.editor.saveCurrentScene(); App.player.play(App.state.currentSceneId); });
         document.getElementById('stop-play-x')?.addEventListener('click', () => App.player.stop());
         document.getElementById('restart-play')?.addEventListener('click', () => App.player.play(App.state.storyData.meta.startSceneId, true));
         
         document.getElementById('export-project-btn').addEventListener('click', () => App.io.exportProjectZip());
-        document.getElementById('preview-btn').addEventListener('click', () => App.io.previewProject());
+        document.getElementById('preview-btn').addEventListener('click', () => { App.editor.saveCurrentScene(); App.io.previewProject(); });
         document.getElementById('export-data-btn').addEventListener('click', () => App.modals.show('export-data-modal'));
         (function ensureValidateButton(){
             const menu = document.querySelector('#project-menu-modal .btn-group');
@@ -1129,13 +1308,12 @@ const App = {
             
             if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
                 const file = e.dataTransfer.files[0];
-                if (file.type.startsWith('image/')) {
-                    const destinationPath = `images/${file.name}`;
-                    App.state.pendingAssetCopies.set(destinationPath, file);
-                    sceneImageInput.value = destinationPath;
-                    sceneImageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    App.setDirty(true);
-                }
+                const assetTypeFolder = App.assets.isVideo(file.name) ? 'videos' : 'images';
+                const destinationPath = `${assetTypeFolder}/${file.name}`;
+                App.state.pendingAssetCopies.set(destinationPath, file);
+                sceneImageInput.value = destinationPath;
+                sceneImageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                App.setDirty(true);
             }
         });	
 
@@ -1154,9 +1332,11 @@ const App = {
             icon.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const parentPreview = e.currentTarget.parentElement;
-                const img = parentPreview.querySelector('img');
-                if (img && img.src) {
+                const img = parentPreview.querySelector('img, canvas');
+                if (img?.src && !img.src.startsWith('data:image/gif')) {
                     App.ui.showFullscreenImage(img.src);
+                } else if (img?.toDataURL) {
+                    App.ui.showFullscreenImage(img.toDataURL());
                 }
             });
         });
@@ -1171,7 +1351,7 @@ const App = {
             if (e.key === 'Escape') {
                 App.modals.hideAll();
             }
-            if (e.ctrlKey && e.key === 's') {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
                 if (App.state.projectDirectoryHandle && App.elements['editor-container'].style.display !== 'none') {
                     App.io.saveProject();
@@ -1327,6 +1507,20 @@ const App = {
                 return;
             }
 
+            // Always save before switching
+            if (App.state.currentSceneId) {
+                App.editor.saveCurrentScene();
+            }
+
+            // Stop any media from the previous scene
+            App.elements['ambience-player'].pause();
+            const previewVideo = App.elements['preview-player-video'];
+            if(previewVideo && !previewVideo.paused) {
+                previewVideo.pause();
+                previewVideo.removeAttribute('src'); // Detach source
+                previewVideo.load();
+            }
+
             if (App.elements['player-container'].style.display === 'flex') {
                 await App.player.renderScene(sceneId);
                 return;
@@ -1337,7 +1531,6 @@ const App = {
             if (needsSelectionChange) {
 				const oldSceneId = App.state.currentSceneId;
 				App.state.currentSceneId = sceneId;
-				App.elements['ambience-player'].pause();
 				
 				const oldTreeNode = document.querySelector(`.scene-node[data-scene-id="${oldSceneId}"]`);
 				const oldCardNode = document.querySelector(`.scene-card[data-scene-id="${oldSceneId}"]`);
@@ -1417,21 +1610,32 @@ const App = {
             defaultSpan.textContent = 'Thumbnail';
             preview.appendChild(defaultSpan);
 
+            App.editor.renderPreview(); // Trigger a preview render to handle video/image switching
             if (!path) return;
+            
             try {
                 defaultSpan.textContent = 'Loading...';
-                const url = await App.io.getAssetDataUrl(path);
+                const isVideo = App.assets.isVideo(path);
+                const url = await (isVideo ? App.assets.getVideoThumbnail(path) : App.io.getAssetDataUrl(path));
 
-                if (currentLoadId !== App.state.thumbnailLoadId) {
-                    return; 
-                }
+                if (currentLoadId !== App.state.thumbnailLoadId) return; 
 
                 if (url) {
                     preview.innerHTML = '';
                     if(icon) preview.appendChild(icon);
-                    const img = document.createElement('img');
-                    img.src = url;
-                    preview.appendChild(img);
+                    const mediaElement = document.createElement(isVideo ? 'canvas' : 'img');
+                    if (isVideo) {
+                        const img = new Image();
+                        img.onload = () => {
+                            mediaElement.width = img.width;
+                            mediaElement.height = img.height;
+                            mediaElement.getContext('2d').drawImage(img, 0, 0);
+                        }
+                        img.src = url;
+                    } else {
+                         mediaElement.src = url;
+                    }
+                    preview.appendChild(mediaElement);
                 } else {
                      defaultSpan.textContent = 'Invalid Path';
                 }
@@ -1496,8 +1700,8 @@ const App = {
             },
             'icon-image': {
                 icon: `<svg class="icon-image" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>`,
-                title: 'Has Image',
-                desc: 'This scene has an associated background or display image.'
+                title: 'Has Image/Video',
+                desc: 'This scene has an associated background image or video.'
             },
             'icon-sound': {
                 icon: `<svg class="icon-sound" viewBox="0 0 16 16"><path d="M9.707,2.293a1,1,0,0,0-1.414,0L4.6,6H2.5A1.5,1.5,0,0,0,1,7.5v1A1.5,1.5,0,0,0,2.5,10H4.6l3.69,3.707a1,1,0,0,0,1.414,0V2.293Z"/></svg>`,
@@ -1526,7 +1730,7 @@ const App = {
 							  <rect x="2" y="7" width="12" height="2" fill="currentColor" />
 						   </svg>`,
 					title: 'Orphan Scene',
-					desc: 'This scene cannot be reached from the Start Scene. It is disconnected from the main story flow.'
+					desc: 'This scene cannot be reached from the main story flow.'
 				}
         }
     },
@@ -1639,6 +1843,8 @@ const App = {
                             text: typeof scene.text === 'string' ? scene.text : '',
                             image: typeof scene.image === 'string' ? scene.image : '',
                             imagePrompt: typeof scene.imagePrompt === 'string' ? scene.imagePrompt : '',
+                            videoLoop: scene.videoLoop ?? true,
+                            videoMuted: scene.videoMuted ?? true,
                             ambienceSound: typeof scene.ambienceSound === 'string' ? scene.ambienceSound : '',
                             ambienceLoop: scene.ambienceLoop ?? true,
                             choices: safeChoices,
@@ -1704,6 +1910,7 @@ const App = {
 
                 await projectHandle.getDirectoryHandle('images', { create: true });
                 await projectHandle.getDirectoryHandle('sounds', { create: true });
+                await projectHandle.getDirectoryHandle('videos', { create: true });
                 
                 const storyFileHandle = await projectHandle.getFileHandle('story.json', { create: true });
                 const writable = await storyFileHandle.createWritable();
@@ -1832,6 +2039,7 @@ const App = {
                 App.debug.log('Ensuring asset folders exist...');
                 await dirHandle.getDirectoryHandle('images', { create: true });
                 await dirHandle.getDirectoryHandle('sounds', { create: true });
+                await dirHandle.getDirectoryHandle('videos', { create: true });
                 App.debug.log('Asset folders checked/created.', 'SUCCESS');
 
                 App.debug.log('--- Project Loaded Successfully ---', 'SUCCESS');
@@ -1857,6 +2065,11 @@ const App = {
         },
         
         async saveProject() {
+            // Save current scene data before saving the whole project
+            if(App.state.currentSceneId) {
+                App.editor.saveCurrentScene();
+            }
+
             App.ui.cursor.wait();
             try {
                 if (!App.state.projectDirectoryHandle) { App.ui.showNotification("No project is open."); return; }
@@ -1942,14 +2155,21 @@ const App = {
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const storyData = ${storyJsonString};
-                const sceneImage = document.getElementById('scene-image'), sceneText = document.getElementById('scene-text'), choicesContainer = document.getElementById('choices-container'), ambiencePlayer = document.getElementById('ambience-player'), musicPlayer = document.getElementById('music-player'), playerMenuBtn = document.getElementById('player-menu-btn'), playerMenuModal = document.getElementById('player-menu-modal'), aboutModal = document.getElementById('about-modal'), gameContainer = document.getElementById('game-container'), contentContainer = document.getElementById('content-container');
+                const sceneImage = document.getElementById('scene-image'), sceneVideo = document.getElementById('scene-video'), sceneText = document.getElementById('scene-text'), choicesContainer = document.getElementById('choices-container'), ambiencePlayer = document.getElementById('ambience-player'), musicPlayer = document.getElementById('music-player'), playerMenuBtn = document.getElementById('player-menu-btn'), playerMenuModal = document.getElementById('player-menu-modal'), aboutModal = document.getElementById('about-modal'), gameContainer = document.getElementById('game-container'), contentContainer = document.getElementById('content-container'), backgroundVideo = document.getElementById('background-video');
                 let gameState = { currentSceneId: null, variables: {}, visited: {} };
-                let currentAmbienceSrc = '', currentMusicSrc = '';
+                let currentAmbienceSrc = '', currentMusicSrc = '', activeVideoElement = null;
                 let typewriterState = { intervalId: null, skipListener: null };
                 
                 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
                 const isAndroid = /android/i.test(navigator.userAgent);
                 const clickEvent = isTouchDevice ? 'touchend' : 'click';
+                const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.ogv'];
+                const isVideo = (path) => {
+                    if (!path) return false;
+                    const lowerPath = path.toLowerCase();
+                    if (lowerPath.startsWith('data:video')) return true;
+                    return VIDEO_EXTENSIONS.some(ext => lowerPath.endsWith(ext));
+                }
 
                 function parseMarkdown(text) {
                     if (!text) return '';
@@ -2001,7 +2221,14 @@ const App = {
                     bindEvent(document.getElementById('player-close-btn'), () => { if (window.top === window.self) { if (document.fullscreenElement) document.exitFullscreen(); window.close(); } else { document.body.innerHTML = '<div id="exit-message" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; font-size: 1.2em; color: #f0f0f0;"><p>Thanks for playing!</p><p>You can now close this window.</p></div>'; } });
 
                     const soundToggleBtn = document.getElementById('player-sound-toggle-btn');
-                    bindEvent(soundToggleBtn, () => { const isMuted = !musicPlayer.muted; musicPlayer.muted = isMuted; ambiencePlayer.muted = isMuted; soundToggleBtn.querySelector('.icon-on').style.display = isMuted ? 'none' : 'block'; soundToggleBtn.querySelector('.icon-off').style.display = isMuted ? 'block' : 'none'; });
+                    bindEvent(soundToggleBtn, () => { 
+                        const isMuted = !musicPlayer.muted; 
+                        musicPlayer.muted = isMuted; 
+                        ambiencePlayer.muted = isMuted; 
+                        if(activeVideoElement) activeVideoElement.muted = isMuted || (storyData.scenes[gameState.currentSceneId]?.videoMuted ?? true);
+                        soundToggleBtn.querySelector('.icon-on').style.display = isMuted ? 'none' : 'block'; 
+                        soundToggleBtn.querySelector('.icon-off').style.display = isMuted ? 'block' : 'none'; 
+                    });
 
                     const saveBtn = document.getElementById('save-btn'), loadBtn = document.getElementById('load-btn');
                     if (!storageAvailable) { [saveBtn, loadBtn].forEach(b => {b.disabled = true; b.title = "Saving/Loading is disabled when run from a local file.";}); } 
@@ -2102,6 +2329,51 @@ const App = {
 
                         const scene = storyData.scenes[sceneId];
                         if (!scene) { sceneText.innerHTML = 'Error: Scene "' + sceneId + '" not found.'; return; }
+                        
+                        // Handle Media
+                        const layout = storyData.meta.layout;
+                        const mediaUrl = scene.image;
+                        const isMediaVideo = isVideo(mediaUrl);
+                        const globalScreenBgUrl = storyData.meta.styles['--screen-bg-image'];
+                        document.body.className = layout;
+                        gameContainer.className = layout;
+                        
+                        const imageContainer = document.getElementById('image-container');
+                        
+                        // Reset all media displays
+                        document.body.style.backgroundImage = 'none';
+                        [backgroundVideo, sceneVideo].forEach(v => {
+                             if(!v.paused) { v.pause(); v.removeAttribute('src'); v.load(); }
+                             v.style.display = 'none';
+							 v.classList.remove('visible');
+                        });
+                        sceneImage.style.display = 'none';
+                        imageContainer.style.display = 'none';
+                        activeVideoElement = null;
+                        document.getElementById('player-video-controls').style.display = 'none';
+
+                        if (isMediaVideo && mediaUrl) {
+                            activeVideoElement = (layout === 'layout-image-as-bg') ? backgroundVideo : sceneVideo;
+                            if (activeVideoElement.src !== mediaUrl) activeVideoElement.src = mediaUrl;
+                            if (layout !== 'layout-image-as-bg') imageContainer.style.display = 'block';
+                            activeVideoElement.style.display = 'block';
+							activeVideoElement.classList.add('visible');
+                            activeVideoElement.loop = scene.videoLoop ?? true;
+                            activeVideoElement.muted = musicPlayer.muted || (scene.videoMuted ?? true);
+                            activeVideoElement.play().catch(e => console.warn("Video autoplay failed:", e));
+                            updateVideoControls(scene);
+                        } else {
+                           if (layout === 'layout-image-as-bg') {
+                                document.body.style.backgroundImage = mediaUrl ? \`url('\${mediaUrl}')\` : (globalScreenBgUrl ? \`url('\${globalScreenBgUrl}')\` : 'none');
+                           } else {
+                                document.body.style.backgroundImage = globalScreenBgUrl ? \`url('\${globalScreenBgUrl}')\` : 'none';
+                                if (mediaUrl) {
+                                    sceneImage.src = mediaUrl;
+                                    sceneImage.style.display = 'block';
+                                    imageContainer.style.display = 'block';
+                                }
+                           }
+                        }
 
                         let visibleChoices = [];
                         for(const choice of (scene.choices || [])) {
@@ -2110,21 +2382,19 @@ const App = {
                                 const varName = choice.condition.variable;
                                 if(varName.startsWith('visited_scene_')) {
                                     conditionMet = !!gameState.visited[varName.substring(14)] === choice.condition.value;
-                                } else { // Check for regular variable condition
+                                } else {
                                     conditionMet = gameState.variables[varName.substring(4)] === choice.condition.value;
                                 }
                             }
                             
                             if (conditionMet) {
                                 if (!choice.action.text && choice.action.target) {
+                                    if(choice.action.target === sceneId) { console.error('Infinite loop detected: silent action targets itself in scene ' + sceneId); continue; }
                                     processChoice(choice);
-                                    return; // Stop rendering this scene
+                                    return; // Stop rendering
                                 }
-                                if (choice.action.text) {
-                                    visibleChoices.push(choice);
-                                } else if (choice.action.set_variable) {
-                                     gameState.variables[choice.action.set_variable] = choice.action.set_value;
-                                }
+                                if (choice.action.text) visibleChoices.push(choice);
+                                else if (choice.action.set_variable) gameState.variables[choice.action.set_variable] = choice.action.set_value;
                             }
                         }
                         
@@ -2137,19 +2407,40 @@ const App = {
                             visibleChoices.forEach(choice => { const b = document.createElement('button'); b.textContent = choice.action.text; b.className = 'choice-btn'; bindEvent(b, () => processChoice(choice)); choicesContainer.appendChild(b); });
                         }
                         
-                        const layout = storyData.meta.layout;
-                        const imageContainer = document.getElementById('image-container');
-                        const imageUrl = scene.image;
-                        const globalScreenBgUrl = storyData.meta.styles['--screen-bg-image'];
-                        document.body.className = layout; gameContainer.className = layout;
-
-                        if (layout === 'layout-image-as-bg') { document.body.style.backgroundImage = imageUrl ? \`url('\${imageUrl}')\` : (globalScreenBgUrl ? \`url('\${globalScreenBgUrl}')\` : 'none'); } 
-                        else { document.body.style.backgroundImage = globalScreenBgUrl ? \`url('\${globalScreenBgUrl}')\` : 'none'; if (imageUrl) { sceneImage.src = imageUrl; imageContainer.style.display = 'block'; } else { imageContainer.style.display = 'none'; } }
-                        
                         ambiencePlayer.loop = scene.ambienceLoop ?? true; const soundUrl = scene.ambienceSound || '';
                         if (soundUrl !== currentAmbienceSrc) { currentAmbienceSrc = soundUrl; ambiencePlayer.src = soundUrl; }
                         if (soundUrl && ambiencePlayer.paused) { ambiencePlayer.play().catch(e => console.warn("Ambience autoplay blocked.")); } else if (!soundUrl) { ambiencePlayer.pause(); }
                     } catch(e) { console.error("Error rendering scene:", e); sceneText.innerHTML = "An error occurred. Check console for details."; }
+                }
+
+                function updateVideoControls(scene) {
+                    if (!activeVideoElement) return;
+
+                    const controls = document.getElementById('player-video-controls');
+                    const playBtn = document.getElementById('player-video-play-btn');
+                    const muteBtn = document.getElementById('player-video-mute-btn');
+                    const loopBtn = document.getElementById('player-video-loop-btn');
+
+                    controls.style.display = 'flex';
+
+                    const updatePlayIcon = () => {
+                        playBtn.querySelector('.icon-on').style.display = activeVideoElement.paused ? 'block' : 'none';
+                        playBtn.querySelector('.icon-off').style.display = activeVideoElement.paused ? 'none' : 'block';
+                    };
+                    const updateMuteIcon = () => {
+                        muteBtn.querySelector('.icon-on').style.display = activeVideoElement.muted ? 'none' : 'block';
+                        muteBtn.querySelector('.icon-off').style.display = activeVideoElement.muted ? 'block' : 'none';
+                    };
+                    
+                    activeVideoElement.onplay = activeVideoElement.onpause = updatePlayIcon;
+                    
+                    playBtn.onclick = e => { e.stopPropagation(); if (activeVideoElement.paused) activeVideoElement.play(); else activeVideoElement.pause(); };
+                    muteBtn.onclick = e => { e.stopPropagation(); activeVideoElement.muted = !activeVideoElement.muted; updateMuteIcon(); };
+                    loopBtn.onclick = e => { e.stopPropagation(); activeVideoElement.loop = !activeVideoElement.loop; loopBtn.classList.toggle('active', activeVideoElement.loop); };
+                    
+                    loopBtn.classList.toggle('active', scene.videoLoop ?? true);
+                    updatePlayIcon();
+                    updateMuteIcon();
                 }
                 
                 async function main() {
@@ -2159,7 +2450,7 @@ const App = {
                     
                     const savedStateJSON = storageAvailable ? localStorage.getItem(saveKey) : null;
                     if (savedStateJSON) { 
-                        initializeGameState(); // Reset first to get the latest variable schema
+                        initializeGameState();
                         const savedState = JSON.parse(savedStateJSON);
                         Object.assign(gameState.variables, savedState.variables);
                         gameState.visited = savedState.visited || {};
@@ -2172,7 +2463,7 @@ const App = {
                     const initialAssets = [startScene?.image, startScene?.ambienceSound, storyData.meta.styles['--music-path'], storyData.meta.styles['--screen-bg-image'], storyData.meta.styles['--container-bg-image']].filter(Boolean);
                     
                     try {
-						const imageAssets = initialAssets.filter(url => /\.(jpe?g|png|gif|webp)$/i.test(url));
+						const imageAssets = initialAssets.filter(url => !isVideo(url));
 						await Promise.all(imageAssets.map(url => new Promise((res) => { 
 							const img = new Image(); 
 							img.onload = res; 
@@ -2180,7 +2471,7 @@ const App = {
 							img.src = url; 
 						})));
 					} catch (e) { 
-						console.warn('A critical error occurred during asset preloading.', e); 
+						console.warn('An error occurred during asset preloading.', e); 
 					}
                     finally { if(loader) loader.style.display = 'none'; setupGlobalStyles(); renderScene(gameState.currentSceneId); }
                 }
@@ -2198,6 +2489,7 @@ const App = {
         
         async exportProjectZip() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to export."); return; }
+            App.editor.saveCurrentScene(); // Ensure latest changes are included
             App.ui.showNotification("Collecting used assets and preparing export...");
 
             const zip = new window.JSZip();
@@ -2313,14 +2605,12 @@ const App = {
     sceneList: {
         ICONS: {
             start: `<svg class="scene-card-icon icon-start" title="Start Scene" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>`,
-			
+            image: `<svg class="scene-card-icon icon-image" title="Has Image" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>`,
+			video: `<svg class="scene-card-icon icon-video" title="Has Video" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm5.5 3v6l5-3-5-3z"></path></svg>`,
             audio: `<svg class="scene-card-icon icon-sound" title="Has Audio" viewBox="0 0 16 16"><path d="M9.707,2.293a1,1,0,0,0-1.414,0L4.6,6H2.5A1.5,1.5,0,0,0,1,7.5v1A1.5,1.5,0,0,0,2.5,10H4.6l3.69,3.707a1,1,0,0,0,1.414,0V2.293Z"/></svg>`,
-			
-            loop: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>`,
-
+			loop: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>`,
             orphan: `<svg width="16" height="16" viewBox="0 0 16 16" class="scene-card-icon icon-orphan" stroke-width="1.5"><rect x="7" y="2" width="2" height="12"/><rect x="3" y="5" width="10" height="2"/></svg>`,
-			
-            end: `<svg class="scene-card-icon icon-deadend" viewBox="0 0 16 16" stroke-width="2"><circle cx="8" cy="8" r="7.5" fill="red" stroke="white" stroke-width="1" /><rect x="3" y="6.5" width="10" height="3" fill="white" /></svg>`,
+			end: `<svg class="scene-card-icon icon-deadend" viewBox="0 0 16 16" stroke-width="2"><circle cx="8" cy="8" r="7.5" fill="red" stroke="white" stroke-width="1" /><rect x="3" y="6.5" width="10" height="3" fill="white" /></svg>`,
             condition: `<svg class="scene-card-icon icon-condition" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.33 8L12.67 5.33M7.33 8L12.67 10.67M2 8h5.33"/><circle cx="2" cy="8" r="1.33"/><circle cx="12.67" cy="5.33" r="1.33"/><circle cx="12.67" cy="10.67" r="1.33"/></svg>`
         },
         
@@ -2344,6 +2634,9 @@ const App = {
 
             if (App.state.orphanSceneIds.has(scene.id)) orphanIconHTML = this.ICONS.orphan;
             if (scene.id === App.state.storyData.meta.startSceneId) iconsHTML += this.ICONS.start;
+            if (scene.image) {
+				iconsHTML += App.assets.isVideo(scene.image) ? this.ICONS.video : this.ICONS.image;
+			}
             if (scene.ambienceSound) { iconsHTML += this.ICONS.audio; if (scene.ambienceLoop !== false) iconsHTML += this.ICONS.loop; }
             
             const hasConditions = scene.choices?.some(c => c.condition);
@@ -2354,10 +2647,13 @@ const App = {
             else { iconsHTML += this.ICONS.end; }
             
             const sceneTextPreview = scene.text ? App.markdown.parse(scene.text.split('\n')[0]) : '...';
+            const thumbnailContent = App.assets.isVideo(scene.image)
+                ? `<canvas data-src-path="${scene.image}"></canvas>`
+                : (scene.image ? `<img data-src-path="${scene.image}" alt="Thumbnail for ${scene.id}">` : `<span>No Image</span>`);
 
             card.innerHTML = `
                 <div class="scene-card-thumbnail">
-                    ${scene.image ? `<img data-src-path="${scene.image}" alt="Thumbnail for ${scene.id}">` : `<span>No Image</span>`}
+                    ${thumbnailContent}
                 </div>
                 <div class="scene-card-content">
                     <div class="scene-card-header">
@@ -2399,14 +2695,35 @@ const App = {
                 container.appendChild(this.createCard(scene));
                 count++;
                 if (count % CHUNK_SIZE === 0) {
-                    // This part helps the browser stay responsive when loading very large projects.
                     await App.debug.yieldToMain();
                 }
             }
-
-            container.querySelectorAll('img[data-src-path]').forEach(async img => {
-                const url = await App.io.getAssetDataUrl(img.dataset.srcPath);
-                if (url) img.src = url; else img.parentElement.innerHTML = `<span>Invalid Path</span>`;
+            
+            // Asynchronously load all thumbnails after rendering the cards
+            container.querySelectorAll('[data-src-path]').forEach(async mediaEl => {
+                const path = mediaEl.dataset.srcPath;
+                const isVideo = App.assets.isVideo(path);
+                try {
+                    const url = await (isVideo ? App.assets.getVideoThumbnail(path) : App.io.getAssetDataUrl(path));
+                    if(url) {
+                        if (isVideo) { // It's a canvas
+                            const img = new Image();
+                            img.onload = () => {
+                                mediaEl.width = img.width;
+                                mediaEl.height = img.height;
+                                mediaEl.getContext('2d').drawImage(img, 0, 0);
+                            };
+                            img.src = url;
+                        } else { // It's an img
+                            mediaEl.src = url;
+                        }
+                    } else {
+                        mediaEl.parentElement.innerHTML = `<span>Invalid Path</span>`;
+                    }
+                } catch(e) {
+                     mediaEl.parentElement.innerHTML = `<span>Error</span>`;
+                     console.warn(`Could not load thumbnail for ${path}`, e);
+                }
             });
         },
     },
@@ -2608,7 +2925,9 @@ const App = {
                 App.ui.showNotification("This name is already in use by a scene or variable.");
                 return;
             }
-            App.state.storyData.scenes[newId] = { id: newId, text: `This is the new scene '${newId}'.`, choices: [], ambienceLoop: true, visited: false, lastModified: Date.now() };
+            const defaultScene = App.getNewStoryObject().scenes.start;
+            App.state.storyData.scenes[newId] = { ...defaultScene, id: newId, text: `This is the new scene '${newId}'.` };
+            
             App.setDirty(true); App.ui.invalidateNavViews(); await App.ui.setViewMode(App.state.currentNavView); App.ui.selectScene(newId);
         },
         async renameScene() {
@@ -2672,8 +2991,15 @@ const App = {
             App.elements['toggle-loop-btn'].classList.toggle('active', scene.ambienceLoop ?? true);
             App.elements['manage-variables-btn'].innerHTML = App.editor.ui.iconManageVariables;
 
+            // Video specific UI
+            App.elements['toggle-video-loop-btn'].classList.toggle('active', scene.videoLoop ?? true);
+            const isMuted = scene.videoMuted ?? true;
+            App.elements['toggle-video-mute-btn'].classList.toggle('active', isMuted);
+            this.ui.updateVideoMuteButton(isMuted);
+
+            this.ui.updateVideoControlsVisibility();
+
             App.ui.updateAiImagePreview(null); App.state.aiImageUrl = null; 
-            this.renderPreview();
         },
         renderPreview() {
             const previewContainer = App.elements['scene-editor-preview'];
@@ -2702,57 +3028,90 @@ const App = {
             App.styles.applyToContainer(previewContainer);
             textEl.innerHTML = App.markdown.parse(sceneText);
         
-            this.updatePreviewImage();
+            this.updatePreviewMedia();
         },
-        async updatePreviewImage() {
-            App.state.previewLoadId++;
-            const currentLoadId = App.state.previewLoadId;
-            
-            const previewWrapper = App.elements['scene-editor-preview-wrapper'];
-            const imageEl = document.getElementById('preview-player-image');
-            const imageContainerEl = document.getElementById('preview-player-image-container');
-            const innerContainer = document.getElementById('preview-player-inner-container');
-            const previewContainer = App.elements['scene-editor-preview'];
+        async updatePreviewMedia() {
+			App.state.previewLoadId++;
+			const currentLoadId = App.state.previewLoadId;
+			
+			const previewWrapper = App.elements['scene-editor-preview-wrapper'];
+			const imageEl = document.getElementById('preview-player-image');
+			const videoBgEl = App.elements['preview-player-video']; // The original background video
+			const videoFgEl = document.getElementById('preview-player-video-fg'); // The new foreground video
+			const imageContainerEl = document.getElementById('preview-player-image-container');
+			const innerContainer = document.getElementById('preview-player-inner-container');
+			const previewContainer = App.elements['scene-editor-preview'];
 
-            previewWrapper.classList.add('is-loading');
+			previewWrapper.classList.add('is-loading');
 
-            try {
-                const sceneImage = App.elements['scene-image'].value;
-                const meta = App.state.storyData.meta;
-                const styles = meta.styles;
+			try {
+				const sceneImage = App.elements['scene-image'].value;
+				const meta = App.state.storyData.meta;
+				const styles = meta.styles;
+				const isMediaVideo = App.assets.isVideo(sceneImage);
 
-                const [sceneImageUrl, globalScreenBgUrl, containerBgUrl] = await Promise.all([
-                    App.io.getAssetDataUrl(sceneImage),
-                    App.io.getAssetDataUrl(styles['--screen-bg-image']),
-                    App.io.getAssetDataUrl(styles['--container-bg-image'])
-                ]);
-                
-                if (currentLoadId !== App.state.previewLoadId) {
-                    return; 
-                }
+				const [sceneMediaUrl, globalScreenBgUrl, containerBgUrl] = await Promise.all([
+					App.io.getAssetDataUrl(sceneImage),
+					App.io.getAssetDataUrl(styles['--screen-bg-image']),
+					App.io.getAssetDataUrl(styles['--container-bg-image'])
+				]);
+				
+				if (currentLoadId !== App.state.previewLoadId) return;
 
-                innerContainer.style.backgroundImage = containerBgUrl ? `url("${containerBgUrl}")` : 'none';
+				// Reset all media displays
+				imageEl.style.display = 'none';
+				imageContainerEl.style.display = 'none';
+				previewContainer.style.backgroundImage = 'none';
+				[videoBgEl, videoFgEl].forEach(v => {
+					v.style.display = 'none';
+					if (v && !v.paused) {
+						v.pause();
+						v.removeAttribute('src');
+						v.load();
+					}
+				});
+				
+				innerContainer.style.backgroundImage = containerBgUrl ? `url("${containerBgUrl}")` : 'none';
 
-                if (meta.layout === 'layout-image-as-bg') {
-                    imageContainerEl.style.display = 'none';
-                    previewContainer.style.backgroundImage = sceneImageUrl ? `url("${sceneImageUrl}")` : (globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none');
-                } else {
-                    previewContainer.style.backgroundImage = globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none';
-                    if (sceneImageUrl) {
-                        imageEl.src = sceneImageUrl;
-                        imageContainerEl.style.display = 'block';
-                    } else {
-                        imageContainerEl.style.display = 'none';
-                    }
-                }
-            } catch (error) {
-                console.error("Failed to update preview image:", error);
-            } finally {
-                if (currentLoadId === App.state.previewLoadId) {
-                    previewWrapper.classList.remove('is-loading');
-                }
-            }
-        },
+				if (isMediaVideo && sceneMediaUrl) {
+					let activeVideoEl;
+					if (meta.layout === 'layout-image-as-bg') {
+						// Use the background video element
+						activeVideoEl = videoBgEl;
+					} else {
+						// Use the new foreground video element and show its container
+						activeVideoEl = videoFgEl;
+						imageContainerEl.style.display = 'block';
+					}
+
+					if (activeVideoEl) {
+						activeVideoEl.src = sceneMediaUrl;
+						activeVideoEl.loop = App.elements['toggle-video-loop-btn'].classList.contains('active');
+						activeVideoEl.muted = App.elements['toggle-video-mute-btn'].classList.contains('active');
+						activeVideoEl.style.display = 'block';
+						activeVideoEl.play().catch(e => console.warn("Preview video autoplay failed.", e));
+					}
+
+				} else { // This is an image or no media
+					if (meta.layout === 'layout-image-as-bg') {
+						previewContainer.style.backgroundImage = sceneMediaUrl ? `url("${sceneMediaUrl}")` : (globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none');
+					} else {
+						previewContainer.style.backgroundImage = globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none';
+						if (sceneMediaUrl) {
+							imageEl.src = sceneMediaUrl;
+							imageEl.style.display = 'block';
+							imageContainerEl.style.display = 'block';
+						}
+					}
+				}
+			} catch (error) {
+				console.error("Failed to update preview media:", error);
+			} finally {
+				if (currentLoadId === App.state.previewLoadId) {
+					previewWrapper.classList.remove('is-loading');
+				}
+			}
+		},
         saveCurrentScene() {
             if (!App.state.currentSceneId) return;
             const scene = App.state.storyData.scenes[App.state.currentSceneId];
@@ -2796,6 +3155,8 @@ const App = {
             scene.imagePrompt = App.elements['scene-image-prompt'].value.trim();
             scene.ambienceSound = App.elements['scene-sound'].value.trim();
             scene.ambienceLoop = App.elements['toggle-loop-btn'].classList.contains('active');
+            scene.videoLoop = App.elements['toggle-video-loop-btn'].classList.contains('active');
+            scene.videoMuted = App.elements['toggle-video-mute-btn'].classList.contains('active');
             scene.choices = newChoices;
             scene.lastModified = Date.now();
         
@@ -2868,7 +3229,7 @@ const App = {
                         </div>
                     </div>
                     <button class="btn-success go-to-scene-btn display-none" title="Go to selected scene">▶</button>
-                    <button class="icon-btn delete-choice-btn" onclick="this.parentElement.remove(); App.editor.renderPreview(); App.editor.saveCurrentScene(false);" title="Delete Choice">&times;</button>
+                    <button class="icon-btn delete-choice-btn" onclick="this.parentElement.remove()" title="Delete Choice">&times;</button>
                 `;
             },
             populateDropdowns(selectElement, includeScenes, includeVariables, includeVisited) {
@@ -2922,17 +3283,37 @@ const App = {
                 if(isSceneSelected) {
                     goToBtn.onclick = () => App.ui.selectScene(selectElement.value.substring(6));
                 }
-                
-                App.editor.renderPreview();
             },
             toggleCondition(button) {
                 const choiceDiv = button.closest('.choice-editor');
                 choiceDiv.classList.toggle('is-conditional');
                 button.innerHTML = choiceDiv.classList.contains('is-conditional') ? this.iconRemoveCondition : this.iconAddCondition;
                 button.title = choiceDiv.classList.contains('is-conditional') ? 'Remove condition' : 'Add a condition';
-                App.editor.saveCurrentScene(false);
+                App.editor.saveCurrentScene();
                 App.editor.renderPreview();
             },
+            updateVideoControlsVisibility() {
+				const path = App.elements['scene-image'].value;
+				const isVideo = App.assets.isVideo(path);
+				App.elements['video-controls'].style.display = isVideo ? 'flex' : 'none';
+
+				// Explicitly show one icon and hide the other to prevent errors
+				if (isVideo) {
+					App.elements['media-icon-image'].classList.add('hidden');
+					App.elements['media-icon-video'].classList.remove('hidden');
+				} else {
+					App.elements['media-icon-image'].classList.remove('hidden');
+					App.elements['media-icon-video'].classList.add('hidden');
+				}
+			},
+            updateVideoPlaybackButton(isPlaying) {
+                App.elements['video-play-icon'].classList.toggle('hidden', isPlaying);
+                App.elements['video-pause-icon'].classList.toggle('hidden', !isPlaying);
+            },
+            updateVideoMuteButton(isMuted) {
+                App.elements['video-unmute-icon'].classList.toggle('hidden', isMuted);
+                App.elements['video-mute-icon'].classList.toggle('hidden', !isMuted);
+            }
         },
         variables: {
             showModal() {
@@ -2972,20 +3353,48 @@ const App = {
     },
     
     assets: {
+        isVideo(path) {
+            return path && App.constants.VIDEO_EXTENSIONS.some(ext => path.toLowerCase().endsWith(ext));
+        },
+        async getVideoThumbnail(path) {
+            const file = await App.io.getAssetFile(path);
+            if (!file) return null;
+            return new Promise((resolve, reject) => {
+                const video = document.createElement('video');
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                
+                video.onloadeddata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    video.currentTime = 0; // Seek to the beginning
+                };
+                
+                video.onseeked = () => {
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/jpeg'));
+                    URL.revokeObjectURL(video.src); // Clean up
+                };
+                
+                video.onerror = (e) => {
+                    reject(e);
+                    URL.revokeObjectURL(video.src);
+                };
+
+                video.src = URL.createObjectURL(file);
+            });
+        },
         async selectFile(assetType, targetInputId) {
             const fileInput = document.getElementById(assetType === 'images' ? 'image-file-input' : 'sound-file-input');
             const handleFile = async (file) => {
                 if (!file) return;
-                const destinationPath = `${assetType}/${file.name}`;
+                const assetTypeFolder = this.isVideo(file.name) ? 'videos' : (assetType === 'sounds' ? 'sounds' : 'images');
+                const destinationPath = `${assetTypeFolder}/${file.name}`;
                 App.state.pendingAssetCopies.set(destinationPath, file);
                 const inputElement = document.getElementById(targetInputId);
                 if (inputElement) {
                     inputElement.value = destinationPath;
                     inputElement.dispatchEvent(new Event('input', { bubbles: true })); 
-                    if (targetInputId === 'scene-image') {
-                        App.ui.updateImageThumbnail(destinationPath);
-                        await App.ui.renderCurrentView(); 
-                    }
                 }
                 App.setDirty(true);
             };
@@ -2994,8 +3403,10 @@ const App = {
                 try {
                     const options = {
                         types: [{
-                            description: assetType === 'images' ? 'Images' : 'Sounds',
-                            accept: assetType === 'images' ? {'image/*': ['.png', '.gif', '.jpeg', '.jpg', '.webp']} : {'audio/*': ['.mp3', '.wav', '.ogg', '.m4a']}
+                            description: assetType === 'images' ? 'Images/Videos' : 'Sounds',
+                            accept: assetType === 'images' 
+                                ? {'media/*': ['.png', '.gif', '.jpeg', '.jpg', '.webp', ...App.constants.VIDEO_EXTENSIONS]} 
+                                : {'audio/*': ['.mp3', '.wav', '.ogg', '.m4a']}
                         }],
                         multiple: false,
                         startIn: App.state.lastAssetHandles[assetType] || App.state.projectDirectoryHandle || 'pictures'
@@ -3019,15 +3430,11 @@ const App = {
             const targetInput = e.target; targetInput.classList.remove('drag-over');
             if (e.dataTransfer.files?.length > 0) {
                 const file = e.dataTransfer.files[0];
-                const assetTypeFolder = targetInput.dataset.assetType || 'assets';
+                const assetTypeFolder = targetInput.dataset.assetType === 'sounds' ? 'sounds' : (this.isVideo(file.name) ? 'videos' : 'images');
                 const destinationPath = `${assetTypeFolder}/${file.name}`;
                 App.state.pendingAssetCopies.set(destinationPath, file);
                 targetInput.value = destinationPath;
                 targetInput.dispatchEvent(new Event('input', { bubbles: true })); 
-                if (targetInput.id === 'scene-image') {
-                    App.ui.updateImageThumbnail(destinationPath);
-                    App.ui.renderCurrentView();
-                }
                 App.setDirty(true);
             }
         },
@@ -3057,11 +3464,7 @@ const App = {
                 const destinationPath = `images/${filename}`;
                 App.state.pendingAssetCopies.set(destinationPath, imageBlob);
                 App.elements['scene-image'].value = destinationPath;
-                App.ui.updateImageThumbnail(destinationPath);
                 App.elements['scene-image'].dispatchEvent(new Event('input', { bubbles: true }));
-                App.setDirty(true); 
-                App.ui.invalidateNavViews(); 
-                await App.ui.setViewMode(App.state.currentNavView);
                 App.ui.updateAiImagePreview(null, 'Ready');
             } catch (err) { 
                 console.error("Error adding AI image:", err); 
@@ -3167,10 +3570,75 @@ const App = {
             await App.ui.setViewMode(App.state.currentNavView);
 
             const scene = App.state.storyData.scenes[sceneId];
-            const { 'player-text': textEl, 'player-choices': choicesEl, 'ambience-player': audio } = App.elements;
-            if (!scene) { textEl.innerHTML = `Error: Scene "${sceneId}" not found.`; return; }
+            const { 'player-text': textEl, 'player-choices': choicesEl, 'ambience-player': audio, 'player-video-bg': videoBg, 'player-video-fg': videoFg, 'player-image': imageEl } = App.elements;
+            const playerContainer = App.elements['player-container'];
+            const playerInnerContainer = App.elements['player-inner-container'];
+            const playerImageContainer = document.getElementById('player-image-container');
 
-            await App.styles.applyToPlayer();
+            if (!scene) { textEl.innerHTML = `Error: Scene "${sceneId}" not found.`; return; }
+            
+            // --- Start of merged and refactored logic ---
+            const meta = App.state.storyData.meta; 
+            const styles = meta.styles; 
+            App.styles.applyToContainer(playerContainer);
+
+            const [sceneMediaUrl, globalScreenBgUrl, containerBgUrl, musicUrl] = await Promise.all([
+                App.io.getAssetDataUrl(scene?.image),
+                App.io.getAssetDataUrl(styles['--screen-bg-image']),
+                App.io.getAssetDataUrl(styles['--container-bg-image']),
+                App.io.getAssetDataUrl(styles['--music-path'])
+            ]);
+
+            playerInnerContainer.style.backgroundImage = containerBgUrl ? `url("${containerBgUrl}")` : 'none';
+
+            if (musicUrl) { 
+                if (!App.elements['music-player'].src.endsWith(musicUrl)) App.elements['music-player'].src = musicUrl; 
+                if (App.elements['music-player'].paused) App.elements['music-player'].play().catch(e=>console.warn(e));
+            } else { 
+                App.elements['music-player'].pause(); 
+                App.elements['music-player'].src = ''; 
+            }
+            
+            const isMediaVideo = App.assets.isVideo(scene.image);
+            
+            // Reset all media displays
+            playerContainer.style.backgroundImage = 'none';
+            playerImageContainer.style.display = 'none';
+            imageEl.style.display = 'none';
+            [videoBg, videoFg].forEach(v => {
+                v.style.display = 'none';
+                if (!v.paused) { v.pause(); v.removeAttribute('src'); v.load(); }
+            });
+            App.state.player.activeVideoElement = null; // CHANGE HERE
+
+            if (isMediaVideo && sceneMediaUrl) {
+                if (meta.layout === 'layout-image-as-bg') {
+                    App.state.player.activeVideoElement = videoBg; // CHANGE HERE
+                    playerContainer.style.backgroundImage = 'none';
+                } else {
+                    App.state.player.activeVideoElement = videoFg; // CHANGE HERE
+                    playerImageContainer.style.display = 'block';
+                    playerContainer.style.backgroundImage = globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none';
+                }
+                // CHANGE ALL "this.state" to "App.state.player" in the following lines
+                App.state.player.activeVideoElement.src = sceneMediaUrl;
+                App.state.player.activeVideoElement.loop = scene.videoLoop ?? true;
+                App.state.player.activeVideoElement.muted = scene.videoMuted ?? true;
+                App.state.player.activeVideoElement.style.display = 'block';
+                App.state.player.activeVideoElement.play().catch(e => console.warn("In-editor player video playback failed.", e));
+            } else if (sceneMediaUrl) { // It's an image
+                if (meta.layout === 'layout-image-as-bg') {
+                    playerContainer.style.backgroundImage = `url("${sceneMediaUrl}")`;
+                } else {
+                    imageEl.src = sceneMediaUrl;
+                    imageEl.style.display = 'block';
+                    playerImageContainer.style.display = 'block';
+                    playerContainer.style.backgroundImage = globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none';
+                }
+            } else { // No media for this scene
+                playerContainer.style.backgroundImage = globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none';
+            }
+            // --- End of merged and refactored logic ---
             
             let visibleChoices = [];
             for(const choice of (scene.choices || [])) {			
@@ -3186,6 +3654,11 @@ const App = {
                 
                 if (conditionMet) {
                     if (!choice.action.text && choice.action.target) {
+                        // FIX: Infinite loop prevention
+                        if (choice.action.target === sceneId) {
+                            console.error(`Infinite loop detected in scene '${sceneId}'. A silent action is targeting itself.`);
+                            continue; 
+                        }
                         this.processChoice(choice);
                         return; // Stop rendering this scene
                     }
@@ -3221,6 +3694,18 @@ const App = {
             App.elements['player-container'].style.display = 'none';
             App.elements['ambience-player'].pause(); App.elements['music-player'].pause();
             App.elements['ambience-player'].src = ''; App.elements['music-player'].src = '';
+
+            const videos = [App.elements['player-video-bg'], App.elements['player-video-fg']];
+            videos.forEach(playerVideo => {
+                if(playerVideo) {
+                    playerVideo.pause();
+                    playerVideo.removeAttribute('src');
+                    playerVideo.load();
+                    playerVideo.style.display = 'none';
+                }
+            });
+            App.state.player.activeVideoElement = null;
+
             if (App.state.currentSceneId) App.editor.render();
         },
         async toggleAmbienceSound() {
@@ -3234,7 +3719,7 @@ const App = {
             const soundUrl = await App.io.getAssetDataUrl(soundPath);
             if (!soundUrl) { App.ui.showNotification("Audio file not found in project."); return; }
 
-            if (!audio.paused && audio.src.endsWith(soundUrl)) audio.pause();
+            if (!audio.paused && audio.src === soundUrl) audio.pause();
             else { audio.src = soundUrl; audio.play().catch(e => console.warn("Audio playback failed.", e)); }
         },
         updateAmbienceButton(isPlaying) {
@@ -3344,37 +3829,16 @@ const App = {
             Object.keys(defaults).forEach(key => container.style.setProperty(key, styles[key] || defaults[key]));
             container.className = meta.layout; if(innerContainer) innerContainer.className = meta.layout;
         },
-        async applyToPlayer() {
-            const pc = App.elements['player-container']; const pic = App.elements['player-inner-container'];
-            const musicPlayer = App.elements['music-player'];
-            const scene = App.state.storyData.scenes[App.state.currentSceneId];
-            const meta = App.state.storyData.meta; const styles = meta.styles; this.applyToContainer(pc);
-            
-            const imageUrl = await App.io.getAssetDataUrl(scene?.image);
-            const globalScreenBgUrl = await App.io.getAssetDataUrl(styles['--screen-bg-image']);
-            const containerBgUrl = await App.io.getAssetDataUrl(styles['--container-bg-image']);
-            pic.style.backgroundImage = containerBgUrl ? `url("${containerBgUrl}")` : 'none';
-
-            if (meta.layout === 'layout-image-as-bg') {
-                document.getElementById('player-image-container').style.display = 'none';
-                pc.style.backgroundImage = imageUrl ? `url("${imageUrl}")` : (globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none');
-            } else {
-                pc.style.backgroundImage = globalScreenBgUrl ? `url("${globalScreenBgUrl}")` : 'none';
-                const playerImage = App.elements['player-image'];
-                if (imageUrl) { playerImage.src = imageUrl; playerImage.parentElement.style.display = 'block'; }
-                else { playerImage.parentElement.style.display = 'none'; }
-            }
-            
-            const musicUrl = await App.io.getAssetDataUrl(styles['--music-path']);
-            if (musicUrl) { if (!musicPlayer.src.endsWith(musicUrl)) musicPlayer.src = musicUrl; if (musicPlayer.paused) musicPlayer.play().catch(e=>console.warn(e));} 
-            else { musicPlayer.pause(); musicPlayer.src = ''; }
-        },
         generateCSS(stylesOverride) { 
             const styles = stylesOverride || App.state.storyData.meta.styles; const defaults = this.getDefaults(); let rootVars = '';
             Object.keys(defaults).forEach(key => { if (key.startsWith('--') && !key.includes('path') && !key.includes('image')) rootVars += `    ${key}: ${styles[key] || defaults[key]};\n`; });
             let css = `:root {\n${rootVars}} body { background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); } #game-container { background-color: var(--container-bg-color); font-size: var(--font-size); } .choice-btn { font-family: var(--font-family); background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid transparent; } .choice-btn:hover { background-color: var(--btn-hover-color); }`;
-            if (styles['--screen-bg-image']) css += `body { background-image: url('${styles['--screen-bg-image']}'); }\n`;
-            if (styles['--container-bg-image']) css += `#game-container { background-image: url('${styles['--container-bg-image']}'); }\n`;
+            if (styles['--screen-bg-image'] && !App.assets.isVideo(styles['--screen-bg-image'])) {
+                css += `body { background-image: url('${styles['--screen-bg-image']}'); }\n`;
+            }
+            if (styles['--container-bg-image'] && !App.assets.isVideo(styles['--container-bg-image'])) {
+                 css += `#game-container { background-image: url('${styles['--container-bg-image']}'); }\n`;
+            }
             return css;
         },
         getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--music-path': '', '--music-volume': '0.4', '--ambience-volume': '0.4', '--typewriter-effect': 'on' }; }
@@ -3411,9 +3875,9 @@ const App = {
             logEl.scrollTop = logEl.scrollHeight;
         },
         removeAllImages() {
-            if (!confirm("Delete image paths from ALL scenes? This cannot be undone.")) return;
+            if (!confirm("Delete image/video paths from ALL scenes? This cannot be undone.")) return;
             let count = 0; Object.values(App.state.storyData.scenes).forEach(scene => { if (scene.image) { scene.image = ''; count++; } });
-            App.setDirty(true); App.editor.render(); App.ui.invalidateNavViews(); App.ui.setViewMode(App.state.currentNavView); App.ui.showNotification(`${count} image paths deleted.`);
+            App.setDirty(true); App.editor.render(); App.ui.invalidateNavViews(); App.ui.setViewMode(App.state.currentNavView); App.ui.showNotification(`${count} image/video paths deleted.`);
         },
         removeAllImagePrompts() {
             if (!confirm("Delete image prompts from ALL scenes? This cannot be undone.")) return;
@@ -3617,4 +4081,3 @@ document.addEventListener('DOMContentLoaded', () => App.init());
 </script>
 </body>
 </html>
-            

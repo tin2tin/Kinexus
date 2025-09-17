@@ -1053,7 +1053,7 @@
             .about-footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #444; font-size: 0.8em; text-align: center; white-space: pre-wrap; }
             .about-footer a { color: #8af; text-decoration: none; }
 
-            #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; color: white; font-size: 1.5em; }
+            #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; color: white; font-size: 1.5em; transition: opacity 0.5s; }
             .loading-spinner { border: 8px solid #f3f3f3; border-top: 8px solid var(--primary-color); border-radius: 50%; width: 60px; height: 60px; animation: spin 1.5s linear infinite; margin-bottom: 20px; }
             @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
             __CUSTOM_STYLES__
@@ -1066,7 +1066,10 @@
     <body class="__LAYOUT_CLASS__">
         <div id="loading-overlay">
             <div class="loading-spinner"></div>
-            <p>Loading...</p>
+            <p id="loading-status">Loading Game...</p>
+			<div id="loading-progress-container" style="display: none; width: 80%; max-width: 400px; background: #444; border-radius: 5px; overflow: hidden; height: 20px; margin-top: 20px; border: 1px solid #666;">
+				<div id="loading-progress-bar" style="width: 0%; height: 100%; background: var(--primary-color); transition: width 0.2s ease-out;"></div>
+			</div>
         </div>
 
         <video id="background-video" playsinline></video>
@@ -2274,26 +2277,6 @@ const App = {
             if (isForExport) {
                 storyJsonString = JSON.stringify(storyData, null, 2);
             } else { 
-                const assetPaths = new Set();
-                Object.values(storyData.scenes).forEach(scene => {
-                    if (scene.image) assetPaths.add(scene.image);
-                    if (scene.ambienceSound) assetPaths.add(scene.ambienceSound);
-                });
-                if(storyData.meta.styles['--music-path']) assetPaths.add(storyData.meta.styles['--music-path']);
-                if(storyData.meta.styles['--screen-bg-image']) assetPaths.add(storyData.meta.styles['--screen-bg-image']);
-
-                const assetDataUrls = {};
-                for (const path of assetPaths) {
-                    assetDataUrls[path] = await App.io.getAssetDataUrl(path);
-                }
-
-                Object.values(storyData.scenes).forEach(scene => {
-                    if (scene.image && assetDataUrls[scene.image]) scene.image = assetDataUrls[scene.image];
-                    if (scene.ambienceSound && assetDataUrls[scene.ambienceSound]) scene.ambienceSound = assetDataUrls[scene.ambienceSound];
-                });
-                if(storyData.meta.styles['--music-path'] && assetDataUrls[storyData.meta.styles['--music-path']]) storyData.meta.styles['--music-path'] = assetDataUrls[storyData.meta.styles['--music-path']];
-                if(storyData.meta.styles['--screen-bg-image'] && assetDataUrls[storyData.meta.styles['--screen-bg-image']]) storyData.meta.styles['--screen-bg-image'] = assetDataUrls[storyData.meta.styles['--screen-bg-image']];
-                
                 storyJsonString = JSON.stringify(storyData);
             }
 
@@ -2306,7 +2289,6 @@ const App = {
                 const formattedFontName = fontName.replace(/ /g, '+');
                 googleFontLink = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${formattedFontName}:wght@400;700&display=swap">`;
             }
-
 
             const playerScript = `
         <script>
@@ -2330,18 +2312,12 @@ const App = {
 
                 function parseMarkdown(text) {
                     if (!text) return '';
-                    let html = text
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
+                    return text
+                        .replace(/</g, '&lt;').replace(/>/g, '&gt;')
                         .replace(/\\[(.*?)\\]\\((.*?)\\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-                        .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')
-                        .replace(/__(.*?)__/g, '<strong>$1</strong>')
-                        .replace(/\\*(.*?)\\*/g, '<em>$1</em>')
-                        .replace(/_(.*?)_/g, '<em>$1</em>')
-                        .replace(/~~(.*?)~~/g, '<s>$1</s>')
-                        .replace(/\`(.*?)\`/g, '<code>$1</code>')
-                        .replace(/\\n/g, '<br>');
-                    return html;
+                        .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>').replace(/__(.*?)__/g, '<strong>$1</strong>')
+                        .replace(/\\*(.*?)\\*/g, '<em>$1</em>').replace(/_(.*?)_/g, '<em>$1</em>')
+                        .replace(/~~(.*?)~~/g, '<s>$1</s>').replace(/\\n/g, '<br>');
                 }
 
                 function bindEvent(element, handler) {
@@ -2355,7 +2331,6 @@ const App = {
                 const storageAvailable = isStorageAvailable();
                 const saveKey = 'cyoa-save-' + storyData.meta.title;
 
-                function linkify(text) { if (!text) return ''; const urlRegex = /(\\b(https?:\\/\\/|www\\.)[-A-Z0-9+&@#\\/%?=~_|!:,.;]*[-A-Z0-9+&@#\\/%=~_|])/ig; return text.replace(urlRegex, url => '<a href="' + (url.startsWith('www.') ? 'http://' + url : url) + '" target="_blank" rel="noopener noreferrer">' + url + '</a>'); }
                 function showModal(modal) { modal.style.display = 'flex'; setTimeout(() => modal.classList.add('visible'), 10); }
                 function hideModal(modal) { modal.classList.remove('visible'); setTimeout(() => modal.style.display = 'none', 300); }
                 
@@ -2394,7 +2369,7 @@ const App = {
                         bindEvent(loadBtn, () => { 
                             const savedStateJSON = localStorage.getItem(saveKey);
                             if (savedStateJSON) { 
-                                initializeGameState(); // Reset first to get the latest variable schema
+                                initializeGameState();
                                 const savedState = JSON.parse(savedStateJSON);
                                 Object.assign(gameState.variables, savedState.variables);
                                 gameState.visited = savedState.visited || {};
@@ -2450,36 +2425,59 @@ const App = {
                 }
                 
                 function typeWriter(text, choices) {
-                    let i = 0; choicesContainer.innerHTML = '';
-                    const tempChoices = document.createElement('div');
-                    choices.forEach(c => { const b = document.createElement('button'); b.className = 'choice-btn'; b.textContent = c.action.text; tempChoices.appendChild(b); });
-                    choicesContainer.appendChild(tempChoices);
-                    sceneText.textContent = text; const containerHeight = contentContainer.offsetHeight; choicesContainer.innerHTML = ''; sceneText.textContent = ''; contentContainer.style.minHeight = containerHeight + 'px';
-
-                    function showChoices() { choicesContainer.innerHTML = ''; choices.forEach((choice, index) => { const b = document.createElement('button'); b.textContent = choice.action.text; b.className = 'choice-btn fade-in'; b.style.animationDelay = (index * 0.2) + 's'; bindEvent(b, (e) => { e.stopPropagation(); processChoice(choice); }); choicesContainer.appendChild(b); }); }
                     if (typewriterState.intervalId) clearInterval(typewriterState.intervalId);
-                    if (typewriterState.skipListener) gameContainer.removeEventListener(clickEvent, typewriterState.skipListener);
+                    if (typewriterState.skipListener) document.body.removeEventListener('click', typewriterState.skipListener);
                     
-                    const skipTyping = () => { 
-                        clearInterval(typewriterState.intervalId); 
-                        typewriterState.intervalId = null; 
-                        sceneText.innerHTML = parseMarkdown(text); 
-                        contentContainer.style.minHeight = ''; 
-                        showChoices(); 
-                        gameContainer.removeEventListener(clickEvent, typewriterState.skipListener); 
-                        typewriterState.skipListener = null; 
+                    const originalMinHeight = contentContainer.style.minHeight;
+                    contentContainer.style.minHeight = ''; 
+                    sceneText.innerHTML = parseMarkdown(text);
+                    choicesContainer.innerHTML = '';
+                    choices.forEach(choice => {
+                        const button = document.createElement('button');
+                        button.className = 'choice-btn';
+                        button.textContent = choice.action.text;
+                        choicesContainer.appendChild(button);
+                    });
+                    const finalHeight = contentContainer.offsetHeight;
+                    contentContainer.style.minHeight = finalHeight + 'px';
+                    
+                    choicesContainer.innerHTML = '';
+                    sceneText.innerHTML = ''; 
+                    let i = 0;
+
+                    const showChoices = () => {
+                        choicesContainer.innerHTML = '';
+                        choices.forEach((choice, index) => {
+                            const button = document.createElement('button');
+                            button.className = 'choice-btn fade-in';
+                            button.textContent = choice.action.text;
+                            button.style.animationDelay = \`\${index * 0.2}s\`;
+                            bindEvent(button, (e) => { e.stopPropagation(); processChoice(choice); });
+                            choicesContainer.appendChild(button);
+                        });
                     };
 
-                    typewriterState.skipListener = skipTyping; 
-                    bindEvent(gameContainer, skipTyping);
+                    const skipTyping = (e) => {
+                        if(e) e.stopPropagation();
+                        clearInterval(typewriterState.intervalId);
+                        document.body.removeEventListener('click', typewriterState.skipListener);
+                        sceneText.innerHTML = parseMarkdown(text);
+                        showChoices();
+                        contentContainer.style.minHeight = originalMinHeight;
+                        typewriterState.intervalId = null;
+                        typewriterState.skipListener = null;
+                    };
 
-                    typewriterState.intervalId = setInterval(() => { 
-                        if (i < text.length) { 
-                            sceneText.textContent += text.charAt(i); 
-                            i++; 
-                        } else { 
-                            skipTyping(); 
-                        } 
+                    typewriterState.skipListener = skipTyping;
+                    document.body.addEventListener('click', skipTyping);
+
+                    typewriterState.intervalId = setInterval(() => {
+                        if (i >= text.length) {
+                            skipTyping(null);
+                        } else {
+                            sceneText.innerHTML = parseMarkdown(text.substring(0, i + 1));
+                            i++;
+                        }
                     }, 30);
                 }
 
@@ -2498,7 +2496,6 @@ const App = {
                         const scene = storyData.scenes[sceneId];
                         if (!scene) { sceneText.innerHTML = 'Error: Scene "' + sceneId + '" not found.'; return; }
                         
-                        // Handle Media
                         const layout = storyData.meta.layout;
                         const mediaUrl = scene.image;
                         const isMediaVideo = isVideo(mediaUrl);
@@ -2509,15 +2506,13 @@ const App = {
                         
                         const imageContainer = document.getElementById('image-container');
                         
-                        // Reset all media displays
                         [backgroundVideo, sceneVideo].forEach(v => {
                              if(!v.paused) { v.pause(); v.removeAttribute('src'); v.load(); }
-                             v.style.display = 'none';
-							 v.classList.remove('visible');
+                             v.style.display = 'none'; v.classList.remove('visible');
                         });
                         sceneImage.style.display = 'none';
                         imageContainer.style.display = 'none';
-                        document.body.style.backgroundImage = 'var(--screen-bg-image)'; // Reset to global BG
+                        document.body.style.backgroundImage = 'var(--screen-bg-image)';
                         activeVideoElement = null;
                         document.getElementById('player-video-controls').style.display = 'none';
 
@@ -2526,8 +2521,7 @@ const App = {
                             if (!isPanelLayout) imageContainer.style.display = 'block';
                             
                             if (activeVideoElement.src !== mediaUrl) activeVideoElement.src = mediaUrl;
-                            activeVideoElement.style.display = 'block';
-							activeVideoElement.classList.add('visible');
+                            activeVideoElement.style.display = 'block'; activeVideoElement.classList.add('visible');
                             activeVideoElement.loop = scene.videoLoop ?? true;
                             activeVideoElement.muted = musicPlayer.muted || (scene.videoMuted ?? true);
                             activeVideoElement.volume = document.getElementById('video-volume-slider').value;
@@ -2548,18 +2542,14 @@ const App = {
                             let conditionMet = true;
                             if(choice.condition) {
                                 const varName = choice.condition.variable;
-                                if(varName.startsWith('visited_scene_')) {
-                                    conditionMet = !!gameState.visited[varName.substring(14)] === choice.condition.value;
-                                } else {
-                                    conditionMet = gameState.variables[varName.substring(4)] === choice.condition.value;
-                                }
+                                conditionMet = varName.startsWith('visited_scene_') ? (!!gameState.visited[varName.substring(14)] === choice.condition.value) : (gameState.variables[varName.substring(4)] === choice.condition.value);
                             }
                             
                             if (conditionMet) {
                                 if (!choice.action.text && choice.action.target) {
                                     if(choice.action.target === sceneId) { console.error('Infinite loop detected: silent action targets itself in scene ' + sceneId); continue; }
                                     processChoice(choice);
-                                    return; // Stop rendering
+                                    return;
                                 }
                                 if (choice.action.text) visibleChoices.push(choice);
                                 else if (choice.action.set_variable) gameState.variables[choice.action.set_variable] = choice.action.set_value;
@@ -2583,75 +2573,124 @@ const App = {
 
                 function updateVideoControls(scene) {
                     if (!activeVideoElement) return;
-
-                    const controls = document.getElementById('player-video-controls');
-                    const playBtn = document.getElementById('player-video-play-btn');
-
+                    const controls = document.getElementById('player-video-controls'), playBtn = document.getElementById('player-video-play-btn');
                     controls.style.display = 'flex';
-
                     const updatePlayIcon = () => {
                         playBtn.querySelector('.icon-on').style.display = activeVideoElement.paused ? 'block' : 'none';
                         playBtn.querySelector('.icon-off').style.display = activeVideoElement.paused ? 'none' : 'block';
                     };
-                    
                     activeVideoElement.onplay = activeVideoElement.onpause = updatePlayIcon;
-                    
                     playBtn.onclick = e => { e.stopPropagation(); if (activeVideoElement.paused) activeVideoElement.play(); else activeVideoElement.pause(); };
-                    
                     updatePlayIcon();
                 }
                 
                 async function main() {
                     const loader = document.getElementById('loading-overlay');
-                    setupMenu();
-                    document.title = storyData.meta.title || 'Choose Your Own Adventure';
+                    const statusEl = document.getElementById('loading-status');
+                    const progressContainer = document.getElementById('loading-progress-container');
+                    const progressBar = document.getElementById('loading-progress-bar');
                     
-                    const savedStateJSON = storageAvailable ? localStorage.getItem(saveKey) : null;
-                    if (savedStateJSON) { 
-                        initializeGameState();
-                        const savedState = JSON.parse(savedStateJSON);
-                        Object.assign(gameState.variables, savedState.variables);
-                        gameState.visited = savedState.visited || {};
-                        gameState.currentSceneId = savedState.currentSceneId;
-                    } else {
-                        initializeGameState();
+                    document.title = storyData.meta.title || 'Choose Your Own Adventure';
+
+                    if (!window.opener) {
+                        statusEl.textContent = "Loading complete.";
+                        if(loader) loader.style.opacity = '0';
+                        setTimeout(() => loader.style.display = 'none', 500);
+                        setupMenu();
+                        const savedStateJSON = storageAvailable ? localStorage.getItem(saveKey) : null;
+                        if (savedStateJSON) { 
+                            initializeGameState();
+                            const savedState = JSON.parse(savedStateJSON);
+                            Object.assign(gameState.variables, savedState.variables);
+                            gameState.visited = savedState.visited || {};
+                            gameState.currentSceneId = savedState.currentSceneId;
+                        } else { initializeGameState(); }
+                        setupGlobalStyles();
+                        renderScene(gameState.currentSceneId);
+                        return;
                     }
                     
-                    const startScene = storyData.scenes[gameState.currentSceneId];
-                    const initialAssets = [startScene?.image, startScene?.ambienceSound, storyData.meta.styles['--music-path'], storyData.meta.styles['--screen-bg-image']].filter(Boolean);
+                    progressContainer.style.display = 'block';
+                    statusEl.textContent = 'Collecting assets...';
+
+                    const assetPaths = new Set();
+                    Object.values(storyData.scenes).forEach(scene => {
+                        if (scene.image) assetPaths.add(scene.image);
+                        if (scene.ambienceSound) assetPaths.add(scene.ambienceSound);
+                    });
+                    if (storyData.meta.styles['--music-path']) assetPaths.add(storyData.meta.styles['--music-path']);
+                    if (storyData.meta.styles['--screen-bg-image']) assetPaths.add(storyData.meta.styles['--screen-bg-image']);
+
+                    const pathsToLoad = Array.from(assetPaths);
+                    const totalAssets = pathsToLoad.length;
+                    let loadedCount = 0;
+                    const assetDataUrls = {};
+
+                    const requestAsset = (path) => {
+                        return new Promise((resolve, reject) => {
+                            const requestId = Math.random().toString(36).substring(2);
+                            
+                            const handler = (event) => {
+                                if (event.data.type === 'assetResponse' && event.data.requestId === requestId) {
+                                    window.removeEventListener('message', handler);
+                                    if(event.data.success) {
+                                        resolve(event.data.dataUrl);
+                                    } else {
+                                        console.warn(\`Failed to load asset: \${path}\`);
+                                        resolve(null); // Resolve with null on failure to not break Promise.all
+                                    }
+                                }
+                            };
+                            
+                            window.addEventListener('message', handler);
+                            window.opener.postMessage({ type: 'requestAsset', path: path, requestId: requestId }, '*');
+                        });
+                    };
+
+                    for (const path of pathsToLoad) {
+                        statusEl.textContent = \`Loading asset (\${loadedCount + 1}/\${totalAssets})...\`;
+                        const dataUrl = await requestAsset(path);
+                        if (dataUrl) assetDataUrls[path] = dataUrl;
+                        loadedCount++;
+                        progressBar.style.width = \`\${(loadedCount / totalAssets) * 100}%\`;
+                    }
                     
-                    try {
-						const imageAssets = initialAssets.filter(url => !isVideo(url));
-						await Promise.all(imageAssets.map(url => new Promise((res) => { 
-							const img = new Image(); 
-							img.onload = res; 
-							img.onerror = res; 
-							img.src = url; 
-						})));
-					} catch (e) { 
-						console.warn('An error occurred during asset preloading.', e); 
-					}
-                    finally { if(loader) loader.style.display = 'none'; setupGlobalStyles(); renderScene(gameState.currentSceneId); }
+                    statusEl.textContent = 'Finalizing...';
+                    Object.values(storyData.scenes).forEach(scene => {
+                        if (scene.image && assetDataUrls[scene.image]) scene.image = assetDataUrls[scene.image];
+                        if (scene.ambienceSound && assetDataUrls[scene.ambienceSound]) scene.ambienceSound = assetDataUrls[scene.ambienceSound];
+                    });
+                    if (storyData.meta.styles['--music-path'] && assetDataUrls[storyData.meta.styles['--music-path']]) storyData.meta.styles['--music-path'] = assetDataUrls[storyData.meta.styles['--music-path']];
+                    if (storyData.meta.styles['--screen-bg-image'] && assetDataUrls[storyData.meta.styles['--screen-bg-image']]) storyData.meta.styles['--screen-bg-image'] = assetDataUrls[storyData.meta.styles['--screen-bg-image']];
+                    
+                    if(loader) loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 500);
+
+                    setupMenu();
+                    initializeGameState();
+                    setupGlobalStyles();
+                    renderScene(gameState.currentSceneId);
                 }
                 main();
             });
         <\/script>`;
 
             return document.getElementById('player-template').innerHTML
-                .replace(/__STORY_TITLE__/g, storyData.meta.title || 'My Story')
-                .replace(/__LAYOUT_CLASS__/g, storyData.meta.layout)
+                .replace(/__STORY_TITLE__/g, App.state.storyData.meta.title || 'My Story')
+                .replace(/__LAYOUT_CLASS__/g, App.state.storyData.meta.layout)
                 .replace('__GOOGLE_FONT_LINK__', googleFontLink)
-                .replace('__CUSTOM_STYLES__', App.styles.generateCSS(storyData.meta.styles))
+                .replace('__CUSTOM_STYLES__', App.styles.generateCSS())
                 .replace('__PLAYER_SCRIPT__', playerScript);
         },
         
         async exportProjectZip() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to export."); return; }
-            App.editor.saveCurrentScene(); // Ensure latest changes are included
+            App.editor.saveCurrentScene();
             App.ui.showNotification("Collecting used assets and preparing export...");
 
             const zip = new window.JSZip();
             
+            // For export, we use the original file paths, not data URLs, as the files will be in the zip.
             const playerHtml = await App.io.getFormattedPlayerHTML(true);
             zip.file("index.html", playerHtml);
 
@@ -2693,23 +2732,62 @@ const App = {
         async previewProject() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to preview."); return; }
             try {
+                // Generate HTML with raw story data (no data URLs)
                 const playerHtml = await App.io.getFormattedPlayerHTML(false);
-                const blob = new Blob([playerHtml], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-            } catch (err) { console.error("Preview failed:", err); App.ui.showNotification("Could not generate preview. Check console for details."); }
+                const previewWindow = window.open('', '_blank');
+                if (!previewWindow) {
+                    App.ui.showNotification("Popup blocked. Please allow popups for this site to use the preview feature.");
+                    return;
+                }
+                previewWindow.document.write(playerHtml);
+                previewWindow.document.close();
+
+                // Define the message handler for asset requests from the preview window
+                const assetRequestHandler = async (event) => {
+                    if (event.source !== previewWindow || !event.data || event.data.type !== 'requestAsset') return;
+                    
+                    const { path, requestId } = event.data;
+                    const dataUrl = await App.io.getAssetDataUrl(path);
+                    
+                    previewWindow.postMessage({
+                        type: 'assetResponse',
+                        requestId: requestId,
+                        success: !!dataUrl,
+                        dataUrl: dataUrl
+                    }, '*');
+                };
+
+                window.addEventListener('message', assetRequestHandler);
+
+                // Clean up the listener when the preview window is closed
+                const checkWindowClosed = setInterval(() => {
+                    if (previewWindow.closed) {
+                        clearInterval(checkWindowClosed);
+                        window.removeEventListener('message', assetRequestHandler);
+                    }
+                }, 500);
+
+            } catch (err) { 
+                console.error("Preview failed:", err); 
+                App.ui.showNotification("Could not generate preview. Check console for details."); 
+            }
         },
         
         async getAssetDataUrl(path) {
-            const file = await App.io.getAssetFile(path);
-            if (!file) return null;
-            
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
+            try {
+                const file = await App.io.getAssetFile(path);
+                if (!file) return null;
+                
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            } catch (error) {
+                console.error(`Failed to get Data URL for path: ${path}`, error);
+                return null;
+            }
         },
 
         async getAssetFile(path) {
@@ -3608,16 +3686,14 @@ const App = {
             }
         },
         typeWriter(text, choices) {
-			// FIX: Pre-calculate panel height to prevent resizing
 			const { 'player-text': textEl, 'player-choices': choicesEl, 'player-content-container': contentContainer, 'player-container': playerContainer } = App.elements;
 
 			if (App.state.player.typewriter.intervalId) clearInterval(App.state.player.typewriter.intervalId);
 			if (App.state.player.typewriter.skipListener) playerContainer.removeEventListener('click', App.state.player.typewriter.skipListener);
 
-			// Pre-calculation logic
 			const originalMinHeight = contentContainer.style.minHeight;
-			contentContainer.style.minHeight = ''; // Clear previous min-height
-			textEl.innerHTML = App.markdown.parse(text); // Temporarily set full text
+			contentContainer.style.minHeight = ''; 
+			textEl.innerHTML = App.markdown.parse(text);
 			choicesEl.innerHTML = '';
 			choices.forEach(choice => {
 				const button = document.createElement('button');
@@ -3625,10 +3701,9 @@ const App = {
 				button.textContent = choice.action.text;
 				choicesEl.appendChild(button);
 			});
-			const finalHeight = contentContainer.offsetHeight; // Measure the height with full content
-			contentContainer.style.minHeight = `${finalHeight}px`; // Lock the height
+			const finalHeight = contentContainer.offsetHeight;
+			contentContainer.style.minHeight = `${finalHeight}px`;
 
-			// Reset for typing
 			choicesEl.innerHTML = '';
 			textEl.innerHTML = ''; 
 			let i = 0;
@@ -3651,7 +3726,7 @@ const App = {
 				playerContainer.removeEventListener('click', App.state.player.typewriter.skipListener);
 				textEl.innerHTML = App.markdown.parse(text);
 				showChoices();
-				contentContainer.style.minHeight = originalMinHeight; // Restore original min-height behavior
+				contentContainer.style.minHeight = originalMinHeight;
 				App.state.player.typewriter.intervalId = null;
 				App.state.player.typewriter.skipListener = null;
 			};
@@ -3683,7 +3758,6 @@ const App = {
             
             App.styles.applyToContainer(playerContainer);
 
-            // This is the key change: apply the layout class to the inner container as well for Play mode
             playerInnerContainer.className = App.state.storyData.meta.layout;
 
             const [sceneMediaUrl, musicUrl] = await Promise.all([
@@ -3702,30 +3776,37 @@ const App = {
             const isMediaVideo = App.assets.isVideo(scene.image);
             const isPanelLayout = App.state.storyData.meta.layout.startsWith('layout-panel');
             
-            playerImageContainer.style.display = 'none';
-            imageEl.style.display = 'none';
-            [videoBg, videoFg].forEach(v => {
-                v.style.display = 'none';
-                if (!v.paused) { v.pause(); v.removeAttribute('src'); v.load(); }
-            });
-            App.state.player.activeVideoElement = null;
+			playerImageContainer.style.display = 'none';
+			imageEl.style.display = 'none';
+			[videoBg, videoFg].forEach(v => {
+				v.style.display = 'none';
+				if (!v.paused) { v.pause(); v.removeAttribute('src'); v.load(); }
+			});
+			playerContainer.style.backgroundImage = 'var(--screen-bg-image)';
+			App.state.player.activeVideoElement = null;
 
-            if (isMediaVideo && sceneMediaUrl) {
-                App.state.player.activeVideoElement = isPanelLayout ? videoBg : videoFg;
-                if (!isPanelLayout) playerImageContainer.style.display = 'block';
-                
-                App.state.player.activeVideoElement.src = sceneMediaUrl;
-                App.state.player.activeVideoElement.loop = scene.videoLoop ?? true;
-                App.state.player.activeVideoElement.muted = scene.videoMuted ?? true;
-				App.state.player.activeVideoElement.volume = parseFloat(App.state.storyData.meta.styles['--video-volume'] || 1.0);
-                App.state.player.activeVideoElement.style.display = 'block';
-                App.state.player.activeVideoElement.play().catch(e => console.warn("In-editor player video playback failed.", e));
-            } else if (sceneMediaUrl && !isPanelLayout) { // It's an image for a non-panel layout
-                imageEl.src = sceneMediaUrl;
-                imageEl.style.display = 'block';
-                playerImageContainer.style.display = 'block';
-            }
-            
+			if (sceneMediaUrl) {
+				if (isMediaVideo) {
+					App.state.player.activeVideoElement = isPanelLayout ? videoBg : videoFg;
+					if (!isPanelLayout) playerImageContainer.style.display = 'block';
+					
+					App.state.player.activeVideoElement.src = sceneMediaUrl;
+					App.state.player.activeVideoElement.loop = scene.videoLoop ?? true;
+					App.state.player.activeVideoElement.muted = scene.videoMuted ?? true;
+					App.state.player.activeVideoElement.volume = parseFloat(App.state.storyData.meta.styles['--video-volume'] || 1.0);
+					App.state.player.activeVideoElement.style.display = 'block';
+					App.state.player.activeVideoElement.play().catch(e => console.warn("In-editor player video playback failed.", e));
+				} else {
+					if (isPanelLayout) {
+						playerContainer.style.backgroundImage = `url('${sceneMediaUrl}')`;
+					} else {
+						imageEl.src = sceneMediaUrl;
+						imageEl.style.display = 'block';
+						playerImageContainer.style.display = 'block';
+					}
+				}
+			}
+
             let visibleChoices = [];
             for(const choice of (scene.choices || [])) {			
                 let conditionMet = true;
@@ -3733,7 +3814,7 @@ const App = {
                     const varName = choice.condition.variable;
                     if(varName.startsWith('visited_scene_')) {
                         conditionMet = !!this.gameState.visited[varName.substring(14)] === choice.condition.value;
-                    } else { // Check for regular variable condition
+                    } else {
                         conditionMet = this.gameState.variables[varName.substring(4)] === choice.condition.value;
                     }
                 }
@@ -3745,7 +3826,7 @@ const App = {
                             continue; 
                         }
                         this.processChoice(choice);
-                        return; // Stop rendering this scene
+                        return;
                     }
                     if (choice.action.text) {
                         visibleChoices.push(choice);

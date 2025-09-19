@@ -110,6 +110,9 @@
 		}
 		.icon-start { color: var(--success-color); }
 		.icon-image { color: #8ab4f8; }
+		.icon-video { color: #8ab4f8; }
+		.icon-video-loop { color: #8ab4f8; }
+		.icon-audio-loop { color: #fdd663; }
 		.icon-sound { color: #fdd663; }
 		.icon-deadend { color: var(--danger-color); stroke-width: 1.5; }
 		.icon-orphan { color: #fff; }
@@ -255,7 +258,7 @@
 			gap: 20px; padding: var(--padding); border-radius: 12px; box-sizing: border-box; display: flex;
 		}
 
-		#scene-editor-preview .choice-btn { padding: 15px 20px; pointer-events: none; background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid var(--btn-color); text-align: left; border-radius: 6px; font-size: 1em; font-family: var(--font-family); }
+		#scene-editor-preview .choice-btn { padding: 15px 20px; pointer-events: none; background-color: var(--btn-color); color: var(--btn-text-color); border: var(--container-outline-width, 0) solid var(--container-outline-color, transparent); text-align: left; border-radius: 6px; font-size: 1em; font-family: var(--font-family); }
 		#scene-editor-preview #preview-player-image,
 		#scene-editor-preview #preview-player-video-fg { max-width: 100%; max-height: 50vh; display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
 		#scene-editor-preview #preview-player-video { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; }
@@ -418,7 +421,7 @@
 		#player-text { white-space: pre-wrap; margin-bottom: 20px; line-height: 1.6; }
 		#player-text a { color: #8ab4f8; }
 		#player-choices { display: flex; flex-direction: column; gap: 12px; }
-		#player-choices .choice-btn { width: 100%; text-align: left; padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; transition: background-color .2s, transform .1s, border-color .2s; background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid transparent; font-family: var(--font-family); }
+		#player-choices .choice-btn { width: 100%; text-align: left; padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; transition: background-color .2s, transform .1s, border-color .2s; background-color: var(--btn-color); color: var(--btn-text-color); border: var(--container-outline-width, 0) solid var(--container-outline-color, transparent); font-family: var(--font-family); }
 		#player-choices .choice-btn:hover { transform: translateY(-2px); background-color: var(--btn-hover-color); }
 		#player-choices .choice-btn:active { transform: translateY(1px); }
 		@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -944,7 +947,7 @@
             #scene-text { white-space: pre-wrap; margin-bottom: 20px; line-height: 1.6; }
             #scene-text a { color: #8ab4f8; }
             #choices-container { display: flex; flex-direction: column; gap: 12px; }
-            .choice-btn { padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; text-align: left; transition: background-color .2s,transform .1s, border-color .2s; }
+            .choice-btn { padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; text-align: left; transition: background-color .2s,transform .1s, border-color .2s; border: var(--container-outline-width, 0) solid var(--container-outline-color, transparent); }
             .choice-btn:hover { transform: translateY(-2px); }
             .choice-btn:active { transform: translateY(1px); }
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -2842,8 +2845,9 @@ const App = {
             start: `<svg class="scene-card-icon icon-start" title="Start Scene" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>`,
             image: `<svg class="scene-card-icon icon-image" title="Has Image" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>`,
 			video: `<svg class="scene-card-icon icon-video" title="Has Video" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm5.5 3v6l5-3-5-3z"></path></svg>`,
+			videoLoop: `<svg class="scene-card-icon icon-video-loop" title="Video Loops" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>`,
             audio: `<svg class="scene-card-icon icon-sound" title="Has Audio" viewBox="0 0 16 16"><path d="M9.707,2.293a1,1,0,0,0-1.414,0L4.6,6H2.5A1.5,1.5,0,0,0,1,7.5v1A1.5,1.5,0,0,0,2.5,10H4.6l3.69,3.707a1,1,0,0,0,1.414,0V2.293Z"/></svg>`,
-			loop: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>`,
+			audioLoop: `<svg class="scene-card-icon icon-audio-loop" title="Audio Loops" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>`,
             orphan: `<svg width="16" height="16" viewBox="0 0 16 16" class="scene-card-icon icon-orphan" stroke-width="1.5"><rect x="7" y="2" width="2" height="12"/><rect x="3" y="5" width="10" height="2"/></svg>`,
 			end: `<svg class="scene-card-icon icon-deadend" viewBox="0 0 16 16" stroke-width="2"><circle cx="8" cy="8" r="7.5" fill="red" stroke="white" stroke-width="1" /><rect x="3" y="6.5" width="10" height="3" fill="white" /></svg>`,
             condition: `<svg class="scene-card-icon icon-condition" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.33 8L12.67 5.33M7.33 8L12.67 10.67M2 8h5.33"/><circle cx="2" cy="8" r="1.33"/><circle cx="12.67" cy="5.33" r="1.33"/><circle cx="12.67" cy="10.67" r="1.33"/></svg>`
@@ -2866,18 +2870,21 @@ const App = {
 				menu.style.top = `${e.pageY}px`;
 			};
 
-            const isDeadEnd = scene.choices.length === 0;
+            const choicesToSceneCount = scene.choices.filter(c => c.action && c.action.target).length;
+            const isDeadEnd = choicesToSceneCount === 0;
             const hasConditions = scene.choices.some(c => c.condition);
             const isVideo = App.assets.isVideo(scene.image);
 
             let iconsHTML = `
                 ${scene.id === App.state.storyData.meta.startSceneId ? this.ICONS.start : ''}
                 ${scene.image ? (isVideo ? this.ICONS.video : this.ICONS.image) : ''}
+                ${scene.image && isVideo && (scene.videoLoop ?? true) ? this.ICONS.videoLoop : ''}
                 ${scene.ambienceSound ? this.ICONS.audio : ''}
+                ${scene.ambienceSound && (scene.ambienceLoop ?? true) ? this.ICONS.audioLoop : ''}
                 ${isDeadEnd ? this.ICONS.end : ''}
                 ${hasConditions ? this.ICONS.condition : ''}
                 ${App.state.orphanSceneIds.has(scene.id) ? this.ICONS.orphan : ''}
-                ${scene.choices.length > 0 ? `<span class="choice-count-icon">${scene.choices.length}</span>` : ''}
+                ${choicesToSceneCount > 0 ? `<span class="choice-count-icon">${choicesToSceneCount}</span>` : ''}
             `;
 
             card.innerHTML = `
@@ -4076,7 +4083,7 @@ const App = {
 				rootVars += `    --container-outline-width: 0;\n`;
 			}
 
-			return `:root {\n${rootVars}} body { background-image: var(--screen-bg-image); background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); } #game-container { font-size: var(--font-size); background-color: var(--container-bg-color); } .choice-btn { font-family: var(--font-family); background-color: var(--btn-color); color: var(--btn-text-color); border: 1px solid transparent; } .choice-btn:hover { background-color: var(--btn-hover-color); }`;
+			return `:root {\n${rootVars}} body { background-image: var(--screen-bg-image); background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); } #game-container { font-size: var(--font-size); background-color: var(--container-bg-color); } .choice-btn { font-family: var(--font-family); background-color: var(--btn-color); color: var(--btn-text-color); border: var(--container-outline-width, 0) solid var(--container-outline-color, transparent); } .choice-btn:hover { background-color: var(--btn-hover-color); }`;
 		},
         getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--container-effect': 'shadow', '--container-outline-color': '#FFFFFF', '--music-path': '', '--music-volume': '0.4', '--ambience-volume': '0.4', '--video-volume': '1.0', '--typewriter-effect': 'on' }; }
     },

@@ -60,7 +60,30 @@
 		#player-container.layout-panel-right {
 			justify-content: flex-end;
 		}
+		
+		/* Dark Scrollbar for Inner Content Panes */
+		#player-inner-container::-webkit-scrollbar,
+		#scene-editor-preview #preview-player-inner-container::-webkit-scrollbar {
+			width: 12px;
+		}
 
+		#player-inner-container::-webkit-scrollbar-track,
+		#scene-editor-preview #preview-player-inner-container::-webkit-scrollbar-track {
+			background: #1e1e1e;
+			border-radius: 8px;
+		}
+
+		#player-inner-container::-webkit-scrollbar-thumb,
+		#scene-editor-preview #preview-player-inner-container::-webkit-scrollbar-thumb {
+			background-color: #444;
+			border-radius: 6px;
+			border: 2px solid #1e1e1e;
+		}
+
+		#player-inner-container::-webkit-scrollbar-thumb:hover,
+		#scene-editor-preview #preview-player-inner-container::-webkit-scrollbar-thumb:hover {
+			background-color: #555;
+		}
 
 		h1, h2, h3 { border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; margin-top: 0; }
 		#variable-manager-modal h3 { border-bottom: none !important; }
@@ -256,6 +279,8 @@
 			border: var(--container-outline-width, 0) solid var(--container-outline-color, transparent);
 			background-color: var(--container-bg-color);
 			gap: 20px; padding: var(--padding); border-radius: 12px; box-sizing: border-box; display: flex;
+			max-height: 95%;
+			overflow-y: auto;
 		}
 
 		#scene-editor-preview .choice-btn { padding: 15px 20px; pointer-events: none; background-color: var(--btn-color); color: var(--btn-text-color); border: var(--container-outline-width, 0) solid var(--container-outline-color, transparent); text-align: left; border-radius: 6px; font-size: 1em; font-family: var(--font-family); }
@@ -356,6 +381,8 @@
 			margin: 20px;
 			position: relative; 
 			z-index: 1;
+			max-height: 90vh;
+			overflow-y: auto;
 		}
 		/* --- CORRECTED ---: Changed selector for in-app player panel layout for consistency */
 		#player-inner-container.layout-panel-left,
@@ -532,7 +559,7 @@
         <button id="toggle-tree-view-btn" class="active" title="Tree View">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M10.23,6.86,8.7,8.4a.5.5,0,0,1-.71,0L6.44,6.86a.5.5,0,0,1,0-.71l.71-.71a.5.5,0,0,1,.71,0l.71.71a.5.5,0,0,0,.71,0l.71-.71a.5.5,0,0,1,.71,0l.71.71A.5.5,0,0,1,10.23,6.86Z"/>
-                <path d="M15,11.5A1.5 1.5,0,0,1,13.5,13H11V9.5a.5.5,0,0,0-.5-.5H8.71a.5.5,0,0,1,0-1H11.5a.5.5,0,0,0,.5-.5V6h1.5a.5.5,0,0,0,0-1H11.5A1.5 1.5,0,0,0,10,6.5v1a1.5 1.5,0,0,0-1.5,1.5H5.5A1.5 1.5,0,0,0,4,7.5v-1A1.5 1.5,0,0,0,2.5,5H1a.5.5,0,0,0,0-1H2.5a.5.5,0,0,1,.5.5V8H5.29a.5.5,0,0,1,0,1H3a.5.5,0,0,0-.5,.5V13H1.5A1.5 1.5,0,0,1,0,11.5v-1A1.5 1.5,0,0,1,1.5,9h.05a.5.5,0,0,1,0,1H1.5a.5.5,0,0,0-.5,.5v1a.5.5,0,0,0,.5,.5H3v.5a.5.5,0,0,0,.5,.5H11a.5.5,0,0,0,.5-.5V13h1.5a.5.5,0,0,0,.5-.5v-1a.5.5,0,0,0-.5-.5h-.05a.5.5,0,0,1,0-1H14.5A1.5 1.5,0,0,1,16,10.5Z"/>
+                <path d="M15,11.5A1.5 1.5,0,0,1,13.5,13H11V9.5a.5.5,0,0,0-.5-.5H8.71a.5.5,0,0,1,0-1H11.5a.5.5,0,0,0,.5-.5V6h1.5a.5.5,0,0,0,0-1H11.5A1.5 1.5,0,0,0,10,6.5v1a1.5 1.5,0,0,0-1.5,1.5H5.5A1.5 1.5,0,0,0,4,7.5v-1A1.5 1.5,0,0,0,2.5,5H1a.5.5,0,0,0,0-1H2.5a.5.5,0,0,1,.5,.5V8H5.29a.5.5,0,0,1,0,1H3a.5.5,0,0,0-.5,.5V13H1.5A1.5 1.5,0,0,1,0,11.5v-1A1.5 1.5,0,0,1,1.5,9h.05a.5.5,0,0,1,0,1H1.5a.5.5,0,0,0-.5,.5v1a.5.5,0,0,0,.5,.5H3v.5a.5.5,0,0,0,.5,.5H11a.5.5,0,0,0,.5-.5V13h1.5a.5.5,0,0,0,.5-.5v-1a.5.5,0,0,0-.5-.5h-.05a.5.5,0,0,1,0-1H14.5A1.5 1.5,0,0,1,16,10.5Z"/>
             </svg>
             Tree
         </button>
@@ -932,6 +959,23 @@
                 position: relative; 
                 padding: var(--padding);
                 z-index: 1;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+			#game-container::-webkit-scrollbar {
+                width: 12px;
+            }
+            #game-container::-webkit-scrollbar-track {
+                background: #1e1e1e;
+                border-radius: 8px;
+            }
+            #game-container::-webkit-scrollbar-thumb {
+                background-color: #444;
+                border-radius: 6px;
+                border: 2px solid #1e1e1e;
+            }
+            #game-container::-webkit-scrollbar-thumb:hover {
+                background-color: #555;
             }
             #image-container, #content-container {
                 position: relative;
@@ -1659,12 +1703,15 @@ const App = {
                 return;
             }
 
-            // Always save before switching
-            if (App.state.currentSceneId) {
+            const isPlayerActive = App.elements['player-container'].style.display === 'flex';
+
+            // BUG FIX: Only save the editor's state if the player is NOT active.
+            // When the player is active, the editor's content is stale and must not be saved.
+            if (!isPlayerActive && App.state.currentSceneId) {
                 App.editor.saveCurrentScene();
             }
 
-            // Stop any media from the previous scene
+            // Stop any media from the previous scene's preview
             App.elements['ambience-player'].pause();
             const previewVideo = App.elements['preview-player-video'];
             if(previewVideo && !previewVideo.paused) {
@@ -1673,10 +1720,13 @@ const App = {
                 previewVideo.load();
             }
 
-            if (App.elements['player-container'].style.display === 'flex') {
+            // If the player is active, just render the new scene there and stop.
+            if (isPlayerActive) {
                 await App.player.renderScene(sceneId);
                 return;
             }
+            
+            // --- The rest of this function only runs for editor-only changes ---
             
             const needsSelectionChange = App.state.currentSceneId !== sceneId;
             

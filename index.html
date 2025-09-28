@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -173,6 +174,9 @@
 		.scene-card { display: flex; gap: 12px; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.2s, background-color 0.2s; }
 		.scene-card:hover { background-color: #2a2a2a; border-color: #555; }
 		.scene-card.active { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
+		.scene-card.has-broken-link { background-color: #4d2529 !important; border-color: var(--danger-color) !important; }
+		.scene-card.has-broken-link:hover { background-color: #6b353c !important; }
+		.scene-card.has-broken-link .scene-card-id, .scene-card.has-broken-link .scene-card-text { color: #f5c5c5 !important; }
 		.scene-card-thumbnail { width: 96px; height: 54px; flex-shrink: 0; background-color: #111; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-size: 0.7em; color: var(--secondary-color); overflow: hidden; border: 1px solid #444; }
 		.scene-card.active .scene-card-thumbnail { border-color: rgba(255,255,255,0.5); }
 		.scene-card-thumbnail img, .scene-card-thumbnail canvas { width: 100%; height: 100%; object-fit: cover; }
@@ -456,7 +460,7 @@
 
 		#stop-play-x { position: absolute; top: 10px; right: 10px; background: var(--danger-color); color: white; border: none; font-size: 1.5em; padding: 5px 10px; cursor: pointer; z-index: 10; }
 		#restart-play { position: absolute; top: 10px; right: 60px; z-index: 10; }
-		#image-preview { width: 150px; height: 150px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--secondary-color); text-align: center; flex-shrink: 0; position: relative; }
+		#image-preview { width: 150px; height: 150px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--text-secondary); text-align: center; flex-shrink: 0; position: relative; }
 		#image-preview img, #image-preview canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
 		#fullscreen-viewer { flex-direction: column; }
 		#fullscreen-image { max-width: 90vw; max-height: 80vh; object-fit: contain; }
@@ -1224,6 +1228,7 @@ const App = {
         currentNavView: 'tree', // 'tree' or 'list'
         navViewsDirty: true,
         missingAssetWarnings: new Set(),
+        brokenAssetLinks: new Map(),
         previewLoadId: 0,
         thumbnailLoadId: 0,
         player: {
@@ -1432,7 +1437,7 @@ const App = {
         document.getElementById('restart-play')?.addEventListener('click', () => App.player.play(App.state.storyData.meta.startSceneId, true));
         
         document.getElementById('export-project-btn').addEventListener('click', () => App.io.exportProjectZip());
-        document.getElementById('preview-btn').addEventListener('click', () => { App.editor.saveCurrentScene(); App.io.previewProject(); });
+        document.getElementById('preview-btn').addEventListener('click', () => App.io.previewProject());
         document.getElementById('export-data-btn').addEventListener('click', () => App.modals.show('export-data-modal'));
         (function ensureValidateButton(){
             const menu = document.querySelector('#project-menu-modal .btn-group');
@@ -1649,88 +1654,79 @@ const App = {
         }
     },
 
-    ui: {
-        cursor: {
-            wait() { document.body.style.cursor = 'wait'; },
-            default() { document.body.style.cursor = 'default'; }
-        },
-        invalidateNavViews() {
-            if (!App.state.navViewsDirty) {
-                App.state.navViewsDirty = true;
-            }
-        },
-        async setViewMode(mode) {
-            if (App.state.navViewsDirty) {
-                this.cursor.wait();
-                App.debug.log('UI view is dirty. Re-rendering navigation views...', 'INFO');
-                try {
-                    const filterTerm = document.getElementById('scene-search-input').value;
-                    await App.tree.render(filterTerm);
-                    await App.sceneList.render(filterTerm);
-                    App.state.navViewsDirty = false;
-                    App.debug.log('Navigation views re-rendered successfully.', 'SUCCESS');
-                } finally {
-                    this.cursor.default();
-                }
-            }
+	ui: {
+		cursor: {
+			wait() { document.body.style.cursor = 'wait'; },
+			default() { document.body.style.cursor = 'default'; }
+		},
+		invalidateNavViews() {
+			if (!App.state.navViewsDirty) {
+				App.state.navViewsDirty = true;
+			}
+		},
+		async setViewMode(mode) {
+			if (App.state.navViewsDirty) {
+				this.cursor.wait();
+				App.debug.log('UI view is dirty. Re-rendering navigation views...', 'INFO');
+				try {
+					await App.io.checkAllProjectAssets(); // Check for broken links before rendering
+					const filterTerm = document.getElementById('scene-search-input').value;
+					await App.tree.render(filterTerm);
+					await App.sceneList.render(filterTerm);
+					App.state.navViewsDirty = false;
+					App.debug.log('Navigation views re-rendered successfully.', 'SUCCESS');
+				} finally {
+					this.cursor.default();
+				}
+			}
 
-            App.state.currentNavView = mode;
-            localStorage.setItem('cyoa-nav-view', mode);
+			App.state.currentNavView = mode;
+			localStorage.setItem('cyoa-nav-view', mode);
 
-            const isTreeView = mode === 'tree';
-            App.elements['tree-view'].style.display = isTreeView ? 'block' : 'none';
-            App.elements['scene-list-view-wrapper'].style.display = isTreeView ? 'none' : 'flex';
-            
-            App.elements['toggle-tree-view-btn'].classList.toggle('active', isTreeView);
-            App.elements['toggle-scene-view-btn'].classList.toggle('active', !isTreeView);
-        },
-        async renderCurrentView() {
-            if (!App.state.projectDirectoryHandle) {
-                this.displayWelcomeMessage();
-                return;
-            }
-            const filterTerm = document.getElementById('scene-search-input').value;
-            if (App.state.currentNavView === 'tree') {
-                await App.tree.render(filterTerm);
-            } else {
-                await App.sceneList.render(filterTerm);
-            }
-        },
+			const isTreeView = mode === 'tree';
+			App.elements['tree-view'].style.display = isTreeView ? 'block' : 'none';
+			App.elements['scene-list-view-wrapper'].style.display = isTreeView ? 'none' : 'flex';
+			
+			App.elements['toggle-tree-view-btn'].classList.toggle('active', isTreeView);
+			App.elements['toggle-scene-view-btn'].classList.toggle('active', !isTreeView);
+		},
+		async renderCurrentView() {
+			if (!App.state.projectDirectoryHandle) {
+				this.displayWelcomeMessage();
+				return;
+			}
+			// This is the fix: Always go through setViewMode to ensure checks are run
+			await this.setViewMode(App.state.currentNavView);
+		},
 
-        async selectScene(sceneId) {
-            if (!sceneId || !App.state.storyData.scenes[sceneId]) {
-                console.error(`Attempted to select non-existent scene: ${sceneId}`);
-                return;
-            }
+		async selectScene(sceneId) {
+			if (!sceneId || !App.state.storyData.scenes[sceneId]) {
+				console.error(`Attempted to select non-existent scene: ${sceneId}`);
+				return;
+			}
 
-            const isPlayerActive = App.elements['player-container'].style.display === 'flex';
+			const isPlayerActive = App.elements['player-container'].style.display === 'flex';
 
-            // BUG FIX: Only save the editor's state if the player is NOT active.
-            // When the player is active, the editor's content is stale and must not be saved.
-            if (!isPlayerActive && App.state.currentSceneId) {
-                App.editor.saveCurrentScene();
-            }
+			if (!isPlayerActive && App.state.currentSceneId) {
+				App.editor.saveCurrentScene();
+			}
 
-            // Stop any media from the previous scene's preview
-            App.elements['ambience-player'].pause();
-            const previewVideo = App.elements['preview-player-video'];
-            if(previewVideo && !previewVideo.paused) {
-                previewVideo.pause();
-                previewVideo.removeAttribute('src'); // Detach source
-                previewVideo.load();
-            }
+			App.elements['ambience-player'].pause();
+			const previewVideo = App.elements['preview-player-video'];
+			if(previewVideo && !previewVideo.paused) {
+				previewVideo.pause();
+				previewVideo.removeAttribute('src');
+				previewVideo.load();
+			}
 
-            // If the player is active, just render the new scene there and stop.
-            if (isPlayerActive) {
-                await App.player.renderScene(sceneId);
-                return;
-            }
-            
-            // --- The rest of this function only runs for editor-only changes ---
-            
-            const needsSelectionChange = App.state.currentSceneId !== sceneId;
-            
-            if (needsSelectionChange) {
+			if (isPlayerActive) {
+				await App.player.renderScene(sceneId);
+				return;
+			}
+			
+			const needsSelectionChange = App.state.currentSceneId !== sceneId;
+			
+			if (needsSelectionChange) {
 				const oldSceneId = App.state.currentSceneId;
 				App.state.currentSceneId = sceneId;
 				
@@ -1753,168 +1749,168 @@ const App = {
 					activeNode.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
 				}
 			});
-        },
+		},
 
-        enableEditor(isEnabled) {
-            App.elements['editor-fieldset'].disabled = !isEnabled;
-            document.getElementById('new-scene-btn').disabled = !isEnabled;
-            document.getElementById('scene-search-input').disabled = !isEnabled;
-            document.getElementById('scene-search-btn').disabled = !isEnabled;
-            App.elements['save-story-btn'].disabled = !isEnabled;
-            document.getElementById('export-project-btn').disabled = !isEnabled;
-            document.getElementById('export-data-btn').disabled = !isEnabled;
-            App.elements['style-editor-btn'].disabled = !isEnabled;
-            document.getElementById('about-editor-btn').disabled = !isEnabled;
-            
-            const batchBtn = App.elements['batch-image-gen-btn'];
-            if (batchBtn) {
-                batchBtn.disabled = !isEnabled;
-                if (isEnabled) {
-                    batchBtn.classList.remove('btn-secondary');
-                    batchBtn.classList.add('btn-purple');
-                } else {
-                    batchBtn.classList.remove('btn-purple');
-                    batchBtn.classList.add('btn-secondary');
-                }
-            }
-        },
-        displayWelcomeMessage() {
-            App.elements['tree-view'].innerHTML = `<li>Welcome! Please create a <strong>New Project</strong> or <strong>Open an existing one</strong> to begin.</li>`;
-            App.elements['scene-list-view'].innerHTML = `<li style="padding:10px;">Welcome! Please create a project to see scenes here.</li>`;
-            document.getElementById('scene-search-input').disabled = true;
-            document.getElementById('scene-search-btn').disabled = true;
-        },
-        updateAiImagePreview(url, message = '') {
-            const preview = App.elements['ai-image-preview'];
-            const icon = preview.querySelector('.thumbnail-fullscreen-icon');
-            preview.innerHTML = '';
-            if (icon) preview.appendChild(icon);
+		enableEditor(isEnabled) {
+			App.elements['editor-fieldset'].disabled = !isEnabled;
+			document.getElementById('new-scene-btn').disabled = !isEnabled;
+			document.getElementById('scene-search-input').disabled = !isEnabled;
+			document.getElementById('scene-search-btn').disabled = !isEnabled;
+			App.elements['save-story-btn'].disabled = !isEnabled;
+			document.getElementById('export-project-btn').disabled = !isEnabled;
+			document.getElementById('export-data-btn').disabled = !isEnabled;
+			App.elements['style-editor-btn'].disabled = !isEnabled;
+			document.getElementById('about-editor-btn').disabled = !isEnabled;
+			
+			const batchBtn = App.elements['batch-image-gen-btn'];
+			if (batchBtn) {
+				batchBtn.disabled = !isEnabled;
+				if (isEnabled) {
+					batchBtn.classList.remove('btn-secondary');
+					batchBtn.classList.add('btn-purple');
+				} else {
+					batchBtn.classList.remove('btn-purple');
+					batchBtn.classList.add('btn-secondary');
+				}
+			}
+		},
+		displayWelcomeMessage() {
+			App.elements['tree-view'].innerHTML = `<li>Welcome! Please create a <strong>New Project</strong> or <strong>Open an existing one</strong> to begin.</li>`;
+			App.elements['scene-list-view'].innerHTML = `<li style="padding:10px;">Welcome! Please create a project to see scenes here.</li>`;
+			document.getElementById('scene-search-input').disabled = true;
+			document.getElementById('scene-search-btn').disabled = true;
+		},
+		updateAiImagePreview(url, message = '') {
+			const preview = App.elements['ai-image-preview'];
+			const icon = preview.querySelector('.thumbnail-fullscreen-icon');
+			preview.innerHTML = '';
+			if (icon) preview.appendChild(icon);
 
-            if (url) {
-                const img = document.createElement('img');
-                img.src = url;
-                preview.appendChild(img);
-            } else {
-                const span = document.createElement('span');
-                span.textContent = message || 'Preview';
-                preview.appendChild(span);
-            }
-        },
-        async updateImageThumbnail(path) {
-            App.state.thumbnailLoadId++;
-            const currentLoadId = App.state.thumbnailLoadId;
+			if (url) {
+				const img = document.createElement('img');
+				img.src = url;
+				preview.appendChild(img);
+			} else {
+				const span = document.createElement('span');
+				span.textContent = message || 'Preview';
+				preview.appendChild(span);
+			}
+		},
+		async updateImageThumbnail(path) {
+			App.state.thumbnailLoadId++;
+			const currentLoadId = App.state.thumbnailLoadId;
 
-            const preview = App.elements['image-preview'];
-            const icon = preview.querySelector('.thumbnail-fullscreen-icon');
-            preview.innerHTML = '';
-            if(icon) preview.appendChild(icon);
-            const defaultSpan = document.createElement('span');
-            defaultSpan.textContent = 'Thumbnail';
-            preview.appendChild(defaultSpan);
+			const preview = App.elements['image-preview'];
+			const icon = preview.querySelector('.thumbnail-fullscreen-icon');
+			preview.innerHTML = '';
+			if(icon) preview.appendChild(icon);
+			const defaultSpan = document.createElement('span');
+			defaultSpan.textContent = 'Thumbnail';
+			preview.appendChild(defaultSpan);
 
-            App.editor.renderPreview(); // Trigger a preview render to handle video/image switching
-            if (!path) return;
-            
-            try {
-                defaultSpan.textContent = 'Loading...';
-                const isVideo = App.assets.isVideo(path);
-                const url = await (isVideo ? App.assets.getVideoThumbnail(path) : App.io.getAssetDataUrl(path));
+			App.editor.renderPreview(); // Trigger a preview render to handle video/image switching
+			if (!path) return;
+			
+			try {
+				defaultSpan.textContent = 'Loading...';
+				const isVideo = App.assets.isVideo(path);
+				const url = await (isVideo ? App.assets.getVideoThumbnail(path) : App.io.getAssetDataUrl(path));
 
-                if (currentLoadId !== App.state.thumbnailLoadId) return; 
+				if (currentLoadId !== App.state.thumbnailLoadId) return; 
 
-                if (url) {
-                    preview.innerHTML = '';
-                    if(icon) preview.appendChild(icon);
-                    const mediaElement = document.createElement(isVideo ? 'canvas' : 'img');
-                    if (isVideo) {
-                        const img = new Image();
-                        img.onload = () => {
-                            mediaElement.width = img.width;
-                            mediaElement.height = img.height;
-                            mediaElement.getContext('2d').drawImage(img, 0, 0);
-                        }
-                        img.src = url;
-                    } else {
-                         mediaElement.src = url;
-                    }
-                    preview.appendChild(mediaElement);
-                } else {
-                     defaultSpan.textContent = 'Invalid Path';
-                }
-            } catch (e) {
-                if (currentLoadId === App.state.thumbnailLoadId) {
-                    defaultSpan.textContent = 'Invalid Path';
-                }
-                console.warn('Thumbnail load failed:', e);
-            }
-        },
-        updateMetaInputs() {
-            const meta = App.state.storyData?.meta;
-            App.elements['story-title'].value = meta?.title || '';
-            App.elements['creator-name'].value = meta?.creatorName || '';
-            App.elements['about-text'].value = meta?.aboutText || '';
-        },
-        showFullscreenImage(src) {
-            document.getElementById('fullscreen-image').src = src;
-            App.modals.show('fullscreen-viewer');
-        },
-        showNotification(message) {
-            App.elements['notification-message'].innerHTML = message;
-            App.modals.show('notification-modal');
-        },
-        showIconThumbnail(data) {
-            const tooltip = document.getElementById('icon-thumbnail-tooltip');
-            tooltip.querySelector('.thumbnail-icon').innerHTML = data.icon;
-            tooltip.querySelector('h4').textContent = data.title;
-            tooltip.querySelector('p').textContent = data.desc;
-            tooltip.style.display = 'flex';
-            requestAnimationFrame(() => { tooltip.style.opacity = '1'; });
-        },
-        showProgress(message) {
-            let progressModal = document.getElementById('progress-modal');
-            if (!progressModal) {
-                progressModal = document.createElement('div');
-                progressModal.id = 'progress-modal';
-                progressModal.className = 'modal';
-                progressModal.style.backgroundColor = 'rgba(0,0,0,0.7)';
-                progressModal.innerHTML = `
-                    <div class="modal-content" style="max-width: 400px; text-align: center;">
-                        <h3 style="margin-top:0;">Loading Project</h3>
-                        <p id="progress-message"></p>
-                    </div>
-                `;
-                document.body.appendChild(progressModal);
-            }
-            progressModal.classList.add('visible');
-            document.getElementById('progress-message').innerHTML = message;
-        },
-        hideProgress() {
-            const progressModal = document.getElementById('progress-modal');
-            if (progressModal) {
-                progressModal.classList.remove('visible');
-            }
-        },
-        iconThumbnails: {
-            'icon-start': {
-                icon: `<svg class="icon-start" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>`,
-                title: 'Start Scene',
-                desc: 'This is the first scene players will see when the story begins.'
-            },
-            'icon-image': {
-                icon: `<svg class="icon-image" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>`,
-                title: 'Has Image/Video',
-                desc: 'This scene has an associated background image or video.'
-            },
-            'icon-sound': {
-                icon: `<svg class="icon-sound" viewBox="0 0 16 16"><path d="M9.707,2.293a1,1,0,0,0-1.414,0L4.6,6H2.5A1.5,1.5,0,0,0,1,7.5v1A1.5,1.5,0,0,0,2.5,10H4.6l3.69,3.707a1,1,0,0,0,1.414,0V2.293Z"/></svg>`,
-                title: 'Has Audio',
-                desc: 'This scene has ambient sound or music that will play.'
-            },
-             'icon-condition': {
-                icon: `<svg class="icon-condition" viewBox="0 0 16 16"><path d="M11 12L19 8 M11 12L19 16 M3 12h8"/><circle cx="3" cy="12" r="2"/><circle cx="19" cy="8" r="2"/><circle cx="19" cy="16" r="2"/></svg>`,
-                title: 'Has Conditions',
-                desc: 'This scene contains one or more choices that depend on a variable or a previously visited scene.'
-            },
+				if (url) {
+					preview.innerHTML = '';
+					if(icon) preview.appendChild(icon);
+					const mediaElement = document.createElement(isVideo ? 'canvas' : 'img');
+					if (isVideo) {
+						const img = new Image();
+						img.onload = () => {
+							mediaElement.width = img.width;
+							mediaElement.height = img.height;
+							mediaElement.getContext('2d').drawImage(img, 0, 0);
+						}
+						img.src = url;
+					} else {
+						 mediaElement.src = url;
+					}
+					preview.appendChild(mediaElement);
+				} else {
+					 defaultSpan.textContent = 'Invalid Path';
+				}
+			} catch (e) {
+				if (currentLoadId === App.state.thumbnailLoadId) {
+					defaultSpan.textContent = 'Invalid Path';
+				}
+				console.warn('Thumbnail load failed:', e);
+			}
+		},
+		updateMetaInputs() {
+			const meta = App.state.storyData?.meta;
+			App.elements['story-title'].value = meta?.title || '';
+			App.elements['creator-name'].value = meta?.creatorName || '';
+			App.elements['about-text'].value = meta?.aboutText || '';
+		},
+		showFullscreenImage(src) {
+			document.getElementById('fullscreen-image').src = src;
+			App.modals.show('fullscreen-viewer');
+		},
+		showNotification(message) {
+			App.elements['notification-message'].innerHTML = message;
+			App.modals.show('notification-modal');
+		},
+		showIconThumbnail(data) {
+			const tooltip = document.getElementById('icon-thumbnail-tooltip');
+			tooltip.querySelector('.thumbnail-icon').innerHTML = data.icon;
+			tooltip.querySelector('h4').textContent = data.title;
+			tooltip.querySelector('p').textContent = data.desc;
+			tooltip.style.display = 'flex';
+			requestAnimationFrame(() => { tooltip.style.opacity = '1'; });
+		},
+		showProgress(message) {
+			let progressModal = document.getElementById('progress-modal');
+			if (!progressModal) {
+				progressModal = document.createElement('div');
+				progressModal.id = 'progress-modal';
+				progressModal.className = 'modal';
+				progressModal.style.backgroundColor = 'rgba(0,0,0,0.7)';
+				progressModal.innerHTML = `
+					<div class="modal-content" style="max-width: 400px; text-align: center;">
+						<h3 style="margin-top:0;">Loading Project</h3>
+						<p id="progress-message"></p>
+					</div>
+				`;
+				document.body.appendChild(progressModal);
+			}
+			progressModal.classList.add('visible');
+			document.getElementById('progress-message').innerHTML = message;
+		},
+		hideProgress() {
+			const progressModal = document.getElementById('progress-modal');
+			if (progressModal) {
+				progressModal.classList.remove('visible');
+			}
+		},
+		iconThumbnails: {
+			'icon-start': {
+				icon: `<svg class="icon-start" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>`,
+				title: 'Start Scene',
+				desc: 'This is the first scene players will see when the story begins.'
+			},
+			'icon-image': {
+				icon: `<svg class="icon-image" viewBox="0 0 16 16"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/></svg>`,
+				title: 'Has Image/Video',
+				desc: 'This scene has an associated background image or video.'
+			},
+			'icon-sound': {
+				icon: `<svg class="icon-sound" viewBox="0 0 16 16"><path d="M9.707,2.293a1,1,0,0,0-1.414,0L4.6,6H2.5A1.5,1.5,0,0,0,1,7.5v1A1.5,1.5,0,0,0,2.5,10H4.6l3.69,3.707a1,1,0,0,0,1.414,0V2.293Z"/></svg>`,
+				title: 'Has Audio',
+				desc: 'This scene has ambient sound or music that will play.'
+			},
+			 'icon-condition': {
+				icon: `<svg class="icon-condition" viewBox="0 0 16 16"><path d="M11 12L19 8 M11 12L19 16 M3 12h8"/><circle cx="3" cy="12" r="2"/><circle cx="19" cy="8" r="2"/><circle cx="19" cy="16" r="2"/></svg>`,
+				title: 'Has Conditions',
+				desc: 'This scene contains one or more choices that depend on a variable or a previously visited scene.'
+			},
 				'icon-deadend': {
 					icon: `<svg class="icon-deadend" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
 							  <!-- Red circle with white border -->
@@ -1934,8 +1930,8 @@ const App = {
 					title: 'Orphan Scene',
 					desc: 'This scene cannot be reached from the main story flow.'
 				}
-        }
-    },
+		}
+	},
 
     io: {
         async verifyPermission(directoryHandle) {
@@ -2257,8 +2253,6 @@ const App = {
                 await dirHandle.getDirectoryHandle('videos', { create: true });
                 App.debug.log('Asset folders checked/created.', 'SUCCESS');
 
-                App.debug.log('--- Project Loaded Successfully ---', 'SUCCESS');
-        
                 let finalNotification = `Project '${App.state.storyData.meta.title}' loaded successfully!`;
                 if (result.warnings.length) {
                     finalNotification += `<br><br><b>Note:</b> The project format was updated. Please save the project to make this change permanent and ensure faster loading in the future.`;
@@ -2739,22 +2733,24 @@ const App = {
         async exportProjectZip() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to export."); return; }
             App.editor.saveCurrentScene();
-            App.ui.showNotification("Collecting used assets and preparing export...");
+        
+            const validationResult = await App.io.checkProjectAssets();
+            if (!validationResult.isValid) {
+                let errorMessage = "<b>Export Cancelled: Missing Files</b><br><br>The following files could not be found in your project folder. Please add them or correct the paths.<br><br>";
+                validationResult.errors.forEach(err => {
+                    errorMessage += `• <b>${err.path}</b><br>  <small>(Used in scenes: ${err.scenes.join(', ')})</small><br>`;
+                });
+                App.ui.showNotification(errorMessage);
+                return;
+            }
 
+            App.ui.showNotification("Collecting used assets and preparing export...");
             const zip = new window.JSZip();
             
-            // For export, we use the original file paths, not data URLs, as the files will be in the zip.
             const playerHtml = await App.io.getFormattedPlayerHTML(true);
             zip.file("index.html", playerHtml);
 
-            const usedAssetPaths = new Set();
-            Object.values(App.state.storyData.scenes).forEach(scene => {
-                if (scene.image) usedAssetPaths.add(scene.image);
-                if (scene.ambienceSound) usedAssetPaths.add(scene.ambienceSound);
-            });
-            const metaStyles = App.state.storyData.meta.styles;
-            if (metaStyles['--screen-bg-image']) usedAssetPaths.add(metaStyles['--screen-bg-image']);
-            if (metaStyles['--music-path']) usedAssetPaths.add(metaStyles['--music-path']);
+            const usedAssetPaths = validationResult.found;
             
             const assetPromises = Array.from(usedAssetPaths).map(async (path) => {
                 try {
@@ -2784,8 +2780,19 @@ const App = {
         
         async previewProject() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to preview."); return; }
+            App.editor.saveCurrentScene();
+
+            const validationResult = await App.io.checkProjectAssets();
+            if (!validationResult.isValid) {
+                let errorMessage = "<b>Preview Cancelled: Missing Files</b><br><br>The following files could not be found in your project folder. Please add them or correct the paths.<br><br>";
+                validationResult.errors.forEach(err => {
+                    errorMessage += `• <b>${err.path}</b><br>  <small>(Used in scenes: ${err.scenes.join(', ')})</small><br>`;
+                });
+                App.ui.showNotification(errorMessage);
+                return;
+            }
+
             try {
-                // Generate HTML with raw story data (no data URLs)
                 const playerHtml = await App.io.getFormattedPlayerHTML(false);
                 const previewWindow = window.open('', '_blank');
                 if (!previewWindow) {
@@ -2795,7 +2802,6 @@ const App = {
                 previewWindow.document.write(playerHtml);
                 previewWindow.document.close();
 
-                // Define the message handler for asset requests from the preview window
                 const assetRequestHandler = async (event) => {
                     if (event.source !== previewWindow || !event.data || event.data.type !== 'requestAsset') return;
                     
@@ -2812,7 +2818,6 @@ const App = {
 
                 window.addEventListener('message', assetRequestHandler);
 
-                // Clean up the listener when the preview window is closed
                 const checkWindowClosed = setInterval(() => {
                     if (previewWindow.closed) {
                         clearInterval(checkWindowClosed);
@@ -2825,7 +2830,69 @@ const App = {
                 App.ui.showNotification("Could not generate preview. Check console for details."); 
             }
         },
-        
+
+		async checkProjectAssets() {
+			const errors = [];
+			const found = new Set();
+			const assetMap = new Map();
+
+			const collectAsset = (path, sceneId) => {
+				if (!path || typeof path !== 'string') return;
+				const trimmedPath = path.trim();
+				if (trimmedPath === '') return;
+
+				if (!assetMap.has(trimmedPath)) {
+					assetMap.set(trimmedPath, new Set());
+				}
+				assetMap.get(trimmedPath).add(sceneId);
+			};
+
+			Object.values(App.state.storyData.scenes).forEach(scene => {
+				collectAsset(scene.image, scene.id);
+				collectAsset(scene.ambienceSound, scene.id);
+			});
+
+			const metaStyles = App.state.storyData.meta.styles;
+			collectAsset(metaStyles['--screen-bg-image'], 'Project Styles');
+			collectAsset(metaStyles['--music-path'], 'Project Styles');
+
+			for (const [path, scenesSet] of assetMap.entries()) {
+				const file = await App.io.getAssetFile(path);
+				if (!file) {
+					errors.push({
+						path: path,
+						scenes: Array.from(scenesSet)
+					});
+				} else {
+					found.add(path);
+				}
+			}
+
+			return {
+				isValid: errors.length === 0,
+				errors: errors,
+				found: found
+			};
+		},
+
+        async checkAllProjectAssets() {
+            App.state.brokenAssetLinks.clear();
+            for (const scene of Object.values(App.state.storyData.scenes)) {
+                const brokenPaths = [];
+                if(scene.image) {
+                    const file = await App.io.getAssetFile(scene.image);
+                    if(!file) brokenPaths.push(scene.image);
+                }
+                if(scene.ambienceSound) {
+                    const file = await App.io.getAssetFile(scene.ambienceSound);
+                    if(!file) brokenPaths.push(scene.ambienceSound);
+                }
+                if(brokenPaths.length > 0) {
+                    App.state.brokenAssetLinks.set(scene.id, brokenPaths);
+                }
+            }
+        },
+
         async getAssetDataUrl(path) {
             try {
                 const file = await App.io.getAssetFile(path);
@@ -2907,6 +2974,14 @@ const App = {
             const card = document.createElement('div');
             card.className = 'scene-card';
             card.dataset.sceneId = scene.id;
+
+            const brokenLinks = App.state.brokenAssetLinks.get(scene.id);
+            if (brokenLinks && brokenLinks.length > 0) {
+                card.classList.add('has-broken-link');
+                const brokenFilesList = brokenLinks.map(p => `• ${p}`).join('\n');
+                card.title = `Broken Asset Links:\n${brokenFilesList}`;
+            }
+
             if (scene.id === App.state.currentSceneId) {
                 card.classList.add('active');
             }

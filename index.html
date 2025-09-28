@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2382,7 +2381,6 @@ const App = {
                 function hideModal(modal) { modal.classList.remove('visible'); setTimeout(() => modal.style.display = 'none', 300); }
                 
                 function initializeGameState() {
-                    gameState.currentSceneId = storyData.meta.startSceneId;
                     gameState.variables = {};
                     (storyData.meta.variables || []).forEach(varName => { gameState.variables[varName] = false; });
                     gameState.visited = {};
@@ -2536,6 +2534,11 @@ const App = {
                 }
 
                 function renderScene(sceneId) {
+                    const isLoopingBackToStart = sceneId === storyData.meta.startSceneId &&
+                                                 Object.keys(gameState.visited).length > 0;
+                    if (isLoopingBackToStart) {
+                        initializeGameState();
+                    }
                     try {
                         gameState.currentSceneId = sceneId;
                         gameState.visited[sceneId] = true;
@@ -2645,13 +2648,16 @@ const App = {
                         setTimeout(() => loader.style.display = 'none', 500);
                         setupMenu();
                         const savedStateJSON = storageAvailable ? localStorage.getItem(saveKey) : null;
-                        if (savedStateJSON) { 
+                        if (savedStateJSON) {
                             initializeGameState();
                             const savedState = JSON.parse(savedStateJSON);
                             Object.assign(gameState.variables, savedState.variables);
                             gameState.visited = savedState.visited || {};
                             gameState.currentSceneId = savedState.currentSceneId;
-                        } else { initializeGameState(); }
+                        } else {
+                            initializeGameState();
+                            gameState.currentSceneId = storyData.meta.startSceneId;
+                        }
                         setupGlobalStyles();
                         renderScene(gameState.currentSceneId);
                         return;
@@ -2715,6 +2721,7 @@ const App = {
 
                     setupMenu();
                     initializeGameState();
+                    gameState.currentSceneId = storyData.meta.startSceneId;
                     setupGlobalStyles();
                     renderScene(gameState.currentSceneId);
                 }
@@ -3796,7 +3803,15 @@ const App = {
 	player: {
         async play(sceneId, fromStart = false) {
             if (!sceneId || !App.state.storyData.scenes[sceneId]) { App.ui.showNotification("Cannot play. Invalid start scene."); return; }
-            if (fromStart || !this.gameState) this.initializeGameState();
+            
+            const isPlayerAlreadyActive = App.elements['player-container'].style.display === 'flex';
+            const isLoopingBackToStart = isPlayerAlreadyActive && sceneId === App.state.storyData.meta.startSceneId;
+
+            if (fromStart || isLoopingBackToStart) {
+                this.initializeGameState();
+            } else if (!this.gameState) {
+                this.initializeGameState();
+            }
             
             App.elements['editor-container'].style.display = 'none';
             App.elements['player-container'].style.display = 'flex';
@@ -3876,6 +3891,11 @@ const App = {
 			}, 30);
 		},
         async renderScene(sceneId) {
+            const isLoopingBackToStart = sceneId === App.state.storyData.meta.startSceneId &&
+                                         Object.keys(this.gameState.visited).length > 0;
+            if (isLoopingBackToStart) {
+                this.initializeGameState();
+            }
             App.state.currentSceneId = sceneId;
             this.gameState.visited[sceneId] = true;
             await App.ui.setViewMode(App.state.currentNavView);

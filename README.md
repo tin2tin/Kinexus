@@ -23,6 +23,8 @@ Library of Kinexus Games: [Itch](https://itch.io/c/6268695/interactive-cinematic
 
 An example project to download, unzip and open with Kinexus: [The_Last_Broadcast](https://github.com/tin2tin/CYOA_Studio/raw/refs/heads/main/example_the_last_broadcast.zip)
 
+Documentation: [Wiki](https://github.com/tin2tin/Kinexus/wiki)
+
 ## Features
 
 *   **Visual Story Creation:**

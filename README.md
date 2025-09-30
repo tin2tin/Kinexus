@@ -2,7 +2,7 @@
   <p>
     <a href="https://tin2tin.github.io/Kinexus/">OPEN KINEXUS</a>,
     <a href="https://github.com/tin2tin/Kinexus/wiki">WIKI</a>,
-    <a href="https://itch.io/c/6268695/interactive-cinematic-fiction-created-in-kinexus">LIBRARY OF GAMES</a>
+    <a href="https://itch.io/c/6268695/interactive-cinematic-fiction-created-in-kinexus">GAMES</a>
     <a href="https://tintwotin.itch.io/cyoa-test?secret=G3dumLNBVgg2migNyde3jOYm8">EXAMPLE</a>
     <a href="https://github.com/tin2tin/CYOA_Studio/raw/refs/heads/main/example_the_last_broadcast.zip">EXAMPLE SOURCE</a>
   </ul>

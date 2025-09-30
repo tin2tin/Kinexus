@@ -1,7 +1,12 @@
-<p align="center">
-    <a href="https://discord.gg/HMYpnPzbTm"><img src="https://img.shields.io/badge/Chat%20with%20us%20on%20Discord--blue?style=social&logo=discord" alt="Chat" title="Chat"></a>
-    <a href="https://twitter.com/tintwotin"><img src="https://img.shields.io/twitter/follow/tintwotin" alt="Follow us on X" title="Follow on X"></a>
-<p>
+<div align="center">
+  <p>
+    <a href="https://tin2tin.github.io/Kinexus/">OPEN KINEXUS</a>,
+    <a href="https://github.com/tin2tin/Kinexus/wiki">WIKI</a>,
+    <a href="https://itch.io/c/6268695/interactive-cinematic-fiction-created-in-kinexus">LIBRARY OF GAMES</a>
+    <a href="https://tintwotin.itch.io/cyoa-test?secret=G3dumLNBVgg2migNyde3jOYm8">EXAMPLE</a>
+    <a href="https://github.com/tin2tin/CYOA_Studio/raw/refs/heads/main/example_the_last_broadcast.zip">EXAMPLE SOURCE</a>
+  </ul>
+</div>
 
 <h1 align="center">KINEXUS</h1>
 
@@ -9,21 +14,9 @@
 
 <img width="1907" height="958" alt="image" src="https://github.com/user-attachments/assets/c9fb771f-5a07-4be4-aa73-8294e3c21879" />
 
-## Try It
-
-<div align="left">
-  <a href="https://tin2tin.github.io/Kinexus/">Open Kinexus</a><br><br>
-</div>
-
-<div align="left">
-  <a href="https://tintwotin.itch.io/cyoa-test?secret=G3dumLNBVgg2migNyde3jOYm8">Try the example game</a><br><br>
-</div>
-
-Library of Kinexus Games: [Itch](https://itch.io/c/6268695/interactive-cinematic-fiction-created-in-kinexus)
-
-An example project to download, unzip and open with Kinexus: [The_Last_Broadcast](https://github.com/tin2tin/CYOA_Studio/raw/refs/heads/main/example_the_last_broadcast.zip)
-
-Documentation: [Wiki](https://github.com/tin2tin/Kinexus/wiki)
+<p align="center">
+    <a href="https://discord.gg/HMYpnPzbTm"><img src="https://img.shields.io/badge/Chat%20with%20us%20on%20Discord--blue?style=social&logo=discord" alt="Chat" title="Chat"></a><a href="https://twitter.com/tintwotin"><img src="https://img.shields.io/twitter/follow/tintwotin" alt="Follow us on X" title="Follow on X"></a>
+<p>
 
 ## Features
 

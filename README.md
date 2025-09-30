@@ -1,3 +1,5 @@
+<h1 align="center">KINEXUS</h1>
+
 <div align="center">
   <p>
     <a href="https://tin2tin.github.io/Kinexus/">OPEN KINEXUS</a>
@@ -7,8 +9,6 @@
     <a href="https://github.com/tin2tin/CYOA_Studio/raw/refs/heads/main/example_the_last_broadcast.zip">EXAMPLE SOURCE</a>
   </ul>
 </div>
-
-<h1 align="center">KINEXUS</h1>
 
 **Kinexus** is a powerful zero-code tool for creating, styling, and exporting choice-based narrative games, interactive fiction, and interactive graphic novels. It runs entirely in your web browser, providing a complete workflow from writing your story to packaging a distributable ZIP file for platforms like [itch.io](https://itch.io/).
 

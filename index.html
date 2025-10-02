@@ -238,7 +238,7 @@
 			stroke: #6c757d; /* Darker grey for loopback */
 			stroke-dasharray: 6, 6;
 		}
-        #node-svg-layer .edge-hitbox { stroke: transparent; stroke-width: 20; fill: none; }
+        #node-svg-layer .edge-hitbox { stroke: transparent; stroke-width: 12; fill: none; }
         #node-svg-layer .edge-group:hover .edge-path { stroke: var(--primary-color); stroke-width: 4; }
 		#node-svg-layer .edge-path.is-filtered-out { stroke: #444; }
 		#node-svg-layer .edge-arrow { fill: #555; transition: fill 0.2s; }
@@ -773,7 +773,6 @@
 		/* Style for the text of the selected connection */
 		#node-svg-layer .edge-group.is-selected-path .edge-label {
 			fill: #fff;
-			font-weight: bold;
 		}
 	</style>
 </head>
@@ -1614,7 +1613,7 @@ const App = {
             'scene-list-view', 'toggle-node-view-btn', 'toggle-scene-view-btn',
             'scene-list-view-wrapper', 'scene-list-sort', 'variable-manager-modal', 'manage-variables-btn',
             'debug-modal', 'debug-log', 'copy-debug-log-btn',
-            'node-editor-view', 'node-canvas', 'node-svg-layer',
+            'node-editor-view', 'node-svg-layer',
             'transform-pane', 'node-element-container', 'edge-group-container', 'temp-edge'
         ];
         ids.forEach(id => this.elements[id] = document.getElementById(id));
@@ -4732,11 +4731,12 @@ const App = {
 			
 			if (e.button === 0) { // Left mouse button
 				if (target.classList.contains('node-handle-bottom')) {
-					// ... (connection logic remains the same) ...
+					e.preventDefault();
+					e.stopPropagation();
+					this.state.isConnecting = true;
+					this.state.connectionStart = { sceneId: nodeEl.dataset.sceneId };
+					App.elements['temp-edge'].setAttribute('visibility', 'visible');
 				} else if (nodeEl && target.closest('.node-header')) {
-					// --- ADD THIS LINE TO SELECT THE NODE ON DRAG START ---
-					App.ui.selectScene(nodeEl.dataset.sceneId);
-					
 					this.state.draggedNode = nodeEl;
 					const scene = App.state.storyData.scenes[nodeEl.dataset.sceneId];
 					const viewRect = App.elements['node-editor-view'].getBoundingClientRect();
@@ -5118,17 +5118,23 @@ const App = {
 				const { source, target, choice, choiceIndex, laneIndex, isLoopback } = conn;
 				const sourceEl = document.querySelector(`.node-editor-node[data-scene-id="${source.id}"]`);
 				const targetEl = document.querySelector(`.node-editor-node[data-scene-id="${target.id}"]`);
-				if (!sourceEl || !targetEl) return;
-
-				const isFiltered = sourceEl.classList.contains('is-filtered-out') || targetEl.classList.contains('is-filtered-out');
-				// Loopbacks don't have lanes, so pass 0
-				const pathData = this.calculateEdgePath(source.position, target.position, sourceEl.offsetHeight, isLoopback ? 0 : laneIndex);
+				if (!sourceEl || !targetEl) return; 
 				
+				const isFiltered = sourceEl.classList.contains('is-filtered-out') || targetEl.classList.contains('is-filtered-out');
+				const pathData = this.calculateEdgePath(source.position, target.position, sourceEl.offsetHeight, isLoopback ? 0 : laneIndex);
+
 				const edgeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 				edgeGroup.classList.add('edge-group');
 				edgeGroup.dataset.sourceId = source.id;
 				edgeGroup.dataset.choiceIndex = choiceIndex;
-				// ... (event listeners remain the same) ...
+				edgeGroup.addEventListener('dblclick', (e) => {
+					e.stopPropagation();
+					App.nodeEditor.editEdgeText(source.id, choiceIndex, e);
+				});
+				edgeGroup.addEventListener('click', (e) => {
+					e.stopPropagation();
+					App.ui.selectScene(source.id);
+				});
 
 				const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 				path.setAttribute('d', pathData.path);
@@ -5136,36 +5142,47 @@ const App = {
 				if (isLoopback || target.id === App.state.storyData.meta.startSceneId) { path.classList.add('edge-path-loopback'); }
 				if (isFiltered) path.classList.add('is-filtered-out');
 				path.setAttribute('marker-end', 'url(#arrowhead)');
-				
-				// ... (rest of the rendering for hitbox, text, textBg remains the same) ...
+
 				const hitbox = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 				hitbox.setAttribute('d', pathData.path);
 				hitbox.classList.add('edge-hitbox');
+
+				// 1. Create the final text element first.
 				const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
 				text.setAttribute('x', pathData.labelPos.x);
 				text.setAttribute('y', pathData.labelPos.y);
-				text.setAttribute('text-anchor', pathData.labelPos.anchor);
+				text.setAttribute('text-anchor', 'middle'); // Always anchor to middle for easier positioning
+				text.setAttribute('dominant-baseline', 'middle');
+				text.setAttribute('dy', '1px');
 				text.textContent = choice.action.text || '...';
 				text.classList.add('edge-label');
-				const tempTextForSizing = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-				tempTextForSizing.classList.add('edge-label');
-				tempTextForSizing.setAttribute('text-anchor', pathData.labelPos.anchor);
-				tempTextForSizing.textContent = text.textContent;
-				svg.appendChild(tempTextForSizing);
-				const bbox = tempTextForSizing.getBBox();
-				svg.removeChild(tempTextForSizing);
+
+				// 2. Temporarily add it to the SVG to get an accurate measurement using getBoundingClientRect.
+				svg.appendChild(text);
+				const clientRect = text.getBoundingClientRect(); // This gives the final rendered pixel size
+				const zoom = App.nodeEditor.state.zoom;
+				const correctWidth = clientRect.width / zoom;    // Convert pixel size back to SVG units
+				const correctHeight = clientRect.height / zoom;
+				svg.removeChild(text);
+
+				// 3. Now, create the background rect using the ACCURATE measurement.
 				const textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-				textBg.setAttribute('x', bbox.x + pathData.labelPos.x - 4);
-				textBg.setAttribute('y', bbox.y + pathData.labelPos.y - 2);
-				textBg.setAttribute('width', bbox.width + 8);
-				textBg.setAttribute('height', bbox.height + 4);
+				const paddingX = 4; // Horizontal padding
+				const paddingY = 2; // Vertical padding
+				textBg.setAttribute('x', pathData.labelPos.x - (correctWidth / 2) - paddingX);
+				textBg.setAttribute('y', pathData.labelPos.y - (correctHeight / 2) - paddingY);
+				textBg.setAttribute('width', correctWidth + (paddingX * 2));
+				textBg.setAttribute('height', correctHeight + (paddingY * 2));
 				textBg.setAttribute('rx', 3);
 				textBg.classList.add('edge-label-bg');
+
+				// 4. Add all elements to the group in the correct order (bottom to top).
 				edgeGroup.appendChild(hitbox);
 				edgeGroup.appendChild(path);
 				edgeGroup.appendChild(textBg);
 				edgeGroup.appendChild(text);
 				fragment.appendChild(edgeGroup);
+
 			});
 			container.appendChild(fragment);
 		},
@@ -5528,7 +5545,7 @@ const App = {
             }
         },
 
-        editEdgeText(sourceSceneId, choiceIndex, event) {
+		editEdgeText(sourceSceneId, choiceIndex, event) {
             const existingEditor = document.getElementById('edge-text-editor');
             if (existingEditor) existingEditor.remove();
 
@@ -5549,18 +5566,40 @@ const App = {
             input.focus();
             input.select();
 
-            const save = () => {
+            const saveAndClose = () => {
+                // Failsafe: if this function is somehow called twice, exit early.
+                if (!document.body.contains(input)) {
+                    return;
+                }
+
                 choice.action.text = input.value;
                 App.setDirty(true);
-                this.renderEdges();
-                if(sourceSceneId === App.state.currentSceneId) App.editor.renderPreview();
-                if (input.parentElement) input.remove();
+                this.renderEdges(); // Redraw the connection lines with the new text
+
+                // If we are editing a choice for the currently selected scene,
+                // we must re-render the main editor to see the change reflected there.
+                if (sourceSceneId === App.state.currentSceneId) {
+                    App.editor.render();
+                }
+                
+                input.remove();
             };
 
-            input.addEventListener('blur', save);
+            const cancelAndClose = () => {
+                if (input.parentElement) {
+                    input.remove();
+                }
+            };
+
+            input.addEventListener('blur', saveAndClose);
+
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') { e.preventDefault(); save(); } 
-                else if (e.key === 'Escape') { if (input.parentElement) input.remove(); }
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    input.blur(); // This triggers the 'blur' event, which calls saveAndClose.
+                } else if (e.key === 'Escape') {
+                    cancelAndClose();
+                }
             });
         },
         

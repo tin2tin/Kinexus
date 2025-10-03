@@ -77,6 +77,7 @@
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
+            font-family: var(--font-family); /* FIX: Apply selected font to player */
 		}
 		#player-container.layout-panel-bottom {
 			align-items: flex-end;
@@ -414,7 +415,9 @@
 		#scene-editor-preview #preview-player-inner-container {
 			width: 100%; max-width: 800px; margin: 20px;
 			box-shadow: var(--container-shadow, 0 5px 20px rgba(0,0,0,.5));
-			border: var(--container-outline-width, 0) solid var(--container-outline-color, transparent);
+			border-width: var(--container-outline-width, 0px);
+            border-style: solid;
+            border-color: var(--container-outline-color, transparent);
 			background-color: var(--container-bg-color);
 			gap: 20px; padding: var(--padding); border-radius: 12px; box-sizing: border-box; display: flex;
 			max-height: 95%;
@@ -564,7 +567,9 @@
 			padding: var(--padding);
 			border-radius: 12px;
 			box-shadow: var(--container-shadow, 0 5px 20px rgba(0,0,0,0.5));
-			border: var(--container-outline-width, 0) solid var(--container-outline-color, transparent);
+			border-width: var(--container-outline-width, 0px);
+            border-style: solid;
+            border-color: var(--container-outline-color, transparent);
 			background-color: var(--container-bg-color);
 			display:flex;
 			gap: 20px;
@@ -806,7 +811,7 @@
 				</button>
 			</div>	
 			
-            <button id="style-editor-btn" class="btn-primary" title="Style Template Editor">
+            <button id="style-editor-btn" class="btn-secondary" title="Style Template Editor">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm-8 8A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm8 0A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3z"/></svg>
 				Style
             </button>
@@ -1220,7 +1225,9 @@
                 max-width: 800px;
                 border-radius: 12px;
                 box-shadow: var(--container-shadow, 0 5px 20px rgba(0,0,0,.5));
-                border: var(--container-outline-width, 0) solid var(--container-outline-color, transparent);
+                border-width: var(--container-outline-width, 0px);
+                border-style: solid;
+                border-color: var(--container-outline-color, transparent);
                 background-color: var(--container-bg-color);
                 display: flex;
                 gap: 20px;
@@ -2313,7 +2320,7 @@ const App = {
 		}
 	},
 
-    io: {
+	io: {
         async verifyPermission(directoryHandle) {
             const options = { mode: 'readwrite' };
             if ((await directoryHandle.queryPermission(options)) === 'granted') {
@@ -2323,6 +2330,64 @@ const App = {
                 return true;
             }
             return false;
+        },
+
+        async saveProject() {
+            if (!App.state.projectDirectoryHandle) {
+                // If there's no directory handle, this will trigger the "Save As" flow
+                return await App.io.saveProjectAs();
+            }
+
+            try {
+                // The "Saving..." notification has been removed to make the final confirmation more prominent.
+        
+                const storyFileHandle = await App.state.projectDirectoryHandle.getFileHandle('story.json', { create: true });
+                const writable = await storyFileHandle.createWritable();
+
+                await writable.write(JSON.stringify(App.state.storyData, null, 2));
+                await writable.close();
+
+                // Copy any pending new assets (images, sounds, etc.)
+                if (App.state.pendingAssetCopies.size > 0) {
+                    for (const [path, file] of App.state.pendingAssetCopies.entries()) {
+                        const pathParts = path.split('/');
+                        const fileName = pathParts.pop();
+                        let dirHandle = App.state.projectDirectoryHandle;
+                        for (const part of pathParts) {
+                            dirHandle = await dirHandle.getDirectoryHandle(part, { create: true });
+                        }
+                        const newFileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+                        const assetWritable = await newFileHandle.createWritable();
+                        await assetWritable.write(file);
+                        await assetWritable.close();
+                    }
+                    App.state.pendingAssetCopies.clear();
+                }
+
+                App.setDirty(false);
+                // Now, show the single, clear confirmation pop-up.
+                App.ui.showNotification(`Project '${App.state.storyData.meta.title}' saved!`);
+
+            } catch (err) {
+                console.error("Failed to save project:", err);
+                App.ui.showNotification(`Could not save project: ${err.name}`);
+            }
+        },
+
+        async saveProjectAs() {
+            try {
+                const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                if (dirHandle) {
+                    App.state.projectDirectoryHandle = dirHandle;
+                    // After selecting a directory, call the main save function
+                    await App.io.saveProject();
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('Save As was aborted or failed:', err);
+                    App.ui.showNotification(`Could not save project: ${err.name}`);
+                }
+            }
         },
 
         async openValidationReport() {
@@ -2662,50 +2727,6 @@ const App = {
             } finally {
                 App.ui.cursor.default();
                 App.ui.hideProgress();
-            }
-        },
-
-        async saveProject() {
-            // Save current scene data before saving the whole project
-            if(App.state.currentSceneId) {
-                App.editor.saveCurrentScene();
-            }
-
-            App.ui.cursor.wait();
-            try {
-                if (!App.state.projectDirectoryHandle) { App.ui.showNotification("No project is open."); return; }
-
-                if (App.state.pendingAssetCopies.size > 0) {
-                    for (const [relativePath, fileObject] of App.state.pendingAssetCopies.entries()) {
-                        const pathParts = relativePath.split('/');
-                        const fileName = pathParts.pop();
-                        let currentHandle = App.state.projectDirectoryHandle;
-                        for (const part of pathParts) {
-                            currentHandle = await currentHandle.getDirectoryHandle(part, { create: true });
-                        }
-                        const fileHandle = await currentHandle.getFileHandle(fileName, { create: true });
-                        const writable = await fileHandle.createWritable();
-                        await writable.write(fileObject);
-                        await writable.close();
-                    }
-                    console.log(`Copied ${App.state.pendingAssetCopies.size} new asset(s) to the project folder.`);
-                    App.state.pendingAssetCopies.clear();
-                }
-
-                const storyFileHandle = await App.state.projectDirectoryHandle.getFileHandle('story.json', { create: true });
-                const writable = await storyFileHandle.createWritable();
-                await writable.write(JSON.stringify(App.state.storyData, null, 2));
-                await writable.close();
-
-                App.setDirty(false);
-                console.log("Project saved successfully!");
-                App.ui.showNotification("Project saved successfully!");
-
-            } catch (err) {
-                console.error(err);
-                App.ui.showNotification("Failed to save project. Check the console for errors.");
-            } finally {
-                App.ui.cursor.default();
             }
         },
 
@@ -3379,7 +3400,6 @@ const App = {
             URL.revokeObjectURL(a.href);
         }
     },
-
     sceneList: {
         ICONS: {
             start: `<svg class="scene-card-icon icon-start" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>`,
@@ -3708,7 +3728,9 @@ const App = {
                     activeVideoEl.muted = App.elements['toggle-video-mute-btn'].classList.contains('active');
                     activeVideoEl.volume = parseFloat(App.state.storyData.meta.styles['--video-volume'] || 1.0);
                     activeVideoEl.style.display = 'block';
-                    activeVideoEl.play().catch(e => console.warn("Preview video autoplay failed.", e));
+                    // FIX: Do not autoplay in editor preview, just load.
+                    activeVideoEl.load();
+                    App.editor.ui.updateVideoPlaybackButton(true); // Show play icon
 
 				} else { // This is an image or no media
 					if (isPanelLayout && sceneMediaUrl) {
@@ -3995,34 +4017,70 @@ const App = {
         isVideo(path) {
             return path && App.constants.VIDEO_EXTENSIONS.some(ext => path.toLowerCase().endsWith(ext));
         },
-        async getVideoThumbnail(path) {
-            const file = await App.io.getAssetFile(path);
-            if (!file) return null;
-            return new Promise((resolve, reject) => {
-                const video = document.createElement('video');
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
+		async getVideoThumbnail(path) {
+			return new Promise(async (resolve) => {
+				const file = await App.io.getAssetFile(path);
+				if (!file) {
+					return resolve(null);
+				}
 
-                video.onloadeddata = () => {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    video.currentTime = 0; // Seek to the beginning
-                };
+				const video = document.createElement('video');
+				video.preload = 'metadata';
+				video.muted = true;
+				video.playsInline = true;
 
-                video.onseeked = () => {
-                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL('image/jpeg'));
-                    URL.revokeObjectURL(video.src); // Clean up
-                };
+				const canvas = document.createElement('canvas');
+				const context = canvas.getContext('2d');
+				const url = URL.createObjectURL(file);
 
-                video.onerror = (e) => {
-                    reject(e);
-                    URL.revokeObjectURL(video.src);
-                };
+				// A reusable cleanup function to prevent memory leaks
+				const cleanup = () => {
+					clearTimeout(timeoutId);
+					video.onerror = null;
+					video.onloadedmetadata = null;
+					video.onseeked = null;
+					video.src = ''; // Detach the source
+					URL.revokeObjectURL(url); // Release the memory
+				};
 
-                video.src = URL.createObjectURL(file);
-            });
-        },
+				const fail = (reason) => {
+					console.warn(`Thumbnail generation failed for ${path}: ${reason}`);
+					cleanup();
+					resolve(null);
+				};
+
+				const timeoutId = setTimeout(() => fail('Timeout'), 5000);
+
+				video.onerror = () => fail('Video element error');
+
+				// This event fires *after* the video seeks to the time we set.
+				// This is the correct moment to draw the image.
+				video.onseeked = () => {
+					clearTimeout(timeoutId); // We're good, cancel the timeout.
+
+					if (video.videoWidth > 0 && video.videoHeight > 0) {
+						canvas.width = video.videoWidth;
+						canvas.height = video.videoHeight;
+						context.drawImage(video, 0, 0, canvas.width, canvas.height);
+						const dataUrl = canvas.toDataURL('image/jpeg');
+						cleanup();
+						resolve(dataUrl); // Success!
+					} else {
+						fail('Video dimensions were not available after seek.');
+					}
+				};
+
+				// This event fires first, when metadata (like duration) is loaded.
+				video.onloadedmetadata = () => {
+					// Seek to 1 second if possible. This is safer than 0s, which is often black.
+					// This action will trigger the 'onseeked' event handler above.
+					video.currentTime = video.duration > 1 ? 1 : video.duration / 2;
+				};
+
+				// Start the process by setting the source.
+				video.src = url;
+			});
+		},
         async selectFile(assetType, targetInputId) {
             const fileInput = document.getElementById(assetType === 'images' ? 'image-file-input' : 'sound-file-input');
             const handleFile = async (file) => {
@@ -4064,19 +4122,22 @@ const App = {
         },
         handleDragOver(e) { e.preventDefault(); e.stopPropagation(); e.target.classList.add('drag-over'); },
         handleDragLeave(e) { e.preventDefault(); e.stopPropagation(); e.target.classList.remove('drag-over'); },
-        handleFileDrop(e) {
-            e.preventDefault(); e.stopPropagation();
-            const targetInput = e.target; targetInput.classList.remove('drag-over');
-            if (e.dataTransfer.files?.length > 0) {
-                const file = e.dataTransfer.files[0];
-                const assetTypeFolder = targetInput.dataset.assetType === 'sounds' ? 'sounds' : (this.isVideo(file.name) ? 'videos' : 'images');
-                const destinationPath = `${assetTypeFolder}/${file.name}`;
-                App.state.pendingAssetCopies.set(destinationPath, file);
-                targetInput.value = destinationPath;
-                targetInput.dispatchEvent(new Event('input', { bubbles: true }));
-                App.setDirty(true);
-            }
-        },
+		handleFileDrop(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			const targetInput = e.target;
+			targetInput.classList.remove('drag-over');
+			if (e.dataTransfer.files?.length > 0) {
+				const file = e.dataTransfer.files[0];
+				// FIX: Correctly call isVideo from the App.assets object, not 'this'.
+				const assetTypeFolder = targetInput.dataset.assetType === 'sounds' ? 'sounds' : (App.assets.isVideo(file.name) ? 'videos' : 'images');
+				const destinationPath = `${assetTypeFolder}/${file.name}`;
+				App.state.pendingAssetCopies.set(destinationPath, file);
+				targetInput.value = destinationPath;
+				targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+				App.setDirty(true);
+			}
+		},
         renderPollinationImage() {
             const promptText = App.elements['scene-image-prompt'].value.trim();
             if (!promptText) { App.ui.showNotification("Please enter a prompt first."); return; }
@@ -4420,7 +4481,7 @@ const App = {
                 <div class="grid-full-width"> <label>Page BG Image <div class="form-group inline" style="margin:0;"><input type="text" id="style-screen-bg-image" class="path-input" data-asset-type="images" placeholder="images/bg.jpg"><button class="btn-warning file-icon-btn" title="Select Screen Background">📁</button></div></label> </div>
                 <hr class="grid-separator">
                 <div class="grid-full-width"> <label>Container Padding (px) <input type="number" id="style-padding" min="0"></label> </div>
-                <div class="grid-span-2"> <label>Container Effect <select id="style-container-effect"><option value="shadow">Shadow</option><option value="outline">Outline</option></select></label> <label id="outline-color-label">Outline Color <input type="color" id="style-container-outline-color"></label></div>
+                <div class="grid-span-2"> <label>Container Effect <select id="style-container-effect"><option value="none">None</option><option value="shadow">Shadow</option><option value="outline">Outline</option></select></label> <label id="outline-color-label">Outline Color <input type="color" id="style-container-outline-color"></label></div>
                 <div class="grid-span-2"> <label>Container BG Color <input type="color" id="style-container-bg-color"></label> <label>Container BG Opacity <input type="range" id="style-container-bg-opacity" min="0" max="1" step="0.01"></label> </div>
                 <hr class="grid-separator">
                 <div class="grid-span-2"> <label>Button Color <input type="color" id="style-btn-color"></label> <label>Button Opacity <input type="range" id="style-btn-opacity" min="0" max="1" step="0.01" value="1"></label> </div>
@@ -4449,25 +4510,45 @@ const App = {
             App.modals.show('style-editor-modal');
         },
         handleUpdate(e) {
-            const el = e.target; const key = `--${el.id.replace('style-', '')}`; const meta = App.state.storyData.meta;
-            if (el.id === 'style-layout') { meta.layout = el.value; }
-            else if (el.id === 'style-container-bg-opacity' || el.id === 'style-btn-opacity') {
-                const colorKey = el.id === 'style-container-bg-opacity' ? '--container-bg-color' : '--btn-color'; const hex = meta.styles[colorKey].match(/#\w{6}/) || ['#000000'];
-                const r = parseInt(hex[0].slice(1,3),16), g = parseInt(hex[0].slice(3,5),16), b = parseInt(hex[0].slice(5,7),16);
+            const el = e.target;
+            const key = `--${el.id.replace('style-', '')}`;
+            const meta = App.state.storyData.meta;
+        
+            if (el.id === 'style-layout') {
+                meta.layout = el.value;
+            } else if (el.id === 'style-container-bg-opacity' || el.id === 'style-btn-opacity') {
+                const colorKey = el.id === 'style-container-bg-opacity' ? '--container-bg-color' : '--btn-color';
+                const colorInputId = el.id === 'style-container-bg-opacity' ? 'style-container-bg-color' : 'style-btn-color';
+                const hex = document.getElementById(colorInputId).value; // FIX: Read current color from picker
+                const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
                 meta.styles[colorKey] = `rgba(${r},${g},${b},${el.value})`;
-            }
-            else if (el.type === 'color') {
+            } else if (el.type === 'color') {
                 const opacityKey = el.id === 'style-container-bg-color' ? 'style-container-bg-opacity' : (el.id === 'style-btn-color' ? 'style-btn-opacity' : null);
-                if(opacityKey) {
-                    const opacity = document.getElementById(opacityKey).value; const r = parseInt(el.value.slice(1,3),16), g = parseInt(el.value.slice(3,5),16), b = parseInt(el.value.slice(5,7),16);
+                if (opacityKey) {
+                    const opacity = document.getElementById(opacityKey).value;
+                    const r = parseInt(el.value.slice(1, 3), 16), g = parseInt(el.value.slice(3, 5), 16), b = parseInt(el.value.slice(5, 7), 16);
                     meta.styles[key] = `rgba(${r},${g},${b},${opacity})`;
-                } else meta.styles[key] = el.value;
+                } else {
+                    meta.styles[key] = el.value;
+                }
+            } else if (el.id === 'style-container-effect') {
+                document.getElementById('outline-color-label').style.display = el.value === 'outline' ? 'block' : 'none';
+                meta.styles[key] = el.value; // Save the effect type
+            } else if (el.id.endsWith('-size') || el.id.endsWith('-padding')) {
+                meta.styles[key] = `${el.value}px`;
+            } else {
+                meta.styles[key] = el.value;
             }
-            else if (el.id === 'style-container-effect') document.getElementById('outline-color-label').style.display = el.value === 'outline' ? 'block' : 'none';
-            else if(el.id.endsWith('-size') || el.id.endsWith('-padding')) meta.styles[key] = `${el.value}px`;
-            else meta.styles[key] = el.value;
-            if (key === '--font-family') this.loadGoogleFont(el.value);
-            App.setDirty(true); App.editor.renderPreview();
+            
+            if (key === '--font-family') {
+                this.loadGoogleFont(el.value);
+            }
+            
+            App.setDirty(true);
+            App.editor.renderPreview();
+            if (App.elements['player-container'].style.display === 'flex') {
+                App.styles.applyToContainer(App.elements['player-container']);
+            }
         },
         loadGoogleFont(fontFamily) {
             const fontName = fontFamily.split(',')[0].replace(/'/g, '').trim();
@@ -4518,10 +4599,15 @@ const App = {
 					innerContainer.style.setProperty('--container-shadow', 'none');
 					innerContainer.style.setProperty('--container-outline-width', '2px');
 					innerContainer.style.setProperty('--container-outline-color', styles['--container-outline-color'] || defaults['--container-outline-color']);
-				} else { // Shadow
+				} else if (effect === 'shadow') { // Shadow
 					innerContainer.style.setProperty('--container-shadow', '0 5px 20px rgba(0,0,0,.5)');
-					innerContainer.style.setProperty('--container-outline-width', '0');
-				}
+					innerContainer.style.setProperty('--container-outline-width', '0px');
+                    innerContainer.style.setProperty('--container-outline-color', 'transparent');
+				} else { // None
+                    innerContainer.style.setProperty('--container-shadow', 'none');
+                    innerContainer.style.setProperty('--container-outline-width', '0px');
+                    innerContainer.style.setProperty('--container-outline-color', 'transparent');
+                }
 			}
 		},
         generateCSS(stylesOverride) {
@@ -4543,12 +4629,17 @@ const App = {
 			if (effect === 'outline') {
 				rootVars += `    --container-shadow: none;\n`;
 				rootVars += `    --container-outline-width: 2px;\n`;
-			} else {
+			} else if (effect === 'shadow') {
 				rootVars += `    --container-shadow: 0 5px 20px rgba(0,0,0,.5);\n`;
-				rootVars += `    --container-outline-width: 0;\n`;
-			}
+				rootVars += `    --container-outline-width: 0px;\n`;
+                rootVars += `    --container-outline-color: transparent;\n`;
+			} else { // None
+                rootVars += `    --container-shadow: none;\n`;
+                rootVars += `    --container-outline-width: 0px;\n`;
+                rootVars += `    --container-outline-color: transparent;\n`;
+            }
 
-			return `:root {\n${rootVars}} body { background-image: var(--screen-bg-image); background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); } #game-container { font-size: var(--font-size); background-color: var(--container-bg-color); } .choice-btn { font-family: var(--font-family); background-color: var(--btn-color); color: var(--btn-text-color); border: var(--container-outline-width, 0) solid var(--container-outline-color, transparent); } .choice-btn:hover { background-color: var(--btn-hover-color); }`;
+			return `:root {\n${rootVars}} body { background-image: var(--screen-bg-image); background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); } #game-container { font-size: var(--font-size); background-color: var(--container-bg-color); } .choice-btn { font-family: var(--font-family); background-color: var(--btn-color); color: var(--btn-text-color); border-width: var(--container-outline-width, 0px); border-style: solid; border-color: var(--container-outline-color, transparent); } .choice-btn:hover { background-color: var(--btn-hover-color); }`;
 		},
         getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--container-effect': 'shadow', '--container-outline-color': '#FFFFFF', '--music-path': '', '--music-volume': '0.4', '--ambience-volume': '0.4', '--video-volume': '1.0', '--typewriter-effect': 'on' }; }
     },
@@ -5229,13 +5320,22 @@ const App = {
             this.updateEdgeSelection(App.state.currentSceneId);
         },
 
-        addNewScene(position = { x: 100, y: 100 }, event = null) {
-            if (event) {
+        addNewScene(position = null, event = null) {
+            // FIX: Ensure a valid position is always determined.
+            let finalPosition = position;
+        
+            if (event && App.state.currentNavView === 'nodes') {
                 const viewRect = App.elements['node-editor-view'].getBoundingClientRect();
                 const mouseX = event.clientX - viewRect.left;
                 const mouseY = event.clientY - viewRect.top;
-                position.x = (mouseX - this.state.pan.x) / this.state.zoom;
-                position.y = (mouseY - this.state.pan.y) / this.state.zoom;
+                finalPosition = {
+                    x: (mouseX - this.state.pan.x) / this.state.zoom,
+                    y: (mouseY - this.state.pan.y) / this.state.zoom
+                };
+            } else if (!finalPosition) {
+                // Default position logic when not triggered by a canvas click
+                const sceneCount = Object.keys(App.state.storyData.scenes).length;
+                finalPosition = { x: 100 + (sceneCount % 5) * 50, y: 100 + Math.floor(sceneCount / 5) * 50 };
             }
 
             App.ui.showCustomPrompt({
@@ -5250,7 +5350,7 @@ const App = {
                         return;
                     }
 
-                    const newScene = { id: newId, text: `This is the new scene '${newId}'.`, choices: [], position: position, lastModified: Date.now(), mediaType: 'none', color: null };
+                    const newScene = { id: newId, text: `This is the new scene '${newId}'.`, choices: [], position: finalPosition, lastModified: Date.now(), mediaType: 'none', color: null };
                     App.state.storyData.scenes[newId] = newScene;
                     App.setDirty(true);
                     App.ui.invalidateNavViews();

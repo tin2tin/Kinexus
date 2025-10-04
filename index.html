@@ -1639,12 +1639,6 @@ const App = {
 
         document.getElementById('select-image-btn').addEventListener('click', () => App.assets.selectFile('images', 'scene-image'));
         document.getElementById('select-sound-btn').addEventListener('click', () => App.assets.selectFile('sounds', 'scene-sound'));
-        App.elements['scene-sound'].addEventListener('input', (e) => {
-            const hasSound = !!e.target.value;
-            const btn = App.elements['toggle-ambience-btn'];
-            btn.classList.toggle('btn-success', hasSound);
-            btn.classList.toggle('btn-secondary', !hasSound);
-        });
 
         // Ambience Controls
         App.elements['toggle-ambience-btn'].addEventListener('click', () => App.player.toggleAmbienceSound());
@@ -1676,21 +1670,27 @@ const App = {
         App.elements['preview-player-video'].addEventListener('pause', () => App.editor.ui.updateVideoPlaybackButton(false));
 
 
-        // Automatic saving listeners
+        // Automatic saving and UI update listeners
         const saveAndPreview = () => { App.editor.saveCurrentScene(); App.editor.renderPreview(); };
+        const saveAndUpdateMediaUI = () => {
+			App.editor.saveCurrentScene();
+			App.editor.ui.updateMediaButtonStates();
+		};
+
         App.elements['scene-text'].addEventListener('input', saveAndPreview);
         App.elements['choices-container'].addEventListener('input', saveAndPreview);
         App.elements['choices-container'].addEventListener('change', saveAndPreview);
         document.getElementById('scene-image-prompt').addEventListener('input', () => App.editor.saveCurrentScene());
+        App.elements['scene-sound'].addEventListener('input', saveAndUpdateMediaUI);
 
 		App.elements['scene-image'].addEventListener('input', (e) => {
-            App.editor.saveCurrentScene(); // Save first
+            App.editor.saveCurrentScene();
             App.editor.ui.updateVideoControlsVisibility();
-			App.ui.updateImageThumbnail(e.target.value); // This will trigger preview render
+			App.editor.ui.updateMediaButtonStates();
+			App.ui.updateImageThumbnail(e.target.value);
             App.ui.invalidateNavViews();
             App.ui.renderCurrentView();
 		});
-		App.elements['scene-sound'].addEventListener('input', () => App.editor.saveCurrentScene());
 
 
         ['story-title', 'creator-name', 'about-text'].forEach(id => {
@@ -3445,9 +3445,9 @@ const App = {
 
             let iconsHTML = `
                 ${scene.id === App.state.storyData.meta.startSceneId ? this.ICONS.start : ''}
-                <span class="scene-card-icon-group">
-                    ${hasMedia ? (mediaType === 'video' ? this.ICONS.video : this.ICONS.image) : ''}
-                </span>
+				<span class="scene-card-icon-group">
+					${hasMedia ? (mediaType === 'video' ? this.ICONS.video + (scene.videoLoop ? this.ICONS.videoLoop : '') : this.ICONS.image) : ''}
+				</span>
                 <span class="scene-card-icon-group">
                     ${scene.ambienceSound ? this.ICONS.audio : ''}
                 </span>
@@ -3639,10 +3639,9 @@ const App = {
             App.ui.updateImageThumbnail(scene.image);
             App.elements['scene-image-prompt'].value = scene.imagePrompt || '';
             App.elements['scene-sound'].value = scene.ambienceSound || '';
-            const hasSound = !!App.elements['scene-sound'].value;
-            App.elements['toggle-ambience-btn'].classList.toggle('btn-success', hasSound); App.elements['toggle-ambience-btn'].classList.toggle('btn-secondary', !hasSound);
             App.elements['toggle-loop-btn'].classList.toggle('active', scene.ambienceLoop ?? true);
             App.elements['manage-variables-btn'].innerHTML = App.editor.ui.iconManageVariables;
+            this.ui.updateMediaButtonStates();
 
             // Video specific UI
             App.elements['toggle-video-loop-btn'].classList.toggle('active', scene.videoLoop ?? true);
@@ -3728,9 +3727,8 @@ const App = {
                     activeVideoEl.muted = App.elements['toggle-video-mute-btn'].classList.contains('active');
                     activeVideoEl.volume = parseFloat(App.state.storyData.meta.styles['--video-volume'] || 1.0);
                     activeVideoEl.style.display = 'block';
-                    // FIX: Do not autoplay in editor preview, just load.
                     activeVideoEl.load();
-                    App.editor.ui.updateVideoPlaybackButton(true); // Show play icon
+                    App.editor.ui.updateVideoPlaybackButton(false);
 
 				} else { // This is an image or no media
 					if (isPanelLayout && sceneMediaUrl) {
@@ -3787,7 +3785,6 @@ const App = {
                 return choice;
             });
             
-            // FIX: Only update text if it has changed to avoid unnecessary re-renders
             const newText = App.elements['scene-text'].value;
             let textChanged = false;
             if (scene.text !== newText) {
@@ -3806,7 +3803,6 @@ const App = {
         
             App.setDirty(true);
             
-            // FIX: If text changed, specifically update the node and scene list views
             if (textChanged) {
                 const nodeTextDisplay = document.querySelector(`.node-editor-node[data-scene-id="${App.state.currentSceneId}"] .node-text-display`);
                 if (nodeTextDisplay) {
@@ -3818,7 +3814,7 @@ const App = {
                 }
             }
 
-            App.ui.invalidateNavViews(); // Still invalidate for other changes
+            App.ui.invalidateNavViews();
          },
         addChoiceToDOM(choice = {}) {
             const container = App.elements['choices-container'];
@@ -3974,7 +3970,18 @@ const App = {
             updateVideoMuteButton(isMuted) {
                 App.elements['video-unmute-icon'].classList.toggle('hidden', isMuted);
                 App.elements['video-mute-icon'].classList.toggle('hidden', !isMuted);
-            }
+            },
+            updateMediaButtonStates() {
+				const hasSound = !!App.elements['scene-sound'].value;
+				const ambienceBtn = App.elements['toggle-ambience-btn'];
+				ambienceBtn.classList.toggle('btn-success', hasSound);
+				ambienceBtn.classList.toggle('btn-secondary', !hasSound);
+
+				const hasVideo = App.assets.isVideo(App.elements['scene-image'].value);
+				const videoBtn = App.elements['toggle-video-playback-btn'];
+				videoBtn.classList.toggle('btn-success', hasVideo);
+				videoBtn.classList.toggle('btn-secondary', !hasVideo);
+			}
         },
         variables: {
             showModal() {
@@ -4033,14 +4040,13 @@ const App = {
 				const context = canvas.getContext('2d');
 				const url = URL.createObjectURL(file);
 
-				// A reusable cleanup function to prevent memory leaks
 				const cleanup = () => {
 					clearTimeout(timeoutId);
 					video.onerror = null;
 					video.onloadedmetadata = null;
 					video.onseeked = null;
-					video.src = ''; // Detach the source
-					URL.revokeObjectURL(url); // Release the memory
+					video.src = ''; 
+					URL.revokeObjectURL(url); 
 				};
 
 				const fail = (reason) => {
@@ -4052,11 +4058,9 @@ const App = {
 				const timeoutId = setTimeout(() => fail('Timeout'), 5000);
 
 				video.onerror = () => fail('Video element error');
-
-				// This event fires *after* the video seeks to the time we set.
-				// This is the correct moment to draw the image.
+				
 				video.onseeked = () => {
-					clearTimeout(timeoutId); // We're good, cancel the timeout.
+					clearTimeout(timeoutId);
 
 					if (video.videoWidth > 0 && video.videoHeight > 0) {
 						canvas.width = video.videoWidth;
@@ -4064,20 +4068,16 @@ const App = {
 						context.drawImage(video, 0, 0, canvas.width, canvas.height);
 						const dataUrl = canvas.toDataURL('image/jpeg');
 						cleanup();
-						resolve(dataUrl); // Success!
+						resolve(dataUrl); 
 					} else {
 						fail('Video dimensions were not available after seek.');
 					}
 				};
 
-				// This event fires first, when metadata (like duration) is loaded.
 				video.onloadedmetadata = () => {
-					// Seek to 1 second if possible. This is safer than 0s, which is often black.
-					// This action will trigger the 'onseeked' event handler above.
 					video.currentTime = video.duration > 1 ? 1 : video.duration / 2;
 				};
 
-				// Start the process by setting the source.
 				video.src = url;
 			});
 		},
@@ -4129,7 +4129,6 @@ const App = {
 			targetInput.classList.remove('drag-over');
 			if (e.dataTransfer.files?.length > 0) {
 				const file = e.dataTransfer.files[0];
-				// FIX: Correctly call isVideo from the App.assets object, not 'this'.
 				const assetTypeFolder = targetInput.dataset.assetType === 'sounds' ? 'sounds' : (App.assets.isVideo(file.name) ? 'videos' : 'images');
 				const destinationPath = `${assetTypeFolder}/${file.name}`;
 				App.state.pendingAssetCopies.set(destinationPath, file);
@@ -4192,8 +4191,19 @@ const App = {
         }
     },
 	player: {
+        pauseAllEditorMedia() {
+			const ambiencePlayer = App.elements['ambience-player'];
+			const previewVideo = App.elements['preview-player-video'];
+			if (ambiencePlayer && !ambiencePlayer.paused) {
+				ambiencePlayer.pause();
+			}
+			if (previewVideo && !previewVideo.paused) {
+				previewVideo.pause();
+			}
+		},
         async play(sceneId, fromStart = false) {
             if (!sceneId || !App.state.storyData.scenes[sceneId]) { App.ui.showNotification("Cannot play. Invalid start scene."); return; }
+            this.pauseAllEditorMedia();
 
             const isPlayerAlreadyActive = App.elements['player-container'].style.display === 'flex';
             const isLoopingBackToStart = isPlayerAlreadyActive && sceneId === App.state.storyData.meta.startSceneId;
@@ -4203,9 +4213,9 @@ const App = {
             } else if (!this.gameState) {
                 this.initializeGameState();
             }
-            // FIX: Player now only covers the scene editor area
+            
             App.elements['player-container'].style.display = 'flex';
-            App.editor.render(); // Re-render the editor to hide the AI panel
+            App.editor.render();
 
             await this.renderScene(sceneId);
         },
@@ -4290,7 +4300,6 @@ const App = {
             }
             App.state.currentSceneId = sceneId;
             this.gameState.visited[sceneId] = true;
-            // No longer need to set view mode when player is active
 
             const scene = App.state.storyData.scenes[sceneId];
             const { 'player-text': textEl, 'player-choices': choicesEl, 'ambience-player': audio, 'player-video-bg': videoBg, 'player-video-fg': videoFg, 'player-image': imageEl } = App.elements;
@@ -4351,8 +4360,6 @@ const App = {
 					}
 				}
 			} else {
-            // If there is NO scene-specific image/video...
-            // Clear any global background image and apply the background color instead.
             playerContainer.style.backgroundImage = 'none';
             playerContainer.style.backgroundColor = App.state.storyData.meta.styles['--bg-color'] || App.styles.getDefaults()['--bg-color'];
 			}
@@ -4406,7 +4413,6 @@ const App = {
             else { audio.pause(); }
         },
         stop() {
-            // FIX: Hide player, which is already in the correct container.
             App.elements['player-container'].style.display = 'none';
 
             App.elements['ambience-player'].pause(); App.elements['music-player'].pause();
@@ -4422,9 +4428,8 @@ const App = {
                 }
             });
             App.state.player.activeVideoElement = null;
-            App.editor.render(); // Re-render the editor to show all panels again
+            App.editor.render();
 
-            // Refresh editor view for the current scene
             if (App.state.currentSceneId) App.ui.selectScene(App.state.currentSceneId);
         },
         async toggleAmbienceSound() {
@@ -4438,8 +4443,12 @@ const App = {
             const soundUrl = await App.io.getAssetDataUrl(soundPath);
             if (!soundUrl) { App.ui.showNotification("Audio file not found in project."); return; }
 
-            if (!audio.paused && audio.src === soundUrl) audio.pause();
-            else { audio.src = soundUrl; audio.play().catch(e => console.warn("Audio playback failed.", e)); }
+            if (!audio.paused && audio.src.endsWith(soundUrl)) {
+                audio.pause();
+            } else {
+                audio.src = soundUrl;
+                audio.play().catch(e => console.warn("Audio playback failed.", e));
+            }
         },
         updateAmbienceButton(isPlaying) {
             App.elements['ambience-play-icon'].classList.toggle('hidden', isPlaying);
@@ -4978,7 +4987,6 @@ const App = {
                 const dotSize = 0.5;
                 const scaledGridSize = gridSize * zoom;
                 
-                // Fade out dots when they get too small
                 const opacity = Math.min(1, Math.max(0, (scaledGridSize - 2) / 4));
 
                 nodeEditorView.style.backgroundImage = `radial-gradient(rgba(60, 61, 64, ${opacity * 0.7}) ${dotSize}px, transparent 0)`;
@@ -5000,7 +5008,6 @@ const App = {
 
 			const searchText = filterTerm.trim().toLowerCase();
 
-			// NEW: Pre-calculate connection data for handle styling
 			const scenesWithInputs = new Set();
 			const scenesWithOutputs = new Set();
 			Object.values(App.state.storyData.scenes).forEach(scene => {
@@ -5131,7 +5138,6 @@ const App = {
 
 			const fragment = document.createDocumentFragment();
 			
-			// --- STEP 1: GATHER ALL CONNECTIONS AND THEIR PROPERTIES ---
 			const allConnections = [];
 			for (const scene of Object.values(scenes)) {
 				if (scene.choices) {
@@ -5142,7 +5148,6 @@ const App = {
 							const sourceLevel = Math.round(scene.position.y / 450);
 							const targetLevel = Math.round(targetScene.position.y / 450);
 							
-							// Skip any lines that go up, as they are handled differently
 							if (targetLevel < sourceLevel) {
 								 allConnections.push({ source: scene, target: targetScene, choice, choiceIndex, isLoopback: true });
 								 return;
@@ -5164,19 +5169,16 @@ const App = {
 				}
 			}
 
-			// --- STEP 2: INTELLIGENTLY ASSIGN LANES USING COLLISION DETECTION ---
-			const lanesByChannel = []; // lanesByChannel[channel_index] = [ [conn1, conn2], [conn3] ]
+			const lanesByChannel = []; 
 			
-			// Sort connections to prioritize longer ones, which are harder to place.
 			allConnections.sort((a, b) => (b.end - b.start) - (a.end - a.start));
 
 			allConnections.forEach(conn => {
-				if (conn.isLoopback) return; // Skip loopbacks for now
+				if (conn.isLoopback) return;
 
 				let laneIndex = 0;
 				while (true) {
 					let isLaneFree = true;
-					// Check this lane across all channels this connection spans
 					for (let level = conn.sourceLevel; level < conn.targetLevel; level++) {
 						if (!lanesByChannel[level]) lanesByChannel[level] = [];
 						if (!lanesByChannel[level][laneIndex]) lanesByChannel[level][laneIndex] = [];
@@ -5192,19 +5194,17 @@ const App = {
 					}
 
 					if (isLaneFree) {
-						// Found a free lane! Reserve it in all required channels.
 						conn.laneIndex = laneIndex;
 						for (let level = conn.sourceLevel; level < conn.targetLevel; level++) {
 							lanesByChannel[level][laneIndex].push(conn);
 						}
 						break;
 					} else {
-						laneIndex++; // Try the next lane
+						laneIndex++; 
 					}
 				}
 			});
 
-			// --- STEP 3: RENDER ALL CONNECTIONS NOW THAT LANES ARE ASSIGNED ---
 			allConnections.forEach(conn => {
 				const { source, target, choice, choiceIndex, laneIndex, isLoopback } = conn;
 				const sourceEl = document.querySelector(`.node-editor-node[data-scene-id="${source.id}"]`);
@@ -5238,28 +5238,25 @@ const App = {
 				hitbox.setAttribute('d', pathData.path);
 				hitbox.classList.add('edge-hitbox');
 
-				// 1. Create the final text element first.
 				const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
 				text.setAttribute('x', pathData.labelPos.x);
 				text.setAttribute('y', pathData.labelPos.y);
-				text.setAttribute('text-anchor', 'middle'); // Always anchor to middle for easier positioning
+				text.setAttribute('text-anchor', 'middle'); 
 				text.setAttribute('dominant-baseline', 'middle');
 				text.setAttribute('dy', '1px');
 				text.textContent = choice.action.text || '...';
 				text.classList.add('edge-label');
 
-				// 2. Temporarily add it to the SVG to get an accurate measurement using getBoundingClientRect.
 				svg.appendChild(text);
-				const clientRect = text.getBoundingClientRect(); // This gives the final rendered pixel size
+				const clientRect = text.getBoundingClientRect(); 
 				const zoom = App.nodeEditor.state.zoom;
-				const correctWidth = clientRect.width / zoom;    // Convert pixel size back to SVG units
+				const correctWidth = clientRect.width / zoom;    
 				const correctHeight = clientRect.height / zoom;
 				svg.removeChild(text);
 
-				// 3. Now, create the background rect using the ACCURATE measurement.
 				const textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-				const paddingX = 4; // Horizontal padding
-				const paddingY = 2; // Vertical padding
+				const paddingX = 4;
+				const paddingY = 2;
 				textBg.setAttribute('x', pathData.labelPos.x - (correctWidth / 2) - paddingX);
 				textBg.setAttribute('y', pathData.labelPos.y - (correctHeight / 2) - paddingY);
 				textBg.setAttribute('width', correctWidth + (paddingX * 2));
@@ -5267,7 +5264,6 @@ const App = {
 				textBg.setAttribute('rx', 3);
 				textBg.classList.add('edge-label-bg');
 
-				// 4. Add all elements to the group in the correct order (bottom to top).
 				edgeGroup.appendChild(hitbox);
 				edgeGroup.appendChild(path);
 				edgeGroup.appendChild(textBg);
@@ -5284,10 +5280,8 @@ const App = {
 
             const allEdges = Array.from(container.querySelectorAll('.edge-group'));
 
-            // First, remove the selected class from all edges
             allEdges.forEach(edge => edge.classList.remove('is-selected-path'));
 
-            // If no scene is selected, we're done
             if (!selectedSceneId) return;
 
             const selectedEdges = [];
@@ -5297,14 +5291,11 @@ const App = {
                 const choice = App.state.storyData.scenes[sourceId]?.choices[choiceIndex];
                 const targetId = choice?.action?.target;
 
-                // Check if this edge is connected to the selected node
                 if (sourceId === selectedSceneId || targetId === selectedSceneId) {
                     selectedEdges.push(edge);
                 }
             });
-
-            // Apply the class and move the selected edges to the end of the container
-            // In SVG, appending an existing element moves it, making it render "on top"
+            
             selectedEdges.forEach(edge => {
                 edge.classList.add('is-selected-path');
                 container.appendChild(edge);
@@ -5321,7 +5312,6 @@ const App = {
         },
 
         addNewScene(position = null, event = null) {
-            // FIX: Ensure a valid position is always determined.
             let finalPosition = position;
         
             if (event && App.state.currentNavView === 'nodes') {
@@ -5333,7 +5323,6 @@ const App = {
                     y: (mouseY - this.state.pan.y) / this.state.zoom
                 };
             } else if (!finalPosition) {
-                // Default position logic when not triggered by a canvas click
                 const sceneCount = Object.keys(App.state.storyData.scenes).length;
                 finalPosition = { x: 100 + (sceneCount % 5) * 50, y: 100 + Math.floor(sceneCount / 5) * 50 };
             }
@@ -5366,11 +5355,10 @@ const App = {
 
 			const HORIZONTAL_GAP = 600;
 			const VERTICAL_GAP = 500;
-			const STAGGER_AMOUNT = 30; // Slightly increased for more label room
+			const STAGGER_AMOUNT = 30;
 			const graph = {};
 			const sceneIds = Object.keys(scenes);
 
-			// Step 1: Build the graph structure
 			sceneIds.forEach(id => {
 				graph[id] = { children: new Set(), parents: new Set(), level: -1 };
 			});
@@ -5384,7 +5372,6 @@ const App = {
 				});
 			});
 
-			// Step 2: Assign levels using Breadth-First Search
 			const levels = [];
 			const queue = [startId];
 			const visited = new Set([startId]);
@@ -5403,7 +5390,6 @@ const App = {
 				});
 			}
 
-			// Step 3: Barycentric sort to group storylines
 			for (let i = 1; i < levels.length; i++) {
 				levels[i].sort((a, b) => {
 					const getParentAvgIndex = (nodeId) => {
@@ -5416,13 +5402,11 @@ const App = {
 				});
 			}
 
-			// Step 4: Handle orphans
 			const orphans = sceneIds.filter(id => !visited.has(id));
 			if (orphans.length > 0) {
 				levels.push(orphans);
 			}
 
-			// Step 5: Pre-calculate the stagger index for each node based on its siblings.
 			const staggerMap = new Map();
 			levels.forEach((levelNodes, levelIndex) => {
 				levelNodes.forEach(parentId => {
@@ -5436,16 +5420,14 @@ const App = {
 				});
 			});
 
-			// --- STEP 6: DYNAMICALLY CALCULATE ROW POSITIONS ---
-			let levelMaxY = -VERTICAL_GAP; // Start above the canvas
+			let levelMaxY = -VERTICAL_GAP; 
 
 			levels.forEach((levelNodes, levelIndex) => {
 				const levelWidth = (levelNodes.length - 1) * HORIZONTAL_GAP;
 				const startX = -levelWidth / 2;
 				
-				// The base Y for this row is determined by the max Y of the previous row
 				const baseY = levelMaxY + VERTICAL_GAP;
-				let currentLevelMaxY = baseY; // Track the max Y for the *current* row
+				let currentLevelMaxY = baseY;
 
 				levelNodes.forEach((nodeId, index) => {
 					if (scenes[nodeId]) {
@@ -5456,13 +5438,11 @@ const App = {
 							x: startX + index * HORIZONTAL_GAP,
 							y: nodeY
 						};
-						// Update the max Y for this level if the current node is lower
 						if (nodeY > currentLevelMaxY) {
 							currentLevelMaxY = nodeY;
 						}
 					}
 				});
-				// Save the max Y of this level to position the next one correctly
 				levelMaxY = currentLevelMaxY;
 			});
 
@@ -5471,15 +5451,14 @@ const App = {
 			this.fitView();
 		},
 
-		// Located in App.nodeEditor
 		calculateEdgePath(sourcePos, targetPos, sourceHeight, laneIndex = 0) {
 			const NODE_WIDTH = 240;
 			const BEND_OFFSET = 70;      
 			const LANE_HEIGHT = 35;      
 			const TEXT_OFFSET_Y = 5; 
 			const TEXT_OFFSET_X = 10;
-			const LOOPBACK_SIDE_OFFSET = 120; // How far the line will go out to the side
-			const ARC_HEIGHT_ABOVE = 40;     // How high the line will go above the target node
+			const LOOPBACK_SIDE_OFFSET = 120;
+			const ARC_HEIGHT_ABOVE = 40;
 
 			const startX = sourcePos.x + NODE_WIDTH / 2;
 			const startY = sourcePos.y + sourceHeight;
@@ -5488,30 +5467,15 @@ const App = {
 
 			let path, labelPos;
 
-			// Check if the connection is a loopback (going upwards)
 			if (endY < startY) {
-				
-				// --- NEW, ROBUST "AROUND-THE-NODE" ORTHOGONAL LOGIC ---
-				// This creates a guaranteed visible path that routes around nodes and cannot collapse.
-				
-				// Always go around the right side for a consistent and predictable layout.
 				const sideX = Math.max(startX, endX) + LOOPBACK_SIDE_OFFSET;
 				const topY = endY - ARC_HEIGHT_ABOVE;
-
-				// Build the path exactly as drawn in your red-line example:
-				// 1. Start                   (M ${startX},${startY})
-				// 2. Go down a little        (V ${startY + 20})
-				// 3. Go far right            (H ${sideX})
-				// 4. Go up past the target   (V ${topY})
-				// 5. Go left over the target (H ${endX})
-				// 6. Go down to connect      (V ${endY})
+				
 				path = `M ${startX},${startY} V ${startY + 20} H ${sideX} V ${topY} H ${endX} V ${endY}`;
 				
-				// Place the label next to the main vertical riser for clarity.
 				labelPos = { x: sideX + TEXT_OFFSET_X, y: (startY + topY) / 2, anchor: 'start' };
 
 			} else {
-				// The existing, correct orthogonal logic for all downward connections.
 				const horizontalLineY = startY + BEND_OFFSET + (laneIndex * LANE_HEIGHT);
 				path = `M ${startX} ${startY} V ${horizontalLineY} H ${endX} V ${endY}`;
 				
@@ -5541,7 +5505,7 @@ const App = {
             if (!scene?.position) return;
             const viewRect = App.elements['node-editor-view'].getBoundingClientRect();
             const nodeWidth = 240;
-            const nodeHeight = 200; // Approximate
+            const nodeHeight = 200;
 
             this.state.pan.x = -scene.position.x * this.state.zoom + (viewRect.width / 2) - (nodeWidth / 2 * this.state.zoom);
             this.state.pan.y = -scene.position.y * this.state.zoom + (viewRect.height / 2) - (nodeHeight / 2 * this.state.zoom);
@@ -5559,7 +5523,7 @@ const App = {
 
             if (edgeData) {
                 itemsHTML += createButton('Delete Connection', `App.nodeEditor.deleteEdge()`);
-            } else if (sceneId) { // Node-specific menu
+            } else if (sceneId) { 
                 itemsHTML += createButton('Set as Start Scene', `App.tree.setAsStartScene()`);
                 itemsHTML += createButton('Duplicate Scene', `App.nodeEditor.cloneScene('${sceneId}')`);
                 itemsHTML += '<hr>';
@@ -5572,7 +5536,7 @@ const App = {
                 itemsHTML += createSubmenu('Set Color Tag', colorSubmenu);
                 itemsHTML += '<hr>';
                 itemsHTML += createButton('Delete Scene', `App.tree.deleteCurrentScene(true)`);
-            } else { // Pane-specific menu
+            } else { 
                 itemsHTML += createButton('Add New Scene Here', `App.nodeEditor.addNewScene(App.nodeEditor.state.contextMenuPos, event)`);
                 itemsHTML += '<hr>';
                 itemsHTML += createButton('Auto-Arrange All', 'App.nodeEditor.autoArrange()');
@@ -5597,10 +5561,10 @@ const App = {
             if (!newId) return;
             if (App.state.storyData.scenes[newId]) { App.ui.showNotification("Scene ID already exists."); return; }
             
-            const newScene = JSON.parse(JSON.stringify(originalScene)); // Deep copy
+            const newScene = JSON.parse(JSON.stringify(originalScene));
             newScene.id = newId;
             newScene.position = { x: originalScene.position.x + 40, y: originalScene.position.y + 40 };
-            newScene.choices = []; // Cloned scenes start with no choices
+            newScene.choices = []; 
 
             App.state.storyData.scenes[newId] = newScene;
             App.setDirty(true);
@@ -5667,17 +5631,14 @@ const App = {
             input.select();
 
             const saveAndClose = () => {
-                // Failsafe: if this function is somehow called twice, exit early.
                 if (!document.body.contains(input)) {
                     return;
                 }
 
                 choice.action.text = input.value;
                 App.setDirty(true);
-                this.renderEdges(); // Redraw the connection lines with the new text
+                this.renderEdges(); 
 
-                // If we are editing a choice for the currently selected scene,
-                // we must re-render the main editor to see the change reflected there.
                 if (sourceSceneId === App.state.currentSceneId) {
                     App.editor.render();
                 }
@@ -5696,7 +5657,7 @@ const App = {
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    input.blur(); // This triggers the 'blur' event, which calls saveAndClose.
+                    input.blur(); 
                 } else if (e.key === 'Escape') {
                     cancelAndClose();
                 }
@@ -5710,7 +5671,7 @@ const App = {
                 const sceneTextEl = document.getElementById('scene-text');
                 sceneTextEl.focus();
                 sceneTextEl.select();
-            }, 50); // Small delay to ensure the editor is rendered
+            }, 50); 
         },
 
         zoom(factor, mouseX = null, mouseY = null) {
@@ -5737,7 +5698,7 @@ const App = {
 
             const viewRect = App.elements['node-editor-view'].getBoundingClientRect();
             const PADDING = 50;
-            const NODE_WIDTH = 240, NODE_HEIGHT = 220; // Approx.
+            const NODE_WIDTH = 240, NODE_HEIGHT = 220;
 
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
             Object.values(scenes).forEach(s => {
@@ -5752,7 +5713,7 @@ const App = {
             
             const zoomX = (viewRect.width - 2 * PADDING) / contentWidth;
             const zoomY = (viewRect.height - 2 * PADDING) / contentHeight;
-            this.state.zoom = Math.min(zoomX, zoomY, 1.5); // Cap max zoom
+            this.state.zoom = Math.min(zoomX, zoomY, 1.5);
 
             this.state.pan.x = -minX * this.state.zoom + (viewRect.width - contentWidth * this.state.zoom) / 2;
             this.state.pan.y = -minY * this.state.zoom + (viewRect.height - contentHeight * this.state.zoom) / 2;
@@ -5773,11 +5734,10 @@ const App = {
 
             let path, labelPos;
 
-            // If target is directly below or very close horizontally
             if (Math.abs(startX - endX) < NODE_WIDTH / 2 && endY > startY) {
                 path = `M ${startX} ${startY} L ${endX} ${endY}`;
                 labelPos = { x: (startX + endX) / 2, y: (startY + endY) / 2 };
-            } else { // Stepped path for all other cases
+            } else { 
                 path = `M ${startX} ${startY} V ${midY} H ${endX} V ${endY}`;
                 labelPos = { x: (startX + endX) / 2, y: midY };
             }

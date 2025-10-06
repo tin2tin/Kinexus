@@ -1647,6 +1647,8 @@ const App = {
         App.elements['toggle-loop-btn'].addEventListener('click', (e) => {
             e.currentTarget.classList.toggle('active');
             App.editor.saveCurrentScene();
+            App.ui.invalidateNavViews();
+            App.ui.renderCurrentView();
         });
 
         // Video Controls
@@ -1654,6 +1656,8 @@ const App = {
             e.currentTarget.classList.toggle('active');
             App.editor.saveCurrentScene();
             App.editor.renderPreview();
+            App.ui.invalidateNavViews();
+            App.ui.renderCurrentView();
         });
         App.elements['toggle-video-mute-btn'].addEventListener('click', (e) => {
             const btn = e.currentTarget;
@@ -1681,7 +1685,13 @@ const App = {
         App.elements['choices-container'].addEventListener('input', saveAndPreview);
         App.elements['choices-container'].addEventListener('change', saveAndPreview);
         document.getElementById('scene-image-prompt').addEventListener('input', () => App.editor.saveCurrentScene());
-        App.elements['scene-sound'].addEventListener('input', saveAndUpdateMediaUI);
+        
+        App.elements['scene-sound'].addEventListener('input', () => {
+			App.editor.saveCurrentScene();
+			App.editor.ui.updateMediaButtonStates();
+            App.ui.invalidateNavViews();
+            App.ui.renderCurrentView();
+		});
 
 		App.elements['scene-image'].addEventListener('input', (e) => {
             App.editor.saveCurrentScene();
@@ -2763,6 +2773,8 @@ const App = {
                 let gameState = { currentSceneId: null, variables: {}, visited: {} };
                 let currentAmbienceSrc = '', currentMusicSrc = '', activeVideoElement = null;
                 let typewriterState = { intervalId: null, skipListener: null };
+                let isGloballyPaused = false;
+                let restorePlayState = { music: false, ambience: false, video: false };
 
                 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
                 const isAndroid = /android/i.test(navigator.userAgent);
@@ -2777,22 +2789,23 @@ const App = {
 
 				function parseMarkdown(text) {
                     if (!text) return '';
+                    // This function mirrors the main app's markdown parser for consistency.
                     let html = text
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
+                        .replace(/</g, '&lt;') // IMPORTANT: Must be first to prevent HTML injection.
                         .replace(/>/g, '&gt;')
-                        .replace(/\[(.*?)\]\((.*?)\)/g, (match, text, url) => {
+                        .replace(/\\[(.*?)\]\\((.*?)\\)/g, (match, text, url) => {
                             const safeUrl = url.trim();
-                            if (safeUrl.startsWith('javascript:') || safeUrl.startsWith('data:') || safeUrl.startsWith('vbscript:')) {
-                                return '[' + text + '](javascript:void(0))'; // Render a dead link
+                             if (safeUrl.startsWith('javascript:') || safeUrl.startsWith('data:') || safeUrl.startsWith('vbscript:')) {
+                                return \`[\${text}](javascript:void(0))\`; // Sanitize malicious links
                             }
-                            return '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + text + '</a>';
+                            return \`<a href="\${safeUrl}" target="_blank" rel="noopener noreferrer">\${text}</a>\`;
                         })
                         .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')
                         .replace(/__(.*?)__/g, '<strong>$1</strong>')
                         .replace(/\\*(.*?)\\*/g, '<em>$1</em>')
                         .replace(/_(.*?)_/g, '<em>$1</em>')
                         .replace(/~~(.*?)~~/g, '<s>$1</s>')
+                        .replace(/\`(.*?)\`/g, '<code>$1</code>')
                         .replace(/\\n/g, '<br>');
                     return html;
                 }
@@ -2829,13 +2842,28 @@ const App = {
                     bindEvent(document.getElementById('player-close-btn'), () => { if (window.top === window.self) { if (document.fullscreenElement) document.exitFullscreen(); window.close(); } else { document.body.innerHTML = '<div id="exit-message" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; font-size: 1.2em; color: #f0f0f0;"><p>Thanks for playing!</p><p>You can now close this window.</p></div>'; } });
 
                     const soundToggleBtn = document.getElementById('player-sound-toggle-btn');
+                    soundToggleBtn.title = "Pause/Play Audio";
                     bindEvent(soundToggleBtn, () => {
-                        const isMuted = !musicPlayer.muted;
-                        musicPlayer.muted = isMuted;
-                        ambiencePlayer.muted = isMuted;
-                        if(activeVideoElement) activeVideoElement.muted = isMuted || (storyData.scenes[gameState.currentSceneId]?.videoMuted ?? true);
-                        soundToggleBtn.querySelector('.icon-on').style.display = isMuted ? 'none' : 'block';
-                        soundToggleBtn.querySelector('.icon-off').style.display = isMuted ? 'block' : 'none';
+                        isGloballyPaused = !isGloballyPaused;
+                        if (isGloballyPaused) {
+                            restorePlayState.music = !musicPlayer.paused;
+                            restorePlayState.ambience = !ambiencePlayer.paused;
+                            restorePlayState.video = activeVideoElement ? !activeVideoElement.paused : false;
+
+                            if (restorePlayState.music) musicPlayer.pause();
+                            if (restorePlayState.ambience) ambiencePlayer.pause();
+                            if (restorePlayState.video) activeVideoElement.pause();
+
+                            soundToggleBtn.querySelector('.icon-on').style.display = 'none';
+                            soundToggleBtn.querySelector('.icon-off').style.display = 'block';
+                        } else {
+                            if (restorePlayState.music) musicPlayer.play().catch(e => console.warn(e));
+                            if (restorePlayState.ambience) ambiencePlayer.play().catch(e => console.warn(e));
+                            if (restorePlayState.video) activeVideoElement.play().catch(e => console.warn(e));
+                            
+                            soundToggleBtn.querySelector('.icon-on').style.display = 'block';
+                            soundToggleBtn.querySelector('.icon-off').style.display = 'none';
+                        }
                     });
 
                     const saveBtn = document.getElementById('save-btn'), loadBtn = document.getElementById('load-btn');
@@ -2893,9 +2921,25 @@ const App = {
 
                 function setupGlobalStyles() {
                     const musicPath = storyData.meta.styles['--music-path'] || '';
-                    if (musicPath !== currentMusicSrc) { currentMusicSrc = musicPath; musicPlayer.src = musicPath; if (musicPath) musicPlayer.play().catch(e=>console.log("Music autoplay blocked.")); else musicPlayer.pause(); }
+                    if (musicPath !== currentMusicSrc) {
+                        currentMusicSrc = musicPath;
+                        musicPlayer.src = musicPath;
+                        if (musicPath) {
+                            restorePlayState.music = true;
+                            if (!isGloballyPaused) musicPlayer.play().catch(e=>console.log("Music autoplay blocked."));
+                        } else {
+                            restorePlayState.music = false;
+                            musicPlayer.pause();
+                        }
+                    }
 
-                    const startAudio = () => { if (musicPlayer.src && musicPlayer.paused) musicPlayer.play().catch(e => console.warn("Music start failed.", e)); if (ambiencePlayer.src && ambiencePlayer.paused) ambiencePlayer.play().catch(e => console.warn("Ambience start failed.", e)); document.body.removeEventListener('click', startAudio); document.body.removeEventListener('touchend', startAudio); };
+                    const startAudio = () => { 
+                        if (!isGloballyPaused) {
+                            if (restorePlayState.music && musicPlayer.paused) musicPlayer.play().catch(e => console.warn("Music start failed.", e)); 
+                            if (restorePlayState.ambience && ambiencePlayer.paused) ambiencePlayer.play().catch(e => console.warn("Ambience start failed.", e));
+                        }
+                        document.body.removeEventListener('click', startAudio); document.body.removeEventListener('touchend', startAudio); 
+                    };
                     document.body.addEventListener('click', startAudio);
                     document.body.addEventListener('touchend', startAudio);
                 }
@@ -2977,6 +3021,10 @@ const App = {
                         const scene = storyData.scenes[sceneId];
                         if (!scene) { sceneText.innerHTML = 'Error: Scene "' + sceneId + '" not found.'; return; }
 
+                        // Apply volumes from sliders
+                        musicPlayer.volume = document.getElementById('volume-slider').value;
+                        ambiencePlayer.volume = document.getElementById('ambience-volume-slider').value;
+                        
                         const layout = storyData.meta.layout;
                         const mediaUrl = scene.image;
                         const isMediaVideo = isVideo(mediaUrl);
@@ -2995,6 +3043,7 @@ const App = {
                         imageContainer.style.display = 'none';
                         document.body.style.backgroundImage = 'var(--screen-bg-image)';
                         activeVideoElement = null;
+                        restorePlayState.video = false;
                         document.getElementById('player-video-controls').style.display = 'none';
 
                         if (isMediaVideo && mediaUrl) {
@@ -3004,9 +3053,13 @@ const App = {
                             if (activeVideoElement.src !== mediaUrl) activeVideoElement.src = mediaUrl;
                             activeVideoElement.style.display = 'block'; activeVideoElement.classList.add('visible');
                             activeVideoElement.loop = scene.videoLoop ?? true;
-                            activeVideoElement.muted = musicPlayer.muted || (scene.videoMuted ?? true);
+                            activeVideoElement.muted = scene.videoMuted ?? true; // Scene-specific mute
                             activeVideoElement.volume = document.getElementById('video-volume-slider').value;
-                            activeVideoElement.play().catch(e => console.warn("Video autoplay failed:", e));
+                            
+                            restorePlayState.video = true;
+                            if (!isGloballyPaused) {
+                                activeVideoElement.play().catch(e => console.warn("Video autoplay failed:", e));
+                            }
                             updateVideoControls(scene);
                         } else {
                            if (isPanelLayout && mediaUrl) {
@@ -3046,9 +3099,22 @@ const App = {
                             visibleChoices.forEach(choice => { const b = document.createElement('button'); b.textContent = choice.action.text; b.className = 'choice-btn'; bindEvent(b, () => processChoice(choice)); choicesContainer.appendChild(b); });
                         }
 
-                        ambiencePlayer.loop = scene.ambienceLoop ?? true; const soundUrl = scene.ambienceSound || '';
-                        if (soundUrl !== currentAmbienceSrc) { currentAmbienceSrc = soundUrl; ambiencePlayer.src = soundUrl; }
-                        if (soundUrl && ambiencePlayer.paused) { ambiencePlayer.play().catch(e => console.warn("Ambience autoplay blocked.")); } else if (!soundUrl) { ambiencePlayer.pause(); }
+                        ambiencePlayer.loop = scene.ambienceLoop ?? true; 
+                        const soundUrl = scene.ambienceSound || '';
+                        if (soundUrl !== currentAmbienceSrc) { 
+                            currentAmbienceSrc = soundUrl; 
+                            ambiencePlayer.src = soundUrl; 
+                        }
+                        
+                        if (soundUrl) {
+                            restorePlayState.ambience = true;
+                            if (!isGloballyPaused) {
+                                ambiencePlayer.play().catch(e => console.warn("Ambience autoplay blocked."));
+                            }
+                        } else {
+                            restorePlayState.ambience = false;
+                            ambiencePlayer.pause();
+                        }
                     } catch(e) { console.error("Error rendering scene:", e); sceneText.innerHTML = "An error occurred. Check console for details."; }
                 }
 
@@ -3449,7 +3515,7 @@ const App = {
 					${hasMedia ? (mediaType === 'video' ? this.ICONS.video + (scene.videoLoop ? this.ICONS.videoLoop : '') : this.ICONS.image) : ''}
 				</span>
                 <span class="scene-card-icon-group">
-                    ${scene.ambienceSound ? this.ICONS.audio : ''}
+                    ${scene.ambienceSound ? this.ICONS.audio + (scene.ambienceLoop ? this.ICONS.audioLoop : '') : ''}
                 </span>
                 ${isDeadEnd ? this.ICONS.end : ''}
                 ${hasConditions ? this.ICONS.condition : ''}
@@ -3642,6 +3708,7 @@ const App = {
             App.elements['toggle-loop-btn'].classList.toggle('active', scene.ambienceLoop ?? true);
             App.elements['manage-variables-btn'].innerHTML = App.editor.ui.iconManageVariables;
             this.ui.updateMediaButtonStates();
+            App.player.updateAmbienceButton(false); // Reset ambience button to "Play" icon
 
             // Video specific UI
             App.elements['toggle-video-loop-btn'].classList.toggle('active', scene.videoLoop ?? true);
@@ -4302,7 +4369,7 @@ const App = {
             this.gameState.visited[sceneId] = true;
 
             const scene = App.state.storyData.scenes[sceneId];
-            const { 'player-text': textEl, 'player-choices': choicesEl, 'ambience-player': audio, 'player-video-bg': videoBg, 'player-video-fg': videoFg, 'player-image': imageEl } = App.elements;
+            const { 'player-text': textEl, 'player-choices': choicesEl, 'ambience-player': audio, 'music-player': music, 'player-video-bg': videoBg, 'player-video-fg': videoFg, 'player-image': imageEl } = App.elements;
             const playerContainer = App.elements['player-container'];
             const playerInnerContainer = App.elements['player-inner-container'];
             const playerImageContainer = document.getElementById('player-image-container');
@@ -4312,18 +4379,22 @@ const App = {
             App.styles.applyToContainer(playerContainer);
 
             playerInnerContainer.className = App.state.storyData.meta.layout;
+            
+            const styles = App.state.storyData.meta.styles;
+            music.volume = parseFloat(styles['--music-volume'] || 0.4);
+            audio.volume = parseFloat(styles['--ambience-volume'] || 0.4);
 
             const [sceneMediaUrl, musicUrl] = await Promise.all([
                 App.io.getAssetDataUrl(scene?.image),
-                App.io.getAssetDataUrl(App.state.storyData.meta.styles['--music-path'])
+                App.io.getAssetDataUrl(styles['--music-path'])
             ]);
 
             if (musicUrl) {
-                if (!App.elements['music-player'].src.endsWith(musicUrl)) App.elements['music-player'].src = musicUrl;
-                if (App.elements['music-player'].paused) App.elements['music-player'].play().catch(e=>console.warn(e));
+                if (!music.src.endsWith(musicUrl)) music.src = musicUrl;
+                if (music.paused) music.play().catch(e=>console.warn(e));
             } else {
-                App.elements['music-player'].pause();
-                App.elements['music-player'].src = '';
+                music.pause();
+                music.src = '';
             }
 
             const isMediaVideo = App.assets.isVideo(scene.image);
@@ -4347,7 +4418,7 @@ const App = {
 					App.state.player.activeVideoElement.src = sceneMediaUrl;
 					App.state.player.activeVideoElement.loop = scene.videoLoop ?? true;
 					App.state.player.activeVideoElement.muted = scene.videoMuted ?? true;
-					App.state.player.activeVideoElement.volume = parseFloat(App.state.storyData.meta.styles['--video-volume'] || 1.0);
+					App.state.player.activeVideoElement.volume = parseFloat(styles['--video-volume'] || 1.0);
 					App.state.player.activeVideoElement.style.display = 'block';
 					App.state.player.activeVideoElement.play().catch(e => console.warn("In-editor player video playback failed.", e));
 				} else {
@@ -4361,7 +4432,7 @@ const App = {
 				}
 			} else {
             playerContainer.style.backgroundImage = 'none';
-            playerContainer.style.backgroundColor = App.state.storyData.meta.styles['--bg-color'] || App.styles.getDefaults()['--bg-color'];
+            playerContainer.style.backgroundColor = styles['--bg-color'] || App.styles.getDefaults()['--bg-color'];
 			}
 
             let visibleChoices = [];
@@ -4393,7 +4464,7 @@ const App = {
                 }
             }
 
-            if (App.state.storyData.meta.styles['--typewriter-effect'] === 'on') {
+            if (styles['--typewriter-effect'] === 'on') {
                 this.typeWriter(scene.text, visibleChoices);
             } else {
                 textEl.innerHTML = App.markdown.parse(scene.text);
@@ -5554,7 +5625,7 @@ const App = {
             if(menu) menu.style.display = 'none';
         },
 
-        cloneScene(sceneId) {
+cloneScene(sceneId) {
             const originalScene = App.state.storyData.scenes[sceneId];
             if (!originalScene) return;
             const newId = prompt("Enter a unique ID for the new duplicated scene:", `${sceneId}_copy`);

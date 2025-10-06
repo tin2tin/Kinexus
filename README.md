@@ -67,6 +67,10 @@
 
 ## Screenshots
 
+Node Editor
+
+<img width="1919" height="909" alt="image" src="https://github.com/user-attachments/assets/280c2baf-ae03-401a-add3-da439cc0d730" />
+
 Style Template Editor
 
 <img width="1905" height="957" alt="image" src="https://github.com/user-attachments/assets/b2fc925b-7f20-4211-86ee-560b6ab4a56a" />
@@ -82,10 +86,6 @@ Preview in Browser/Export as Standalone
 Standalone Menu
 
 <img width="1919" height="990" alt="image" src="https://github.com/user-attachments/assets/9efbb7b8-d471-4be1-8879-7bd51d8a3b7a" />
-
-Story Map Navigator
-
-<img width="602" height="740" alt="image" src="https://github.com/user-attachments/assets/95d27c3a-f76e-4f91-8477-587cdf92b8dd" />
 
 Generate AI Image
 

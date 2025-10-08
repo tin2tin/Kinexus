@@ -73,11 +73,12 @@
 			justify-content: center;
 			align-items: center;
 			z-index: 2000;
-            /* FIX: Player background image fix */
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            font-family: var(--font-family); /* FIX: Apply selected font to player */
+			/* FIX: Player background image fix */
+			background-size: cover;
+			background-repeat: no-repeat;
+			background-position: center;
+			font-family: var(--font-family); /* FIX: Apply selected font to player */
+			font-size: var(--font-size); /* <-- ADD THIS LINE */
 		}
 		#player-container.layout-panel-bottom {
 			align-items: flex-end;
@@ -4377,25 +4378,13 @@ const App = {
             if (!scene) { textEl.innerHTML = `Error: Scene "${sceneId}" not found.`; return; }
 
             App.styles.applyToContainer(playerContainer);
+            App.styles.updateLivePlayerStyles();
 
-            playerInnerContainer.className = App.state.storyData.meta.layout;
-            
             const styles = App.state.storyData.meta.styles;
-            music.volume = parseFloat(styles['--music-volume'] || 0.4);
-            audio.volume = parseFloat(styles['--ambience-volume'] || 0.4);
 
-            const [sceneMediaUrl, musicUrl] = await Promise.all([
+            const [sceneMediaUrl] = await Promise.all([
                 App.io.getAssetDataUrl(scene?.image),
-                App.io.getAssetDataUrl(styles['--music-path'])
             ]);
-
-            if (musicUrl) {
-                if (!music.src.endsWith(musicUrl)) music.src = musicUrl;
-                if (music.paused) music.play().catch(e=>console.warn(e));
-            } else {
-                music.pause();
-                music.src = '';
-            }
 
             const isMediaVideo = App.assets.isVideo(scene.image);
             const isPanelLayout = App.state.storyData.meta.layout.startsWith('layout-panel');
@@ -4626,9 +4615,79 @@ const App = {
             
             App.setDirty(true);
             App.editor.renderPreview();
-            if (App.elements['player-container'].style.display === 'flex') {
-                App.styles.applyToContainer(App.elements['player-container']);
+            this.updateLivePlayerStyles();
+        },
+        async updateLivePlayerStyles() {
+            if (App.elements['player-container'].style.display !== 'flex') {
+                return;
             }
+        
+            const playerContainer = App.elements['player-container'];
+            const meta = App.state.storyData.meta;
+            const styles = meta.styles;
+        
+            // 1. Apply all CSS variable-driven styles
+            this.applyToContainer(playerContainer);
+        
+            // 2. Handle layout change
+            const currentLayout = meta.layout;
+            playerContainer.className = currentLayout;
+            App.elements['player-inner-container'].className = currentLayout;
+        
+            // Re-evaluate media display based on the new layout
+            const scene = App.state.storyData.scenes[App.state.currentSceneId];
+            if (scene) {
+                const isMediaVideo = App.assets.isVideo(scene.image);
+                const sceneMediaUrl = await App.io.getAssetDataUrl(scene.image);
+                const isPanelLayout = currentLayout.startsWith('layout-panel');
+                
+                // Stop and hide all media first
+                App.elements['player-image'].style.display = 'none';
+                [App.elements['player-video-bg'], App.elements['player-video-fg']].forEach(v => {
+                    if (!v.paused) v.pause();
+                    v.style.display = 'none';
+                });
+                playerContainer.style.backgroundImage = 'none';
+        
+                if (sceneMediaUrl) {
+                    if (isMediaVideo) {
+                        const videoEl = isPanelLayout ? App.elements['player-video-bg'] : App.elements['player-video-fg'];
+                        videoEl.style.display = 'block';
+                        if (videoEl.src !== sceneMediaUrl) videoEl.src = sceneMediaUrl;
+                        if (videoEl.paused) videoEl.play().catch(e => console.warn(e));
+                    } else {
+                        if (isPanelLayout) {
+                            playerContainer.style.backgroundImage = `url('${sceneMediaUrl}')`;
+                        } else {
+                            App.elements['player-image'].src = sceneMediaUrl;
+                            App.elements['player-image'].style.display = 'block';
+                        }
+                    }
+                }
+            }
+        
+            // 3. Update Audio Volumes
+            App.elements['music-player'].volume = parseFloat(styles['--music-volume'] || 0.4);
+            App.elements['ambience-player'].volume = parseFloat(styles['--ambience-volume'] || 0.4);
+            if (App.state.player.activeVideoElement) {
+                App.state.player.activeVideoElement.volume = parseFloat(styles['--video-volume'] || 1.0);
+            }
+        
+            // 4. Handle Music Path Change
+            const musicPath = styles['--music-path'];
+            const musicUrl = await App.io.getAssetDataUrl(musicPath);
+            const musicPlayer = App.elements['music-player'];
+            if (musicUrl) {
+                if (musicPlayer.src !== musicUrl) musicPlayer.src = musicUrl;
+                if (musicPlayer.paused) musicPlayer.play().catch(e => console.warn(e));
+            } else {
+                musicPlayer.pause();
+                musicPlayer.src = '';
+            }
+        
+            // 5. Handle Typewriter Effect (This will only apply on the next scene render)
+            // No direct action can be taken here to change text already on screen without re-rendering it,
+            // but the setting is saved, and the player logic will pick it up on the next scene.
         },
         loadGoogleFont(fontFamily) {
             const fontName = fontFamily.split(',')[0].replace(/'/g, '').trim();

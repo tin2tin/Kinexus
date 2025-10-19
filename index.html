@@ -232,18 +232,22 @@
 			background: var(--primary-color); /* Make connected handles blue */
 		}
 		#node-svg-layer .edge-path {
-			stroke: #888; /* Lighter grey for normal connections */
+			stroke: var(--edge-color, #888); /* Use variable, fallback to grey */
 			stroke-width: 3;
 			fill: none !important;
+			transition: stroke 0.2s; /* Add transition for smoothness */
 		}
 		#node-svg-layer .edge-path.edge-path-loopback {
-			stroke: #6c757d; /* Darker grey for loopback */
+			/* The variable will still apply the color */
 			stroke-dasharray: 6, 6;
 		}
         #node-svg-layer .edge-hitbox { stroke: transparent; stroke-width: 12; fill: none; }
         #node-svg-layer .edge-group:hover .edge-path { stroke: var(--primary-color); stroke-width: 4; }
 		#node-svg-layer .edge-path.is-filtered-out { stroke: #444; }
-		#node-svg-layer .edge-arrow { fill: #555; transition: fill 0.2s; }
+		#node-svg-layer .edge-arrow { 
+			fill: var(--edge-color, #555); /* Use variable, fallback to grey */
+			transition: fill 0.2s; 
+		}
         #node-svg-layer .edge-group:hover .edge-arrow { fill: var(--primary-color); }
 		#node-svg-layer .edge-arrow.is-filtered-out { fill: #444; }
         #temp-edge { stroke: var(--primary-color); stroke-width: 2; stroke-dasharray: 5,5; fill: none; pointer-events: none; }
@@ -4940,6 +4944,21 @@ const App = {
             isConnecting: false,
             connectionStart: null,
         },
+        colorPalette: [
+            '#5FB5AC', '#a67db8', '#f2ae42', '#f28c4b', '#e56b6f',
+            '#6fa8dc', '#f6b26b', '#ffd966', '#93c47d', '#76a5af',
+            '#b4a7d6', '#d5a6bd', '#e06666', '#f6b26b', '#8e7cc3'
+        ],
+        nodeColors: new Map(),
+        getNodeColor(nodeId) {
+            if (this.nodeColors.has(nodeId)) {
+                return this.nodeColors.get(nodeId);
+            }
+            const hash = nodeId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const color = this.colorPalette[hash % this.colorPalette.length];
+            this.nodeColors.set(nodeId, color);
+            return color;
+        },
 
         init() {
             const view = App.elements['node-editor-view'];
@@ -5344,8 +5363,10 @@ const App = {
 				const isFiltered = sourceEl.classList.contains('is-filtered-out') || targetEl.classList.contains('is-filtered-out');
 				const pathData = this.calculateEdgePath(source.position, target.position, sourceEl.offsetHeight, isLoopback ? 0 : laneIndex);
 
+                const sourceColor = this.getNodeColor(source.id);
 				const edgeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 				edgeGroup.classList.add('edge-group');
+                edgeGroup.style.setProperty('--edge-color', sourceColor);
 				edgeGroup.dataset.sourceId = source.id;
 				edgeGroup.dataset.choiceIndex = choiceIndex;
 				edgeGroup.addEventListener('dblclick', (e) => {

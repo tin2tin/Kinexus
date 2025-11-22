@@ -220,6 +220,7 @@
 		.icon-start { color: var(--success-color); }
 		.icon-image, .icon-video, .icon-video-loop { color: #8ab4f8; }
 		.icon-sound, .icon-audio-loop { color: #fdd663; }
+        .icon-speech, .icon-speech-loop { color: #dd99ff; }
 		.icon-deadend { color: var(--danger-color); }
 		.icon-condition { color: var(--condition-icon-color); }
 		.icon-orphan { color: #fff; }
@@ -358,7 +359,7 @@
 		.btn-purple { background-color: var(--purple-color); }
 		.file-icon-btn { padding: 8px; min-width: 40px; }
 		.btn-round { border-radius: 50%; width: 30px; height: 30px; padding: 0; font-size: 1.2em; line-height: 30px; flex-shrink: 0; }
-		#image-file-input, #sound-file-input { display: none; }
+		#image-file-input, #sound-file-input, #speech-file-input { display: none; }
 
 		.form-group { margin-bottom: 20px; }
 		.form-group.choice-group { margin-bottom: 8px; }
@@ -663,7 +664,7 @@
 		.thumbnail-fullscreen-icon svg { width: 16px; height: 16px; }
 		.play-pause-icon.hidden { display: none; }
 		#style-editor-grid #style-font-size, #style-editor-grid #style-padding { background-color: #1E1E1E; color: white; border: 1px solid #444444; border-radius: 4px; height: 40px; box-sizing: border-box; }
-		#toggle-loop-btn.active, #toggle-video-loop-btn.active { background-color: var(--primary-color); }
+		#toggle-loop-btn.active, #toggle-speech-loop-btn.active, #toggle-video-loop-btn.active { background-color: var(--primary-color); }
 		#toggle-video-mute-btn:not(.active) { background-color: var(--primary-color); } /* Active means MUTED, so when NOT active, it's colored */
 		#custom-tooltip { display: none; position: fixed; z-index: 9999; background-color: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 5px 10px; font-size: 14px; max-width: 350px; word-wrap: break-word; white-space: pre-wrap; pointer-events: none; opacity: 0; transition: opacity 0.1s linear; }
 		#icon-thumbnail-tooltip { display: none; position: fixed; z-index: 9999; background-color: #2a2a2e; color: #fff; border: 1px solid #555; border-radius: 6px; padding: 12px; font-size: 14px; width: 280px; pointer-events: none; opacity: 0; transition: opacity 0.1s linear; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: flex; gap: 12px; align-items: center; }
@@ -984,6 +985,26 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
                             </button>
                         </div>
+                        <!-- Speech/Audio Option Added Here -->
+                        <div class="form-group inline">
+                             <span class="media-icon-label" title="Speech/Voiceover Path">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/><path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3z"/></svg>
+                            </span>
+                            <input type="text" id="scene-speech" data-asset-type="sounds" placeholder="e.g., sounds/dialogue.mp3">
+                             <button id="toggle-speech-loop-btn" class="btn-secondary file-icon-btn" title="Toggle Speech Loop">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                     <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                                     <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/>
+                                 </svg>
+                             </button>
+                             <button id="toggle-speech-btn" class="btn-secondary file-icon-btn" title="Play/Pause Speech">
+                                <svg class="play-pause-icon" id="speech-play-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734L10.804 8z"/></svg>
+                                <svg class="play-pause-icon hidden" id="speech-pause-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5z"/></svg>
+                            </button>
+                            <button id="select-speech-btn" class="btn-warning file-icon-btn" title="Select Speech File">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1028,6 +1049,7 @@
                 </div>
             </div>
             <audio id="ambience-player"></audio>
+            <audio id="speech-player"></audio>
             <audio id="music-player" loop></audio>
         </div>
     </div>
@@ -1037,6 +1059,7 @@
 <!-- Hidden Inputs for File Selection -->
 <input type="file" id="image-file-input" accept="image/*,video/*">
 <input type="file" id="sound-file-input" accept="audio/*">
+<input type="file" id="speech-file-input" accept="audio/*">
 
 <!-- Context Menus -->
 <div id="tree-context-menu" class="context-menu">
@@ -1414,6 +1437,7 @@
                 <div id="choices-container"></div>
             </div>
             <audio id="ambience-player"></audio>
+            <audio id="speech-player"></audio>
             <audio id="music-player" loop></audio>
         </div>
 
@@ -1462,6 +1486,7 @@
                     <hr>
                     <div class="menu-item"><span>Music</span><input type="range" id="volume-slider" min="0" max="1" step="0.01"></div>
                     <div class="menu-item"><span>Ambience</span><input type="range" id="ambience-volume-slider" min="0" max="1" step="0.01"></div>
+                    <div class="menu-item"><span>Speech</span><input type="range" id="speech-volume-slider" min="0" max="1" step="0.01"></div>
                     <div class="menu-item"><span>Video</span><input type="range" id="video-volume-slider" min="0" max="1" step="0.01"></div>
                     <div class="menu-item"><span>Font Size</span><input type="range" id="font-size-slider" min="8" max="28" step="1" value="16"></div>
                     <hr>
@@ -1596,9 +1621,11 @@ const App = {
             scenes: { "start": {
                 id: "start", text: "Start here.", image: "", imagePrompt: "",
                 videoLoop: true, videoMuted: true,
-                ambienceSound: "", ambienceLoop: true, choices: [], visited: false,
+                ambienceSound: "", ambienceLoop: true, 
+                speechSound: "", speechLoop: false, // New default properties
+                choices: [], visited: false,
                 lastModified: Date.now(),
-                mediaType: 'none', color: null, // New properties
+                mediaType: 'none', color: null,
                 position: { x: 200, y: 50 }
             } }
         };
@@ -1607,8 +1634,8 @@ const App = {
     cacheElements() {
         const ids = [
             'editor-container', 'player-container', 'scene-id', 'scene-image',
-            'scene-image-prompt', 'scene-sound', 'scene-text', 'choices-container',
-            'ambience-player', 'music-player', 'export-data-modal', 'style-editor-modal', 'about-editor-modal',
+            'scene-image-prompt', 'scene-sound', 'scene-speech', 'scene-text', 'choices-container',
+            'ambience-player', 'speech-player', 'music-player', 'export-data-modal', 'style-editor-modal', 'about-editor-modal',
             'tree-context-menu', 'editor-context-menu', 'save-project-dirty-btn',
             'save-story-btn', 'player-image', 'player-text', 'player-choices', 'player-content-container', 'player-inner-container',
             'player-video-bg', 'player-video-fg',
@@ -1616,6 +1643,7 @@ const App = {
             'story-title', 'creator-name', 'about-text',
             'notification-modal', 'notification-message', 'notification-close-btn',
             'toggle-ambience-btn', 'ambience-play-icon', 'ambience-pause-icon', 'toggle-loop-btn',
+            'toggle-speech-btn', 'speech-play-icon', 'speech-pause-icon', 'toggle-speech-loop-btn',
             'scene-editor-preview', 'scene-editor-preview-wrapper', 'preview-player-video',
             'video-controls', 'toggle-video-loop-btn', 'toggle-video-mute-btn', 'toggle-video-playback-btn',
             'video-play-icon', 'video-pause-icon', 'video-unmute-icon', 'video-mute-icon',
@@ -1644,6 +1672,7 @@ const App = {
 
         document.getElementById('select-image-btn').addEventListener('click', () => App.assets.selectFile('images', 'scene-image'));
         document.getElementById('select-sound-btn').addEventListener('click', () => App.assets.selectFile('sounds', 'scene-sound'));
+        document.getElementById('select-speech-btn').addEventListener('click', () => App.assets.selectFile('sounds', 'scene-speech'));
 
         // Ambience Controls
         App.elements['toggle-ambience-btn'].addEventListener('click', () => App.player.toggleAmbienceSound());
@@ -1655,6 +1684,18 @@ const App = {
             App.ui.invalidateNavViews();
             App.ui.renderCurrentView();
         });
+
+        // Speech Controls
+        App.elements['toggle-speech-btn'].addEventListener('click', () => App.player.toggleSpeechSound());
+        App.elements['speech-player'].addEventListener('play', () => App.player.updateSpeechButton(true));
+        App.elements['speech-player'].addEventListener('pause', () => App.player.updateSpeechButton(false));
+        App.elements['toggle-speech-loop-btn'].addEventListener('click', (e) => {
+            e.currentTarget.classList.toggle('active');
+            App.editor.saveCurrentScene();
+            App.ui.invalidateNavViews();
+            App.ui.renderCurrentView();
+        });
+
 
         // Video Controls
         App.elements['toggle-video-loop-btn'].addEventListener('click', (e) => {
@@ -1681,22 +1722,21 @@ const App = {
 
         // Automatic saving and UI update listeners
         const saveAndPreview = () => { App.editor.saveCurrentScene(); App.editor.renderPreview(); };
-        const saveAndUpdateMediaUI = () => {
-			App.editor.saveCurrentScene();
-			App.editor.ui.updateMediaButtonStates();
-		};
-
+        
         App.elements['scene-text'].addEventListener('input', saveAndPreview);
         App.elements['choices-container'].addEventListener('input', saveAndPreview);
         App.elements['choices-container'].addEventListener('change', saveAndPreview);
         document.getElementById('scene-image-prompt').addEventListener('input', () => App.editor.saveCurrentScene());
         
-        App.elements['scene-sound'].addEventListener('input', () => {
+        const mediaUpdateHandler = () => {
 			App.editor.saveCurrentScene();
 			App.editor.ui.updateMediaButtonStates();
             App.ui.invalidateNavViews();
             App.ui.renderCurrentView();
-		});
+		};
+
+        App.elements['scene-sound'].addEventListener('input', mediaUpdateHandler);
+        App.elements['scene-speech'].addEventListener('input', mediaUpdateHandler);
 
 		App.elements['scene-image'].addEventListener('input', (e) => {
             App.editor.saveCurrentScene();
@@ -1777,7 +1817,7 @@ const App = {
         document.getElementById('batch-remove-images-btn').addEventListener('click', () => App.batch.removeAllImages());
         document.getElementById('batch-remove-prompts-btn').addEventListener('click', () => App.batch.removeAllImagePrompts());
 
-        const inputs = ['scene-image', 'scene-sound'];
+        const inputs = ['scene-image', 'scene-sound', 'scene-speech'];
         inputs.forEach(id => {
             const el = document.getElementById(id);
             el.addEventListener('dragover', App.assets.handleDragOver);
@@ -2067,6 +2107,7 @@ const App = {
 			}
 
 			App.elements['ambience-player'].pause();
+            App.elements['speech-player'].pause();
 			const previewVideo = App.elements['preview-player-video'];
 			if(previewVideo && !previewVideo.paused) {
 				previewVideo.pause();
@@ -2311,6 +2352,11 @@ const App = {
 				title: 'Has Audio',
 				desc: 'This scene has ambient sound or music that will play.'
 			},
+            'icon-speech': {
+				icon: `<svg class="icon-speech" viewBox="0 0 16 16"><path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/><path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3z"/></svg>`,
+				title: 'Has Speech',
+				desc: 'This scene has a voiceover or speech audio file.'
+			},
 			 'icon-condition': {
 				icon: `<svg class="icon-condition" viewBox="0 0 16 16"><path d="M11 12L19 8 M11 12L19 16 M3 12h8"/><circle cx="3" cy="12" r="2"/><circle cx="19" cy="8" r="2"/><circle cx="19" cy="16" r="2"/></svg>`,
 				title: 'Has Conditions',
@@ -2525,6 +2571,9 @@ const App = {
                             videoMuted: scene.videoMuted ?? true,
                             ambienceSound: typeof scene.ambienceSound === 'string' ? scene.ambienceSound : '',
                             ambienceLoop: scene.ambienceLoop ?? true,
+                            // --- NEW SPEECH FIELDS ---
+                            speechSound: typeof scene.speechSound === 'string' ? scene.speechSound : '',
+                            speechLoop: scene.speechLoop ?? false, // Default to false for speech
                             choices: safeChoices,
                             visited: scene.visited === true,
                             lastModified: typeof scene.lastModified === 'number' ? scene.lastModified : Date.now(),
@@ -2774,12 +2823,12 @@ const App = {
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const storyData = ${storyJsonString};
-                const sceneImage = document.getElementById('scene-image'), sceneVideo = document.getElementById('scene-video'), sceneText = document.getElementById('scene-text'), choicesContainer = document.getElementById('choices-container'), ambiencePlayer = document.getElementById('ambience-player'), musicPlayer = document.getElementById('music-player'), playerMenuBtn = document.getElementById('player-menu-btn'), playerMenuModal = document.getElementById('player-menu-modal'), aboutModal = document.getElementById('about-modal'), gameContainer = document.getElementById('game-container'), contentContainer = document.getElementById('content-container'), backgroundVideo = document.getElementById('background-video');
+                const sceneImage = document.getElementById('scene-image'), sceneVideo = document.getElementById('scene-video'), sceneText = document.getElementById('scene-text'), choicesContainer = document.getElementById('choices-container'), ambiencePlayer = document.getElementById('ambience-player'), speechPlayer = document.getElementById('speech-player'), musicPlayer = document.getElementById('music-player'), playerMenuBtn = document.getElementById('player-menu-btn'), playerMenuModal = document.getElementById('player-menu-modal'), aboutModal = document.getElementById('about-modal'), gameContainer = document.getElementById('game-container'), contentContainer = document.getElementById('content-container'), backgroundVideo = document.getElementById('background-video');
                 let gameState = { currentSceneId: null, variables: {}, visited: {} };
-                let currentAmbienceSrc = '', currentMusicSrc = '', activeVideoElement = null;
+                let currentAmbienceSrc = '', currentSpeechSrc = '', currentMusicSrc = '', activeVideoElement = null;
                 let typewriterState = { intervalId: null, skipListener: null };
                 let isGloballyPaused = false;
-                let restorePlayState = { music: false, ambience: false, video: false };
+                let restorePlayState = { music: false, ambience: false, speech: false, video: false };
 
                 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
                 const isAndroid = /android/i.test(navigator.userAgent);
@@ -2853,10 +2902,12 @@ const App = {
                         if (isGloballyPaused) {
                             restorePlayState.music = !musicPlayer.paused;
                             restorePlayState.ambience = !ambiencePlayer.paused;
+                            restorePlayState.speech = !speechPlayer.paused;
                             restorePlayState.video = activeVideoElement ? !activeVideoElement.paused : false;
 
                             if (restorePlayState.music) musicPlayer.pause();
                             if (restorePlayState.ambience) ambiencePlayer.pause();
+                            if (restorePlayState.speech) speechPlayer.pause();
                             if (restorePlayState.video) activeVideoElement.pause();
 
                             soundToggleBtn.querySelector('.icon-on').style.display = 'none';
@@ -2864,6 +2915,7 @@ const App = {
                         } else {
                             if (restorePlayState.music) musicPlayer.play().catch(e => console.warn(e));
                             if (restorePlayState.ambience) ambiencePlayer.play().catch(e => console.warn(e));
+                            if (restorePlayState.speech) speechPlayer.play().catch(e => console.warn(e));
                             if (restorePlayState.video) activeVideoElement.play().catch(e => console.warn(e));
                             
                             soundToggleBtn.querySelector('.icon-on').style.display = 'block';
@@ -2901,6 +2953,7 @@ const App = {
                     };
                     setupSlider('volume-slider', musicPlayer, 'cyoa-music-volume-' + storyData.meta.title, '--music-volume');
                     setupSlider('ambience-volume-slider', ambiencePlayer, 'cyoa-ambience-volume-' + storyData.meta.title, '--ambience-volume');
+                    setupSlider('speech-volume-slider', speechPlayer, 'cyoa-speech-volume-' + storyData.meta.title, '--speech-volume');
 
                     const videoVolumeSlider = document.getElementById('video-volume-slider');
                     const videoVolKey = 'cyoa-video-volume-' + storyData.meta.title;
@@ -2942,6 +2995,7 @@ const App = {
                         if (!isGloballyPaused) {
                             if (restorePlayState.music && musicPlayer.paused) musicPlayer.play().catch(e => console.warn("Music start failed.", e)); 
                             if (restorePlayState.ambience && ambiencePlayer.paused) ambiencePlayer.play().catch(e => console.warn("Ambience start failed.", e));
+                            if (restorePlayState.speech && speechPlayer.paused) speechPlayer.play().catch(e => console.warn("Speech start failed.", e));
                         }
                         document.body.removeEventListener('click', startAudio); document.body.removeEventListener('touchend', startAudio); 
                     };
@@ -3029,6 +3083,7 @@ const App = {
                         // Apply volumes from sliders
                         musicPlayer.volume = document.getElementById('volume-slider').value;
                         ambiencePlayer.volume = document.getElementById('ambience-volume-slider').value;
+                        speechPlayer.volume = document.getElementById('speech-volume-slider').value;
                         
                         const layout = storyData.meta.layout;
                         const mediaUrl = scene.image;
@@ -3104,6 +3159,7 @@ const App = {
                             visibleChoices.forEach(choice => { const b = document.createElement('button'); b.textContent = choice.action.text; b.className = 'choice-btn'; bindEvent(b, () => processChoice(choice)); choicesContainer.appendChild(b); });
                         }
 
+                        // AMBIENCE HANDLING
                         ambiencePlayer.loop = scene.ambienceLoop ?? true; 
                         const soundUrl = scene.ambienceSound || '';
                         if (soundUrl !== currentAmbienceSrc) { 
@@ -3120,6 +3176,26 @@ const App = {
                             restorePlayState.ambience = false;
                             ambiencePlayer.pause();
                         }
+
+                        // SPEECH HANDLING
+                        speechPlayer.loop = scene.speechLoop ?? false; 
+                        const speechUrl = scene.speechSound || '';
+                        if (speechUrl !== currentSpeechSrc) { 
+                            currentSpeechSrc = speechUrl; 
+                            speechPlayer.src = speechUrl; 
+                        }
+                        
+                        if (speechUrl) {
+                            restorePlayState.speech = true;
+                            if (!isGloballyPaused) {
+                                speechPlayer.play().catch(e => console.warn("Speech autoplay blocked."));
+                            }
+                        } else {
+                            restorePlayState.speech = false;
+                            speechPlayer.pause();
+                        }
+
+
                     } catch(e) { console.error("Error rendering scene:", e); sceneText.innerHTML = "An error occurred. Check console for details."; }
                 }
 
@@ -3172,6 +3248,7 @@ const App = {
                     Object.values(storyData.scenes).forEach(scene => {
                         if (scene.image) assetPaths.add(scene.image);
                         if (scene.ambienceSound) assetPaths.add(scene.ambienceSound);
+                        if (scene.speechSound) assetPaths.add(scene.speechSound); // Collect speech
                     });
                     if (storyData.meta.styles['--music-path']) assetPaths.add(storyData.meta.styles['--music-path']);
                     if (storyData.meta.styles['--screen-bg-image']) assetPaths.add(storyData.meta.styles['--screen-bg-image']);
@@ -3214,6 +3291,7 @@ const App = {
                     Object.values(storyData.scenes).forEach(scene => {
                         if (scene.image && assetDataUrls[scene.image]) scene.image = assetDataUrls[scene.image];
                         if (scene.ambienceSound && assetDataUrls[scene.ambienceSound]) scene.ambienceSound = assetDataUrls[scene.ambienceSound];
+                        if (scene.speechSound && assetDataUrls[scene.speechSound]) scene.speechSound = assetDataUrls[scene.speechSound];
                     });
                     if (storyData.meta.styles['--music-path'] && assetDataUrls[storyData.meta.styles['--music-path']]) storyData.meta.styles['--music-path'] = assetDataUrls[storyData.meta.styles['--music-path']];
                     if (storyData.meta.styles['--screen-bg-image'] && assetDataUrls[storyData.meta.styles['--screen-bg-image']]) storyData.meta.styles['--screen-bg-image'] = assetDataUrls[storyData.meta.styles['--screen-bg-image']];
@@ -3365,6 +3443,7 @@ const App = {
 			Object.values(App.state.storyData.scenes).forEach(scene => {
 				collectAsset(scene.image, scene.id);
 				collectAsset(scene.ambienceSound, scene.id);
+                collectAsset(scene.speechSound, scene.id);
 			});
 
 			const metaStyles = App.state.storyData.meta.styles;
@@ -3401,6 +3480,10 @@ const App = {
                 if(scene.ambienceSound) {
                     const file = await App.io.getAssetFile(scene.ambienceSound);
                     if(!file) brokenPaths.push(scene.ambienceSound);
+                }
+                if(scene.speechSound) {
+                    const file = await App.io.getAssetFile(scene.speechSound);
+                    if(!file) brokenPaths.push(scene.speechSound);
                 }
                 if(brokenPaths.length > 0) {
                     App.state.brokenAssetLinks.set(scene.id, brokenPaths);
@@ -3479,6 +3562,7 @@ const App = {
 			videoLoop: `<svg class="scene-card-icon icon-video-loop" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>`,
             audio: `<svg class="scene-card-icon icon-sound" viewBox="0 0 16 16"><path d="M9.707,2.293a1,1,0,0,0-1.414,0L4.6,6H2.5A1.5,1.5,0,0,0,1,7.5v1A1.5,1.5,0,0,0,2.5,10H4.6l3.69,3.707a1,1,0,0,0,1.414,0V2.293Z"/></svg>`,
 			audioLoop: `<svg class="scene-card-icon icon-audio-loop" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>`,
+            speech: `<svg class="scene-card-icon icon-speech" viewBox="0 0 16 16"><path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/><path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3z"/></svg>`,
             orphan: `<svg class="scene-card-icon icon-orphan" viewBox="0 0 16 16"><rect x="7" y="2" width="2" height="12"/><rect x="3" y="5" width="10" height="2"/></svg>`,
 			end: `<svg class="scene-card-icon icon-deadend" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7.5" fill="none" stroke="currentColor" stroke-width="1"/><rect x="3" y="6.5" width="10" height="3" fill="currentColor"/></svg>`,
             condition: `<svg class="scene-card-icon icon-condition" viewBox="0 0 16 16"><path d="M7.33 8L12.67 5.33M7.33 8L12.67 10.67M2 8h5.33"/><circle cx="2" cy="8" r="1.33"/><circle cx="12.67" cy="5.33" r="1.33"/><circle cx="12.67" cy="10.67" r="1.33"/></svg>`
@@ -3521,6 +3605,9 @@ const App = {
 				</span>
                 <span class="scene-card-icon-group">
                     ${scene.ambienceSound ? this.ICONS.audio + (scene.ambienceLoop ? this.ICONS.audioLoop : '') : ''}
+                </span>
+                <span class="scene-card-icon-group">
+                    ${scene.speechSound ? this.ICONS.speech : ''}
                 </span>
                 ${isDeadEnd ? this.ICONS.end : ''}
                 ${hasConditions ? this.ICONS.condition : ''}
@@ -3709,11 +3796,18 @@ const App = {
             App.elements['scene-image'].value = scene.image || '';
             App.ui.updateImageThumbnail(scene.image);
             App.elements['scene-image-prompt'].value = scene.imagePrompt || '';
+            
             App.elements['scene-sound'].value = scene.ambienceSound || '';
             App.elements['toggle-loop-btn'].classList.toggle('active', scene.ambienceLoop ?? true);
+            
+            // New Speech Fields
+            App.elements['scene-speech'].value = scene.speechSound || '';
+            App.elements['toggle-speech-loop-btn'].classList.toggle('active', scene.speechLoop ?? false);
+
             App.elements['manage-variables-btn'].innerHTML = App.editor.ui.iconManageVariables;
             this.ui.updateMediaButtonStates();
             App.player.updateAmbienceButton(false); // Reset ambience button to "Play" icon
+            App.player.updateSpeechButton(false);   // Reset speech button
 
             // Video specific UI
             App.elements['toggle-video-loop-btn'].classList.toggle('active', scene.videoLoop ?? true);
@@ -3866,8 +3960,14 @@ const App = {
 
             scene.image = App.elements['scene-image'].value.trim();
             scene.imagePrompt = App.elements['scene-image-prompt'].value.trim();
+            
             scene.ambienceSound = App.elements['scene-sound'].value.trim();
             scene.ambienceLoop = App.elements['toggle-loop-btn'].classList.contains('active');
+            
+            // Save Speech settings
+            scene.speechSound = App.elements['scene-speech'].value.trim();
+            scene.speechLoop = App.elements['toggle-speech-loop-btn'].classList.contains('active');
+
             scene.videoLoop = App.elements['toggle-video-loop-btn'].classList.contains('active');
             scene.videoMuted = App.elements['toggle-video-mute-btn'].classList.contains('active');
             scene.choices = newChoices;
@@ -4049,6 +4149,11 @@ const App = {
 				ambienceBtn.classList.toggle('btn-success', hasSound);
 				ambienceBtn.classList.toggle('btn-secondary', !hasSound);
 
+                const hasSpeech = !!App.elements['scene-speech'].value;
+                const speechBtn = App.elements['toggle-speech-btn'];
+                speechBtn.classList.toggle('btn-success', hasSpeech);
+                speechBtn.classList.toggle('btn-secondary', !hasSpeech);
+
 				const hasVideo = App.assets.isVideo(App.elements['scene-image'].value);
 				const videoBtn = App.elements['toggle-video-playback-btn'];
 				videoBtn.classList.toggle('btn-success', hasVideo);
@@ -4154,10 +4259,13 @@ const App = {
 			});
 		},
         async selectFile(assetType, targetInputId) {
-            const fileInput = document.getElementById(assetType === 'images' ? 'image-file-input' : 'sound-file-input');
+            // Select appropriate input based on type (image or sound/speech)
+            const isSound = assetType === 'sounds';
+            const fileInput = document.getElementById(isSound ? 'sound-file-input' : 'image-file-input');
+            
             const handleFile = async (file) => {
                 if (!file) return;
-                const assetTypeFolder = this.isVideo(file.name) ? 'videos' : (assetType === 'sounds' ? 'sounds' : 'images');
+                const assetTypeFolder = this.isVideo(file.name) ? 'videos' : (isSound ? 'sounds' : 'images');
                 const destinationPath = `${assetTypeFolder}/${file.name}`;
                 App.state.pendingAssetCopies.set(destinationPath, file);
                 const inputElement = document.getElementById(targetInputId);
@@ -4172,10 +4280,10 @@ const App = {
                 try {
                     const options = {
                         types: [{
-                            description: assetType === 'images' ? 'Images/Videos' : 'Sounds',
-                            accept: assetType === 'images'
-                                ? {'media/*': ['.png', '.gif', '.jpeg', '.jpg', '.webp', ...App.constants.VIDEO_EXTENSIONS]}
-                                : {'audio/*': ['.mp3', '.wav', '.ogg', '.m4a']}
+                            description: isSound ? 'Sounds' : 'Images/Videos',
+                            accept: isSound
+                                ? {'audio/*': ['.mp3', '.wav', '.ogg', '.m4a']}
+                                : {'media/*': ['.png', '.gif', '.jpeg', '.jpg', '.webp', ...App.constants.VIDEO_EXTENSIONS]}
                         }],
                         multiple: false,
                         startIn: App.state.lastAssetHandles[assetType] || App.state.projectDirectoryHandle || 'pictures'
@@ -4265,9 +4373,13 @@ const App = {
 	player: {
         pauseAllEditorMedia() {
 			const ambiencePlayer = App.elements['ambience-player'];
+            const speechPlayer = App.elements['speech-player'];
 			const previewVideo = App.elements['preview-player-video'];
 			if (ambiencePlayer && !ambiencePlayer.paused) {
 				ambiencePlayer.pause();
+			}
+            if (speechPlayer && !speechPlayer.paused) {
+				speechPlayer.pause();
 			}
 			if (previewVideo && !previewVideo.paused) {
 				previewVideo.pause();
@@ -4374,7 +4486,7 @@ const App = {
             this.gameState.visited[sceneId] = true;
 
             const scene = App.state.storyData.scenes[sceneId];
-            const { 'player-text': textEl, 'player-choices': choicesEl, 'ambience-player': audio, 'music-player': music, 'player-video-bg': videoBg, 'player-video-fg': videoFg, 'player-image': imageEl } = App.elements;
+            const { 'player-text': textEl, 'player-choices': choicesEl, 'ambience-player': audio, 'speech-player': speech, 'music-player': music, 'player-video-bg': videoBg, 'player-video-fg': videoFg, 'player-image': imageEl } = App.elements;
             const playerContainer = App.elements['player-container'];
             const playerInnerContainer = App.elements['player-inner-container'];
             const playerImageContainer = document.getElementById('player-image-container');
@@ -4424,8 +4536,8 @@ const App = {
 					}
 				}
 			} else {
-            playerContainer.style.backgroundImage = 'none';
-            playerContainer.style.backgroundColor = styles['--bg-color'] || App.styles.getDefaults()['--bg-color'];
+                playerContainer.style.backgroundImage = 'none';
+                playerContainer.style.backgroundColor = styles['--bg-color'] || App.styles.getDefaults()['--bg-color'];
 			}
 
             let visibleChoices = [];
@@ -4471,16 +4583,24 @@ const App = {
                 });
             }
 
+            // Play Ambience
             audio.loop = scene.ambienceLoop ?? true;
             const soundUrl = await App.io.getAssetDataUrl(scene.ambienceSound);
             if (soundUrl) { if(audio.src !== soundUrl) audio.src = soundUrl; audio.play().catch(e=>console.warn("Audio autoplay blocked.")); }
             else { audio.pause(); }
+
+            // Play Speech
+            speech.loop = scene.speechLoop ?? false;
+            const speechUrl = await App.io.getAssetDataUrl(scene.speechSound);
+            if (speechUrl) { if(speech.src !== speechUrl) speech.src = speechUrl; speech.play().catch(e=>console.warn("Speech autoplay blocked.")); }
+            else { speech.pause(); }
+
         },
         stop() {
             App.elements['player-container'].style.display = 'none';
 
-            App.elements['ambience-player'].pause(); App.elements['music-player'].pause();
-            App.elements['ambience-player'].src = ''; App.elements['music-player'].src = '';
+            App.elements['ambience-player'].pause(); App.elements['music-player'].pause(); App.elements['speech-player'].pause();
+            App.elements['ambience-player'].src = ''; App.elements['music-player'].src = ''; App.elements['speech-player'].src = '';
 
             const videos = [App.elements['player-video-bg'], App.elements['player-video-fg']];
             videos.forEach(playerVideo => {
@@ -4517,6 +4637,28 @@ const App = {
         updateAmbienceButton(isPlaying) {
             App.elements['ambience-play-icon'].classList.toggle('hidden', isPlaying);
             App.elements['ambience-pause-icon'].classList.toggle('hidden', !isPlaying);
+        },
+        async toggleSpeechSound() {
+			const audio = App.elements['speech-player'];
+            const soundPath = App.elements['scene-speech'].value;
+            if (!soundPath) return;
+
+            const scene = App.state.storyData.scenes[App.state.currentSceneId];
+            if (scene) audio.loop = scene.speechLoop ?? false;
+
+            const soundUrl = await App.io.getAssetDataUrl(soundPath);
+            if (!soundUrl) { App.ui.showNotification("Speech file not found in project."); return; }
+
+            if (!audio.paused && audio.src.endsWith(soundUrl)) {
+                audio.pause();
+            } else {
+                audio.src = soundUrl;
+                audio.play().catch(e => console.warn("Speech playback failed.", e));
+            }
+        },
+        updateSpeechButton(isPlaying) {
+            App.elements['speech-play-icon'].classList.toggle('hidden', isPlaying);
+            App.elements['speech-pause-icon'].classList.toggle('hidden', !isPlaying);
         }
     },
 
@@ -4562,7 +4704,7 @@ const App = {
                 <hr class="grid-separator">
                 <div class="grid-full-width"> <label>Background Music <div class="form-group inline" style="margin:0;"><input type="text" id="style-music-path" class="path-input" data-asset-type="sounds" placeholder="sounds/music.mp3"><button class="btn-warning file-icon-btn" title="Select Music File">📁</button></div></label> </div>
                 <div class="grid-span-2"> <label>Music Volume <input type="range" id="style-music-volume" min="0" max="1" step="0.01"></label> <label>Ambience Volume <input type="range" id="style-ambience-volume" min="0" max="1" step="0.01"></label> </div>
-                <div class="grid-full-width"> <label>Video Volume <input type="range" id="style-video-volume" min="0" max="1" step="0.01"></label> </div>
+                <div class="grid-span-2"> <label>Speech Volume <input type="range" id="style-speech-volume" min="0" max="1" step="0.01"></label> <label>Video Volume <input type="range" id="style-video-volume" min="0" max="1" step="0.01"></label> </div>
             `;
 
             Object.keys(defaults).forEach(key => { const el = grid.querySelector(`#style-${key.replace(/--/g, '')}`); if(el) el.value = (el.type === 'number' || key.endsWith('-volume')) ? parseFloat(styles[key] || defaults[key]) : (styles[key] || defaults[key]).replace('px', ''); });
@@ -4673,6 +4815,7 @@ const App = {
             // 3. Update Audio Volumes
             App.elements['music-player'].volume = parseFloat(styles['--music-volume'] || 0.4);
             App.elements['ambience-player'].volume = parseFloat(styles['--ambience-volume'] || 0.4);
+            App.elements['speech-player'].volume = parseFloat(styles['--speech-volume'] || 0.4);
             if (App.state.player.activeVideoElement) {
                 App.state.player.activeVideoElement.volume = parseFloat(styles['--video-volume'] || 1.0);
             }
@@ -4688,10 +4831,6 @@ const App = {
                 musicPlayer.pause();
                 musicPlayer.src = '';
             }
-        
-            // 5. Handle Typewriter Effect (This will only apply on the next scene render)
-            // No direct action can be taken here to change text already on screen without re-rendering it,
-            // but the setting is saved, and the player logic will pick it up on the next scene.
         },
         loadGoogleFont(fontFamily) {
             const fontName = fontFamily.split(',')[0].replace(/'/g, '').trim();
@@ -4784,7 +4923,7 @@ const App = {
 
 			return `:root {\n${rootVars}} body { background-image: var(--screen-bg-image); background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); } #game-container { font-size: var(--font-size); background-color: var(--container-bg-color); } .choice-btn { font-family: var(--font-family); background-color: var(--btn-color); color: var(--btn-text-color); border-width: var(--container-outline-width, 0px); border-style: solid; border-color: var(--container-outline-color, transparent); } .choice-btn:hover { background-color: var(--btn-hover-color); }`;
 		},
-        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--container-effect': 'shadow', '--container-outline-color': '#FFFFFF', '--music-path': '', '--music-volume': '0.4', '--ambience-volume': '0.4', '--video-volume': '1.0', '--typewriter-effect': 'on' }; }
+        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--container-effect': 'shadow', '--container-outline-color': '#FFFFFF', '--music-path': '', '--music-volume': '0.4', '--ambience-volume': '0.4', '--speech-volume': '0.4', '--video-volume': '1.0', '--typewriter-effect': 'on' }; }
     },
 
     modals: {
@@ -5198,6 +5337,7 @@ const App = {
 
             const isStart = scene.id === App.state.storyData.meta.startSceneId;
             const hasSound = !!scene.ambienceSound;
+            const hasSpeech = !!scene.speechSound;
             const hasConditions = (scene.choices || []).some(c => c.condition);
             const choicesWithTargets = (scene.choices || []).filter(c => c.action?.target);
             const isDeadEnd = choicesWithTargets.length === 0;
@@ -5222,6 +5362,7 @@ const App = {
                     ${mediaType === 'image' ? `<span class="icon-group" title="Has Image">${App.sceneList.ICONS.image}</span>` : ''}
                     ${mediaType === 'video' ? `<span class="icon-group" title="Has Video">${App.sceneList.ICONS.video} ${scene.videoLoop ? App.sceneList.ICONS.videoLoop : ''}</span>` : ''}
                     ${hasSound ? `<span class="icon-group" title="Has Sound">${App.sceneList.ICONS.audio} ${scene.ambienceLoop ? App.sceneList.ICONS.audioLoop : ''}</span>` : ''}
+                    ${hasSpeech ? `<span class="icon-group" title="Has Speech">${App.sceneList.ICONS.speech}</span>` : ''}
                     ${hasConditions ? `<span title="Has Conditions">${App.sceneList.ICONS.condition}</span>` : ''}
                     ${isDeadEnd ? `<span title="Dead End">${App.sceneList.ICONS.end}</span>` : ''}
                 </div>

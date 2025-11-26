@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kinexus</title>
+    <!-- [Styles remain unchanged] -->
 		<style>
 		:root {
 			--primary-color: #4a78ad; --secondary-color: #6c757d; --light-bg: #121212;
@@ -1585,6 +1586,7 @@ const App = {
 			{ name: "Poiret One", value: "'Poiret One', cursive" },
 			{ name: "Road Rage", value: "'Road Rage', cursive" },
 			{ name: "Roboto", value: "'Roboto', sans-serif" },
+			{ name: "Silkscreen", value: "'Silkscreen', monospace" },
 			{ name: "Smokum", value: "'Smokum', cursive" },
 			{ name: "Snowburst One", value: "'Snowburst One', cursive" },
 			{ name: "Source Code Pro", value: "'Source Code Pro', monospace" },
@@ -3135,8 +3137,21 @@ const App = {
                         for(const choice of (scene.choices || [])) {
                             let conditionMet = true;
                             if(choice.condition) {
-                                const varName = choice.condition.variable;
-                                conditionMet = varName.startsWith('visited_scene_') ? (!!gameState.visited[varName.substring(14)] === choice.condition.value) : (gameState.variables[varName.substring(4)] === choice.condition.value);
+                                const rawVarName = choice.condition.variable;
+                                // FIX: Check if this is a 'visited scene' check or a normal variable
+                                if (rawVarName.startsWith('visited_scene_')) {
+                                    const targetSceneId = rawVarName.substring(14);
+                                    conditionMet = (!!gameState.visited[targetSceneId]) === choice.condition.value;
+                                } else {
+                                    // FIX: Handle variables.
+                                    // Ensure we handle cases where data might still have 'var_' prefix from old saves,
+                                    // but prefer the direct name.
+                                    let varKey = rawVarName;
+                                    if (varKey.startsWith('var_')) {
+                                        varKey = varKey.substring(4);
+                                    }
+                                    conditionMet = gameState.variables[varKey] === choice.condition.value;
+                                }
                             }
 
                             if (conditionMet) {
@@ -3931,11 +3946,12 @@ const App = {
                     action: { text: actionText, target: null, set_variable: null, set_value: false } 
                 };
 
+                // FIX: Strip the 'var_' prefix when saving the condition variable
                 if (isConditional) {
                     const condVar = view.querySelector('.condition-select').value;
                     if(condVar) {
                         choice.condition = {
-                            variable: condVar,
+                            variable: condVar.startsWith('var_') ? condVar.substring(4) : condVar, 
                             value: view.querySelector('.condition-boolean-select').value === 'true'
                         };
                     }
@@ -4003,7 +4019,12 @@ const App = {
                 choiceDiv.classList.add('is-conditional');
                 choiceDiv.querySelector('.toggle-condition-btn').innerHTML = App.editor.ui.iconRemoveCondition;
                 const cView = choiceDiv.querySelector('.condition-view');
-                cView.querySelector('.condition-select').value = choice.condition.variable;
+                
+                // FIX: Re-apply 'var_' prefix when loading into the dropdown if it's missing
+                const varName = choice.condition.variable;
+                const selectValue = varName.startsWith('visited_scene_') ? varName : (varName.startsWith('var_') ? varName : 'var_' + varName);
+                cView.querySelector('.condition-select').value = selectValue;
+                
                 cView.querySelector('.condition-boolean-select').value = String(choice.condition.value);
             } else {
                 choiceDiv.querySelector('.toggle-condition-btn').innerHTML = App.editor.ui.iconAddCondition;
@@ -5010,7 +5031,7 @@ const App = {
             if (generatedCount > 0) this.logInfo("IMPORTANT: Remember to Save Project!");
 
             this.isGenerating = false; this.abortRequested = false; fieldset.disabled = false; btn.disabled = false;
-            btn.innerHTML = `<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg> Generate`;
+            btn.innerHTML = `<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg> Generate`;
             App.editor.render(); App.ui.invalidateNavViews(); await App.ui.setViewMode(App.state.currentNavView);
         },
 
@@ -5084,9 +5105,10 @@ const App = {
             connectionStart: null,
         },
         colorPalette: [
-            '#5FB5AC', '#a67db8', '#f2ae42', '#f28c4b', '#e56b6f',
-            '#6fa8dc', '#f6b26b', '#ffd966', '#93c47d', '#76a5af',
-            '#b4a7d6', '#d5a6bd', '#e06666', '#f6b26b', '#8e7cc3'
+            '#e57373', '#f06292', '#ba68c8', '#9575cd', '#7986cb',
+            '#4db6ac', '#81c784', '#aed581', '#dce775', '#fff176',
+            '#ffb74d', '#ff8a65', '#a1887f', '#90a4ae', '#5c6bc0',
+            '#26a69a', '#9ccc65', '#ffca28', '#8d6e63', '#78909c'
         ],
         nodeColors: new Map(),
         getNodeColor(nodeId) {
@@ -5423,146 +5445,248 @@ const App = {
 			const container = App.elements['edge-group-container'];
 			container.innerHTML = '';
 			
+			// 1. Ensure <defs> exists
+			let defs = svg.querySelector('defs');
+			if (!defs) {
+				defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+				svg.prepend(defs);
+			}
+
+			// 2. Define the "Selected" Blue Arrow Marker (if missing)
+			if (!document.getElementById('arrow-selected')) {
+				const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+				marker.setAttribute('id', 'arrow-selected');
+				marker.setAttribute('viewBox', '0 0 10 10');
+				marker.setAttribute('refX', '8');
+				marker.setAttribute('refY', '5');
+				marker.setAttribute('markerWidth', '5');
+				marker.setAttribute('markerHeight', '5');
+				marker.setAttribute('orient', 'auto');
+				const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+				path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+				// Use CSS variable for color, fallback to blue
+				path.style.fill = 'var(--primary-color, #4a78ad)'; 
+				marker.appendChild(path);
+				defs.appendChild(marker);
+			}
+
+			// 3. Inject CSS overrides for Selection State
+			// This forces the "Selected" state to win over the inline colors
+			if (!svg.querySelector('#dynamic-edge-styles')) {
+				const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+				style.id = 'dynamic-edge-styles';
+				style.textContent = `
+					/* Force Blue Line */
+					.edge-group.is-selected-path .edge-path {
+						stroke: var(--primary-color, #4a78ad) !important;
+						stroke-width: 4px !important;
+						marker-end: url(#arrow-selected) !important;
+						filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+					}
+					/* Force Blue Background Box */
+					.edge-group.is-selected-path .edge-label-bg {
+						fill: var(--primary-color, #4a78ad) !important;
+						stroke: #fff !important;
+						stroke-width: 2px !important;
+						fill-opacity: 1 !important;
+					}
+					/* Force White Text */
+					.edge-group.is-selected-path .edge-label {
+						fill: #ffffff !important;
+						font-weight: bold;
+					}
+				`;
+				svg.prepend(style);
+			}
+
 			const scenes = App.state.storyData?.scenes;
 			if (!scenes) return;
 
 			const fragment = document.createDocumentFragment();
 			
-			const allConnections = [];
-			for (const scene of Object.values(scenes)) {
-				if (scene.choices) {
-					scene.choices.forEach((choice, choiceIndex) => {
-						const targetId = choice.action?.target;
-						if (targetId && scenes[targetId]) {
-							const targetScene = scenes[targetId];
-							const sourceLevel = Math.round(scene.position.y / 450);
-							const targetLevel = Math.round(targetScene.position.y / 450);
-							
-							if (targetLevel < sourceLevel) {
-								 allConnections.push({ source: scene, target: targetScene, choice, choiceIndex, isLoopback: true });
-								 return;
-							}
+			// --- CONFIGURATION ---
+			const LANE_HEIGHT = 40; 
+			const START_OFFSET = 30; 
+			const MAX_LABEL_CHARS = 20; 
+			const CHAR_PX_WIDTH = 7;    
+			const BOX_PADDING = 12;     
+			const CORNER_RADIUS = 15;
 
-							allConnections.push({
-								source: scene,
-								target: targetScene,
-								choice,
-								choiceIndex,
-								isLoopback: false,
-								start: Math.min(scene.position.x, targetScene.position.x),
-								end: Math.max(scene.position.x, targetScene.position.x),
-								sourceLevel,
-								targetLevel
-							});
-						}
-					});
-				}
-			}
-
-			const lanesByChannel = []; 
-			
-			allConnections.sort((a, b) => (b.end - b.start) - (a.end - a.start));
-
-			allConnections.forEach(conn => {
-				if (conn.isLoopback) return;
-
-				let laneIndex = 0;
-				while (true) {
-					let isLaneFree = true;
-					for (let level = conn.sourceLevel; level < conn.targetLevel; level++) {
-						if (!lanesByChannel[level]) lanesByChannel[level] = [];
-						if (!lanesByChannel[level][laneIndex]) lanesByChannel[level][laneIndex] = [];
-
-						const hasCollision = lanesByChannel[level][laneIndex].some(existingConn => {
-							return Math.max(conn.start, existingConn.start) < Math.min(conn.end, existingConn.end);
-						});
-
-						if (hasCollision) {
-							isLaneFree = false;
-							break;
-						}
-					}
-
-					if (isLaneFree) {
-						conn.laneIndex = laneIndex;
-						for (let level = conn.sourceLevel; level < conn.targetLevel; level++) {
-							lanesByChannel[level][laneIndex].push(conn);
-						}
-						break;
-					} else {
-						laneIndex++; 
-					}
-				}
-			});
-
-			allConnections.forEach(conn => {
-				const { source, target, choice, choiceIndex, laneIndex, isLoopback } = conn;
-				const sourceEl = document.querySelector(`.node-editor-node[data-scene-id="${source.id}"]`);
-				const targetEl = document.querySelector(`.node-editor-node[data-scene-id="${target.id}"]`);
-				if (!sourceEl || !targetEl) return; 
+			// Helper: Darken hex color for label background
+			const darkenColor = (color, percent) => {
+				const num = parseInt(color.replace('#', ''), 16);
+				const amt = Math.round(2.55 * percent);
+				const R = (num >> 16);
+				const G = (num >> 8 & 0x00FF);
+				const B = (num & 0x0000FF);
 				
-				const isFiltered = sourceEl.classList.contains('is-filtered-out') || targetEl.classList.contains('is-filtered-out');
-				const pathData = this.calculateEdgePath(source.position, target.position, sourceEl.offsetHeight, isLoopback ? 0 : laneIndex);
+				// Percentage subtractive darkening
+				const newR = Math.max(0, Math.floor(R * (1 - percent / 100)));
+				const newG = Math.max(0, Math.floor(G * (1 - percent / 100)));
+				const newB = Math.max(0, Math.floor(B * (1 - percent / 100)));
 
-                const sourceColor = this.getNodeColor(source.id);
-				const edgeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-				edgeGroup.classList.add('edge-group');
-                edgeGroup.style.setProperty('--edge-color', sourceColor);
-				edgeGroup.dataset.sourceId = source.id;
-				edgeGroup.dataset.choiceIndex = choiceIndex;
-				edgeGroup.addEventListener('dblclick', (e) => {
-					e.stopPropagation();
-					App.nodeEditor.editEdgeText(source.id, choiceIndex, e);
+				return '#' + (0x1000000 + (newR * 0x10000) + (newG * 0x100) + newB).toString(16).slice(1);
+			};
+
+			Object.values(scenes).forEach(source => {
+				if (!source.choices || source.choices.length === 0) return;
+
+				source.choices.forEach((choice, index) => {
+					const targetId = choice.action?.target;
+					const target = scenes[targetId];
+					if (!target) return;
+
+					// 4. Get Colors & Markers
+					const sourceColor = this.getNodeColor(source.id);
+					// Darken by 30% for text box
+					const labelBgColor = darkenColor(sourceColor, 30); 
+
+					const markerId = `arrow-${sourceColor.replace('#', '')}`;
+
+					// Define colored arrow marker if missing
+					if (!document.getElementById(markerId)) {
+						const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+						marker.setAttribute('id', markerId);
+						marker.setAttribute('viewBox', '0 0 10 10');
+						marker.setAttribute('refX', '8');
+						marker.setAttribute('refY', '5');
+						marker.setAttribute('markerWidth', '5'); 
+						marker.setAttribute('markerHeight', '5'); 
+						marker.setAttribute('orient', 'auto');
+						const arrowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+						arrowPath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+						arrowPath.setAttribute('fill', sourceColor);
+						marker.appendChild(arrowPath);
+						defs.appendChild(marker);
+					}
+
+					// 5. Geometry
+					const isLoopback = target.position.y <= source.position.y;
+					const laneOffset = START_OFFSET + (index * LANE_HEIGHT);
+					
+					const sourceEl = document.querySelector(`.node-editor-node[data-scene-id="${source.id}"]`);
+					const targetEl = document.querySelector(`.node-editor-node[data-scene-id="${target.id}"]`);
+					
+					if (!sourceEl || !targetEl) return;
+
+					const isFiltered = sourceEl.classList.contains('is-filtered-out') || targetEl.classList.contains('is-filtered-out');
+					const sourceHeight = sourceEl.offsetHeight;
+					const NODE_WIDTH = 240;
+
+					const startX = source.position.x + NODE_WIDTH / 2;
+					const startY = source.position.y + sourceHeight;
+					const endX = target.position.x + NODE_WIDTH / 2;
+					const endY = target.position.y;
+					
+					let pathStr = '';
+					let labelX = 0;
+					let labelY = 0;
+
+					if (isLoopback) {
+						const sideDist = 100 + (index * 20);
+						const goRight = endX > startX;
+						const dir = goRight ? 1 : -1;
+						const sideX = goRight ? Math.max(startX, endX) + sideDist : Math.min(startX, endX) - sideDist;
+						const topY = endY - 40;
+						const midY = startY + laneOffset;
+						const r = CORNER_RADIUS;
+
+						pathStr = `M ${startX} ${startY} ` +
+								  `L ${startX} ${midY - r} ` +
+								  `Q ${startX} ${midY} ${startX + (dir * r)} ${midY} ` +
+								  `L ${sideX - (dir * r)} ${midY} ` +
+								  `Q ${sideX} ${midY} ${sideX} ${midY - r} ` +
+								  `L ${sideX} ${topY + r} ` +
+								  `Q ${sideX} ${topY} ${sideX - (dir * r)} ${topY} ` +
+								  `L ${endX + (dir * r)} ${topY} ` +
+								  `Q ${endX} ${topY} ${endX} ${topY + r} ` +
+								  `L ${endX} ${endY}`;
+
+						labelX = sideX + (goRight ? 10 : -10);
+						labelY = (midY + topY) / 2;
+					} else {
+						const midY = startY + laneOffset;
+						const xDiff = endX - startX;
+						const dir = xDiff > 0 ? 1 : -1;
+						const r = Math.min(CORNER_RADIUS, Math.abs(xDiff) / 2);
+						
+						pathStr = `M ${startX} ${startY} ` +
+								  `L ${startX} ${midY - r} ` +
+								  `Q ${startX} ${midY} ${startX + (dir * r)} ${midY} ` +
+								  `L ${endX - (dir * r)} ${midY} ` +
+								  `Q ${endX} ${midY} ${endX} ${midY + r} ` +
+								  `L ${endX} ${endY}`;
+						labelX = (startX + endX) / 2;
+						labelY = midY;
+					}
+
+					// 6. Elements
+					const edgeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+					edgeGroup.classList.add('edge-group');
+					// Used for hover logic if needed, but overridden by inline styles below for main look
+					edgeGroup.style.setProperty('--edge-color', sourceColor);
+					edgeGroup.dataset.sourceId = source.id;
+					edgeGroup.dataset.choiceIndex = index;
+					
+					edgeGroup.addEventListener('dblclick', (e) => { e.stopPropagation(); App.nodeEditor.editEdgeText(source.id, index, e); });
+					edgeGroup.addEventListener('click', (e) => { e.stopPropagation(); App.ui.selectScene(source.id); });
+
+					const hitbox = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+					hitbox.setAttribute('d', pathStr);
+					hitbox.classList.add('edge-hitbox');
+					
+					const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+					path.setAttribute('d', pathStr);
+					path.classList.add('edge-path');
+					if (isLoopback) path.classList.add('edge-path-loopback');
+					if (isFiltered) path.classList.add('is-filtered-out');
+					path.setAttribute('marker-end', `url(#${markerId})`);
+					path.setAttribute('fill', 'none'); 
+
+					// Text Preparation
+					let rawText = choice.action.text || '...';
+					let displayText = rawText;
+					if (rawText.length > MAX_LABEL_CHARS) displayText = rawText.substring(0, MAX_LABEL_CHARS) + '...';
+
+					const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+					text.setAttribute('x', labelX);
+					text.setAttribute('y', labelY);
+					text.setAttribute('text-anchor', 'middle'); 
+					text.setAttribute('dominant-baseline', isLoopback ? 'middle' : 'auto');
+					text.setAttribute('dy', isLoopback ? '0' : '-4px');
+					text.textContent = displayText;
+					text.classList.add('edge-label');
+					text.setAttribute('fill', '#ffffff');
+
+					// Background Box
+					const boxWidth = (displayText.length * CHAR_PX_WIDTH) + BOX_PADDING;
+					const boxHeight = 16;
+					const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+					bgRect.setAttribute('x', labelX - boxWidth/2);
+					bgRect.setAttribute('y', labelY - (isLoopback ? 8 : 14));
+					bgRect.setAttribute('width', boxWidth);
+					bgRect.setAttribute('height', boxHeight);
+					bgRect.setAttribute('rx', 3);
+					
+					// Apply styles using !important to ensure they stick until selection class overrides them
+					bgRect.style.setProperty('fill', labelBgColor, 'important');
+					bgRect.style.setProperty('stroke', sourceColor, 'important');
+					bgRect.style.setProperty('stroke-width', '1px', 'important');
+					bgRect.style.setProperty('fill-opacity', '0.9', 'important');
+					bgRect.classList.add('edge-label-bg');
+
+					const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+					title.textContent = rawText;
+					edgeGroup.appendChild(title);
+					
+					edgeGroup.appendChild(hitbox);
+					edgeGroup.appendChild(path);
+					edgeGroup.appendChild(bgRect);
+					edgeGroup.appendChild(text);
+					fragment.appendChild(edgeGroup);
 				});
-				edgeGroup.addEventListener('click', (e) => {
-					e.stopPropagation();
-					App.ui.selectScene(source.id);
-				});
-
-				const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-				path.setAttribute('d', pathData.path);
-				path.classList.add('edge-path');
-				if (isLoopback || target.id === App.state.storyData.meta.startSceneId) { path.classList.add('edge-path-loopback'); }
-				if (isFiltered) path.classList.add('is-filtered-out');
-				path.setAttribute('marker-end', 'url(#arrowhead)');
-
-				const hitbox = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-				hitbox.setAttribute('d', pathData.path);
-				hitbox.classList.add('edge-hitbox');
-
-				const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-				text.setAttribute('x', pathData.labelPos.x);
-				text.setAttribute('y', pathData.labelPos.y);
-				text.setAttribute('text-anchor', 'middle'); 
-				text.setAttribute('dominant-baseline', 'middle');
-				text.setAttribute('dy', '1px');
-				text.textContent = choice.action.text || '...';
-				text.classList.add('edge-label');
-
-				svg.appendChild(text);
-				const clientRect = text.getBoundingClientRect(); 
-				const zoom = App.nodeEditor.state.zoom;
-				const correctWidth = clientRect.width / zoom;    
-				const correctHeight = clientRect.height / zoom;
-				svg.removeChild(text);
-
-				const textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-				const paddingX = 4;
-				const paddingY = 2;
-				textBg.setAttribute('x', pathData.labelPos.x - (correctWidth / 2) - paddingX);
-				textBg.setAttribute('y', pathData.labelPos.y - (correctHeight / 2) - paddingY);
-				textBg.setAttribute('width', correctWidth + (paddingX * 2));
-				textBg.setAttribute('height', correctHeight + (paddingY * 2));
-				textBg.setAttribute('rx', 3);
-				textBg.classList.add('edge-label-bg');
-
-				edgeGroup.appendChild(hitbox);
-				edgeGroup.appendChild(path);
-				edgeGroup.appendChild(textBg);
-				edgeGroup.appendChild(text);
-				fragment.appendChild(edgeGroup);
-
 			});
+
 			container.appendChild(fragment);
 		},
 		
@@ -5645,138 +5769,180 @@ const App = {
 			const startId = App.state.storyData.meta.startSceneId;
 			if (!scenes || !startId) return;
 
-			const HORIZONTAL_GAP = 600;
-			const VERTICAL_GAP = 500;
-			const STAGGER_AMOUNT = 30;
-			const graph = {};
-			const sceneIds = Object.keys(scenes);
+			// --- CONFIGURATION ---
+			const NODE_WIDTH = 240; 
+			const CHAR_WIDTH = 8;        
+			const MIN_SIBLING_GAP = 100; 
+			const GAP_BETWEEN_LAYERS = 80; 
+			const LINE_HEIGHT_PER_CHOICE = 45; 
+			const TREE_VERTICAL_SPACING = 200; // Space between disconnected trees
+			const START_X = 50;
+			const START_Y = 50;
 
-			sceneIds.forEach(id => {
-				graph[id] = { children: new Set(), parents: new Set(), level: -1 };
-			});
-			sceneIds.forEach(id => {
-				(scenes[id].choices || []).forEach(choice => {
-					const targetId = choice.action.target;
-					if (targetId && graph[targetId]) {
-						graph[id].children.add(targetId);
-						graph[targetId].parents.add(id);
-					}
-				});
-			});
+			// Helper: Dynamic Node Height
+			const getNodeHeight = (scene) => {
+				let h = 180; 
+				if (scene.image || (scene.mediaType && scene.mediaType !== 'none')) {
+					h += 135;
+				}
+				return h;
+			};
 
-			const levels = [];
-			const queue = [startId];
-			const visited = new Set([startId]);
-			graph[startId].level = 0;
-			let head = 0;
-			while (head < queue.length) {
-				const u = queue[head++];
-				if (!levels[graph[u].level]) levels[graph[u].level] = [];
-				levels[graph[u].level].push(u);
-				graph[u].children.forEach(v => {
-					if (!visited.has(v)) {
-						visited.add(v);
-						graph[v].level = graph[u].level + 1;
-						queue.push(v);
-					}
-				});
-			}
-
-			for (let i = 1; i < levels.length; i++) {
-				levels[i].sort((a, b) => {
-					const getParentAvgIndex = (nodeId) => {
-						const parents = Array.from(graph[nodeId].parents);
-						if (parents.length === 0) return -1;
-						const sum = parents.reduce((acc, parentId) => acc + (levels[i - 1].indexOf(parentId) || 0), 0);
-						return sum / parents.length;
-					};
-					return getParentAvgIndex(a) - getParentAvgIndex(b);
-				});
-			}
-
-			const orphans = sceneIds.filter(id => !visited.has(id));
-			if (orphans.length > 0) {
-				levels.push(orphans);
-			}
-
-			const staggerMap = new Map();
-			levels.forEach((levelNodes, levelIndex) => {
-				levelNodes.forEach(parentId => {
-					const childrenInNextLevel = Array.from(graph[parentId].children)
-						.filter(childId => graph[childId].level === levelIndex + 1)
-						.sort((a, b) => levels[levelIndex + 1].indexOf(a) - levels[levelIndex + 1].indexOf(b));
-
-					childrenInNextLevel.forEach((childId, staggerIndex) => {
-						staggerMap.set(childId, staggerIndex);
-					});
-				});
+			const nodes = Object.keys(scenes);
+			
+			// 1. Initialize Data & Calculate In-Degrees
+			// We need to know which nodes are "Roots" (no other node points to them)
+			const hierarchy = {}; 
+			const inDegree = new Map();
+			
+			nodes.forEach(id => {
+				hierarchy[id] = { children: [], subtreeWidth: 0, selfWidth: NODE_WIDTH, visited: false };
+				inDegree.set(id, 0);
 			});
 
-			let levelMaxY = -VERTICAL_GAP; 
-
-			levels.forEach((levelNodes, levelIndex) => {
-				const levelWidth = (levelNodes.length - 1) * HORIZONTAL_GAP;
-				const startX = -levelWidth / 2;
-				
-				const baseY = levelMaxY + VERTICAL_GAP;
-				let currentLevelMaxY = baseY;
-
-				levelNodes.forEach((nodeId, index) => {
-					if (scenes[nodeId]) {
-						const staggerIndex = staggerMap.get(nodeId) || 0;
-						const nodeY = baseY + (staggerIndex * STAGGER_AMOUNT);
-
-						scenes[nodeId].position = {
-							x: startX + index * HORIZONTAL_GAP,
-							y: nodeY
-						};
-						if (nodeY > currentLevelMaxY) {
-							currentLevelMaxY = nodeY;
+			// Calculate In-Degrees
+			nodes.forEach(id => {
+				const s = scenes[id];
+				if (s.choices) {
+					s.choices.forEach(c => {
+						const target = c.action.target;
+						if (target && scenes[target]) {
+							inDegree.set(target, inDegree.get(target) + 1);
 						}
-					}
-				});
-				levelMaxY = currentLevelMaxY;
+					});
+				}
 			});
+
+			// 2. Determine Processing Order (The "Forest" of Trees)
+			// Priority: StartScene -> Disconnected Roots (InDegree 0) -> Any remaining unvisited (Cycles)
+			let processingQueue = [startId];
+			
+			const otherRoots = nodes.filter(id => id !== startId && inDegree.get(id) === 0).sort();
+			processingQueue = processingQueue.concat(otherRoots);
+			
+			// 3. Layout Loop
+			let currentTreeStartY = START_Y;
+
+			// Loop until every single node has been arranged
+			let safetyCounter = 0;
+			while (true) {
+				// Find the next unvisited root
+				let rootId = null;
+				
+				// Try the queue first
+				while (processingQueue.length > 0) {
+					const candidate = processingQueue.shift();
+					if (!hierarchy[candidate].visited) {
+						rootId = candidate;
+						break;
+					}
+				}
+
+				// If queue empty, check if ANY node is left unvisited (e.g. disconnected loops A->B->A)
+				if (!rootId) {
+					const unvisited = nodes.find(id => !hierarchy[id].visited);
+					if (!unvisited) break; // ALL DONE
+					rootId = unvisited; // Pick one arbitrarily to break the cycle
+				}
+
+				// --- PROCESS THIS TREE ---
+				
+				// A. Build Spanning Tree for this root (BFS)
+				const queue = [rootId];
+				hierarchy[rootId].visited = true;
+				const treeNodes = [rootId]; // Track nodes in this specific tree
+
+				let head = 0;
+				while (head < queue.length) {
+					const currentId = queue[head++];
+					const scene = scenes[currentId];
+
+					if (scene.choices) {
+						scene.choices.forEach(choice => {
+							const targetId = choice.action.target;
+							if (targetId && scenes[targetId]) {
+								// Only enter if not visited globally
+								if (!hierarchy[targetId].visited) {
+									hierarchy[targetId].visited = true;
+									hierarchy[currentId].children.push(targetId);
+									
+									// Text Width Calc
+									const textLen = (choice.action.text || "").length * CHAR_WIDTH;
+									if (textLen > hierarchy[targetId].selfWidth) {
+										hierarchy[targetId].selfWidth = textLen + 60; 
+									}
+									
+									queue.push(targetId);
+									treeNodes.push(targetId);
+								}
+							}
+						});
+					}
+				}
+
+				// B. Post-Order Width Calculation
+				const calculateSubtreeWidth = (nodeId) => {
+					const nodeData = hierarchy[nodeId];
+					if (nodeData.children.length === 0) {
+						nodeData.subtreeWidth = nodeData.selfWidth;
+					} else {
+						let sumWidth = 0;
+						nodeData.children.forEach(childId => sumWidth += calculateSubtreeWidth(childId));
+						const gapTotal = (nodeData.children.length - 1) * MIN_SIBLING_GAP;
+						nodeData.subtreeWidth = Math.max(nodeData.selfWidth, sumWidth + gapTotal);
+					}
+					return nodeData.subtreeWidth;
+				};
+				calculateSubtreeWidth(rootId);
+
+				// C. Pre-Order Positioning
+				let treeMaxY = currentTreeStartY;
+
+				const setPosition = (nodeId, x, y) => {
+					const nodeData = hierarchy[nodeId];
+					const scene = scenes[nodeId];
+
+					const finalX = x + (nodeData.subtreeWidth / 2) - (NODE_WIDTH / 2);
+					scene.position = { x: finalX, y: y };
+
+					// Update bounds for the next tree
+					const h = getNodeHeight(scene);
+					if (y + h > treeMaxY) treeMaxY = y + h;
+
+					// Calc next layer Y
+					const connectionCount = scene.choices ? scene.choices.length : 0;
+					const nextLayerY = y + h + (connectionCount * LINE_HEIGHT_PER_CHOICE) + GAP_BETWEEN_LAYERS;
+
+					let currentChildX = x;
+					
+					// Center children group
+					let childrenTotalWidth = 0;
+					nodeData.children.forEach(c => childrenTotalWidth += hierarchy[c].subtreeWidth);
+					childrenTotalWidth += (nodeData.children.length - 1) * MIN_SIBLING_GAP;
+					
+					if (childrenTotalWidth < nodeData.subtreeWidth) {
+						currentChildX += (nodeData.subtreeWidth - childrenTotalWidth) / 2;
+					}
+
+					nodeData.children.forEach(childId => {
+						const childWidth = hierarchy[childId].subtreeWidth;
+						setPosition(childId, currentChildX, nextLayerY);
+						currentChildX += childWidth + MIN_SIBLING_GAP;
+					});
+				};
+
+				setPosition(rootId, START_X, currentTreeStartY);
+
+				// Prepare Y for the next disconnected tree
+				currentTreeStartY = treeMaxY + TREE_VERTICAL_SPACING;
+				
+				safetyCounter++;
+				if(safetyCounter > 10000) break; // Emergency break
+			}
 
 			App.setDirty(true);
 			this.render();
 			this.fitView();
-		},
-
-		calculateEdgePath(sourcePos, targetPos, sourceHeight, laneIndex = 0) {
-			const NODE_WIDTH = 240;
-			const BEND_OFFSET = 70;      
-			const LANE_HEIGHT = 35;      
-			const TEXT_OFFSET_Y = 5; 
-			const TEXT_OFFSET_X = 10;
-			const LOOPBACK_SIDE_OFFSET = 120;
-			const ARC_HEIGHT_ABOVE = 40;
-
-			const startX = sourcePos.x + NODE_WIDTH / 2;
-			const startY = sourcePos.y + sourceHeight;
-			const endX = targetPos.x + NODE_WIDTH / 2;
-			const endY = targetPos.y;
-
-			let path, labelPos;
-
-			if (endY < startY) {
-				const sideX = Math.max(startX, endX) + LOOPBACK_SIDE_OFFSET;
-				const topY = endY - ARC_HEIGHT_ABOVE;
-				
-				path = `M ${startX},${startY} V ${startY + 20} H ${sideX} V ${topY} H ${endX} V ${endY}`;
-				
-				labelPos = { x: sideX + TEXT_OFFSET_X, y: (startY + topY) / 2, anchor: 'start' };
-
-			} else {
-				const horizontalLineY = startY + BEND_OFFSET + (laneIndex * LANE_HEIGHT);
-				path = `M ${startX} ${startY} V ${horizontalLineY} H ${endX} V ${endY}`;
-				
-				const textAnchor = (endX > startX) ? 'start' : 'end';
-				const textX = startX + (Math.sign(endX - startX) * TEXT_OFFSET_X);
-				labelPos = { x: textX, y: horizontalLineY - TEXT_OFFSET_Y, anchor: textAnchor };
-			}
-
-			return { path, labelPos };
 		},
 
         findNextOrphan() {

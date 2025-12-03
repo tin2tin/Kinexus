@@ -4,24 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kinexus</title>
-    <!-- [Styles remain unchanged] -->
 		<style>
 		:root {
 			--primary-color: #4a78ad; --secondary-color: #6c757d; --light-bg: #121212;
 			--dark-text: #e0e0e0; --border-color: #333333; --success-color: #5a8f66;
 			--danger-color: #b85a66; --warning-color: #c7921a; --warning-text: #ffffff;
 			--purple-color: #8e63a9;
-
-			/* Styles from Choice UI Template */
 			--bg-main: #131316; --bg-container: #1e1e22; --bg-element: #2c2d30;
 			--text-primary: #e1e1e1; --text-secondary: #9e9ea5;
 			--accent-color-primary: #5FB5AC;
 			--accent-color-secondary: #5FB5AC;
 			--title-underline-color: #4A78AD;
 			--condition-icon-color: #5FB5AC;
-            --canvas-bg: #131316; /* For edge label background */
-
-            /* New colors for node headers and tags from React script */
+            --canvas-bg: #131316;
             --header-none-bg: #4a4a4f;
             --header-image-bg: #4A78AD;
             --header-video-bg: #8e63a9;
@@ -57,7 +52,7 @@
 			user-select: none;
 		}
 		#editor-container {
-            position: relative; /* Added for player positioning */
+            position: relative;
             flex-grow: 1;
             padding: 0 20px 20px;
             overflow-y: auto;
@@ -67,20 +62,44 @@
 		#editor-container fieldset:disabled { opacity: 0.5; pointer-events: none; }
 		#player-container {
 			display: none;
-			position: absolute; /* Changed for positioning within editor-container */
+			position: absolute;
 			top: 0; left: 0;
 			width: 100%; height: 100%;
 			overflow: auto;
 			justify-content: center;
 			align-items: center;
 			z-index: 2000;
-			/* FIX: Player background image fix */
 			background-size: cover;
 			background-repeat: no-repeat;
 			background-position: center;
-			font-family: var(--font-family); /* FIX: Apply selected font to player */
-			font-size: var(--font-size); /* <-- ADD THIS LINE */
+			font-family: var(--font-family);
+			font-size: var(--font-size);
 		}
+        #editor-transition-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2001;
+            background-size: cover; background-position: center; background-color: #000;
+            pointer-events: none; opacity: 0;
+        }
+        #editor-transition-overlay.active { opacity: 1; }
+
+		/* Updated Cinematic Hiding Classes to target parent containers */
+		#player-inner-container.cinematic-hidden,
+		#game-container.cinematic-hidden {
+			opacity: 0 !important;
+			pointer-events: none;
+			visibility: hidden;
+			transition: opacity 0.5s ease-in;
+		}
+
+		#player-inner-container.cinematic-visible,
+		#game-container.cinematic-visible {
+			opacity: 1 !important;
+			pointer-events: auto;
+			visibility: visible;
+		}
+
 		#player-container.layout-panel-bottom {
 			align-items: flex-end;
 			padding: 20px;
@@ -93,7 +112,6 @@
 			justify-content: flex-end;
 		}
 
-		/* Dark Scrollbar for Inner Content Panes */
 		#player-inner-container::-webkit-scrollbar,
 		#scene-editor-preview #preview-player-inner-container::-webkit-scrollbar {
 			width: 12px;
@@ -121,11 +139,11 @@
 		#variable-manager-modal h3 { border-bottom: none !important; }
 		#editor-container h1 { margin-top: 20px; }
 		.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; margin-top: 15px; }
-		.header h1 { white-space: nowrap; border-bottom: none; } /* FIX: Removed underline */
+		.header h1 { white-space: nowrap; border-bottom: none; }
 		.header h2 { margin-bottom: 0; }
 		.header h3 { border-bottom: none; }
 		#save-project-dirty-btn {
-			display: none; /* JS toggles this to inline-flex */
+			display: none;
 			padding: 6px;
 			margin-left: 10px;
 			line-height: 1;
@@ -138,7 +156,6 @@
 
 		hr { border: none; border-top: 1px solid var(--border-color); margin: 15px 0; }
 
-		/* --- NEW: Node Editor Styles --- */
 		#node-editor-view {
 			flex-grow: 1;
 			position: relative;
@@ -171,7 +188,7 @@
 			width: 240px;
 			font-size: 13px;
 			text-align: left;
-			overflow: visible; /* Allow handles to be visible */
+			overflow: visible;
 			box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 			cursor: default;
 			display: flex;
@@ -201,7 +218,7 @@
 
 		.node-editor-node.selected { border: 2px solid var(--primary-color); box-shadow: 0 0 10px var(--primary-color); }
 		.node-editor-node.has-broken-link { border: 2px dashed var(--danger-color) !important; }
-		.node-editor-node.is-filtered-out { /* Opacity removed */ pointer-events: none; filter: grayscale(80%); }
+		.node-editor-node.is-filtered-out { pointer-events: none; filter: grayscale(80%); }
 
 		.node-header { padding: 8px 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; cursor: move; user-select: none; background-color: var(--header-none-bg); color: #fff; transition: background-color 0.3s; border-radius: 5px 5px 0 0; }
         .node-header.media-image { background-color: var(--header-image-bg); }
@@ -229,25 +246,24 @@
 		.choice-count-icon { background-color: #6c757d; color: white; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; line-height: 1; flex-shrink: 0; }
 		#node-svg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
         #edge-group-container { transform-origin: 0 0; }
-		.node-handle {background: #6c757d; /* Default to grey */}
+		.node-handle {background: #6c757d;}
 		.node-handle.is-connected {
-			background: var(--primary-color); /* Make connected handles blue */
+			background: var(--primary-color);
 		}
 		#node-svg-layer .edge-path {
-			stroke: var(--edge-color, #888); /* Use variable, fallback to grey */
+			stroke: var(--edge-color, #888);
 			stroke-width: 3;
 			fill: none !important;
-			transition: stroke 0.2s; /* Add transition for smoothness */
+			transition: stroke 0.2s;
 		}
 		#node-svg-layer .edge-path.edge-path-loopback {
-			/* The variable will still apply the color */
 			stroke-dasharray: 6, 6;
 		}
         #node-svg-layer .edge-hitbox { stroke: transparent; stroke-width: 12; fill: none; }
         #node-svg-layer .edge-group:hover .edge-path { stroke: var(--primary-color); stroke-width: 4; }
 		#node-svg-layer .edge-path.is-filtered-out { stroke: #444; }
 		#node-svg-layer .edge-arrow { 
-			fill: var(--edge-color, #555); /* Use variable, fallback to grey */
+			fill: var(--edge-color, #555);
 			transition: fill 0.2s; 
 		}
         #node-svg-layer .edge-group:hover .edge-arrow { fill: var(--primary-color); }
@@ -269,18 +285,17 @@
 			min-width: 36px;
 		}
 
-        /* --- STYLES FOR EDGE LABELS --- */
         #node-svg-layer .edge-group {
             cursor: pointer;
-            pointer-events: all; /* Make the group clickable */
+            pointer-events: all;
         }
         #node-svg-layer .edge-label {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             font-size: 12px;
             fill: var(--text-primary);
-            text-anchor: middle; /* Center the text */
+            text-anchor: middle;
             dominant-baseline: middle;
-            pointer-events: none; /* Text should not block clicks on the group */
+            pointer-events: none;
             transition: fill 0.2s;
         }
         #node-svg-layer .edge-group:hover .edge-label { fill: #fff; }
@@ -295,10 +310,9 @@
             fill: var(--primary-color);
         }
 
-        /* Style for the temporary text editor */
         #edge-text-editor {
             position: absolute;
-            z-index: 1001; /* Ensure it's on top of everything */
+            z-index: 1001;
             padding: 4px;
             font-size: 12px;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -309,7 +323,6 @@
         }
 
 
-		/* Scene List View Styles */
 		#scene-list-view-wrapper { display: none; flex-direction: column; flex-grow: 1; min-height: 0; }
 		#scene-list-view { list-style-type: none; padding-left: 0; flex-grow: 1; overflow: auto; min-height: 100px; margin-top: 10px; }
 		#scene-list-controls { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-top: 10px; flex-shrink: 0; }
@@ -339,7 +352,6 @@
 		.scene-card-text { font-size: 0.85em; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 		.scene-card.active .scene-card-text { color: #ddd; }
 
-		/* View Toggler Styles */
 		#view-mode-toggle { display: flex; gap: 5px; }
 		#view-mode-toggle button { flex-grow: 1; background-color: var(--secondary-color); opacity: 0.6; }
 		#view-mode-toggle button.active { background-color: var(--primary-color); opacity: 1; }
@@ -366,6 +378,12 @@
 		.form-group.choice-group { margin-bottom: 8px; }
 		.form-group.inline { display: flex; align-items: center; gap: 10px; }
 		.form-group.inline input, .form-group.inline select { flex-grow: 1; }
+		.form-group.inline .cinematic-select {
+			flex-grow: 0;
+			min-width: 110px;
+			background-color: #1e1e1e; color: var(--dark-text); border: 1px solid #444; border-radius: 4px; padding: 5px 8px; font-size: 0.9em;
+		}
+
 		.form-group label.checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer; }
 		.form-group label.checkbox-label input { width: auto; flex-grow: 0; }
 		label { display: block; font-weight: bold; margin-bottom: 5px; }
@@ -383,7 +401,7 @@
 		#media-paths-container { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
 		#media-paths-container .form-group.inline { margin: 0; }
 		#media-paths-container .media-icon-label { margin-bottom: 0; flex-shrink: 0; width: 24px; height: 24px; color: var(--secondary-color); display: inline-flex; align-items: center; justify-content: center; }
-		#video-controls { display: none; } /* Hide video controls by default */
+		#video-controls { display: none; }
 		.form-group.inline .video-control-btn { flex-shrink: 0; }
 
 
@@ -502,7 +520,6 @@
 		}
 		#batch-image-modal .modal-content { display: flex; flex-direction: column; }
 
-		/* --- NEW Context Menu Styles --- */
         .context-menu {
             display: none;
             position: absolute;
@@ -540,7 +557,7 @@
             display: none;
             position: absolute;
             left: 100%;
-            top: -5px; /* Align with parent button */
+            top: -5px;
             background-color: #252629;
             border: 1px solid var(--border-color);
             box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
@@ -666,7 +683,7 @@
 		.play-pause-icon.hidden { display: none; }
 		#style-editor-grid #style-font-size, #style-editor-grid #style-padding { background-color: #1E1E1E; color: white; border: 1px solid #444444; border-radius: 4px; height: 40px; box-sizing: border-box; }
 		#toggle-loop-btn.active, #toggle-speech-loop-btn.active, #toggle-video-loop-btn.active { background-color: var(--primary-color); }
-		#toggle-video-mute-btn:not(.active) { background-color: var(--primary-color); } /* Active means MUTED, so when NOT active, it's colored */
+		#toggle-video-mute-btn:not(.active) { background-color: var(--primary-color); }
 		#custom-tooltip { display: none; position: fixed; z-index: 9999; background-color: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 5px 10px; font-size: 14px; max-width: 350px; word-wrap: break-word; white-space: pre-wrap; pointer-events: none; opacity: 0; transition: opacity 0.1s linear; }
 		#icon-thumbnail-tooltip { display: none; position: fixed; z-index: 9999; background-color: #2a2a2e; color: #fff; border: 1px solid #555; border-radius: 6px; padding: 12px; font-size: 14px; width: 280px; pointer-events: none; opacity: 0; transition: opacity 0.1s linear; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: flex; gap: 12px; align-items: center; }
 		#icon-thumbnail-tooltip .thumbnail-icon { flex-shrink: 0; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
@@ -678,7 +695,6 @@
 		#batch-controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: end; }
 		#batch-controls-grid .full-width { grid-column: 1 / -1; }
 
-		/* --- Choice UI Styles --- */
 		#choices-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 		#manage-variables-btn { width: 30px; height: 30px; border-radius: 50%; }
 		.choice-editor { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
@@ -703,7 +719,6 @@
 		.choice-editor .delete-choice-btn { background-color: var(--danger-color); font-size: 1.5em; color: white; }
 		.go-to-scene-btn { padding: 8px; line-height: 1; min-width: auto; }
 
-		/* --- Variable Manager Modal Styles --- */
 		#variable-manager-modal .modal-content { max-width: 400px; }
 		#variable-manager-modal h3 { margin: 0; padding-bottom: 10px; border-bottom: 2px solid var(--title-underline-color); }
 		#variable-manager-modal .variable-list { list-style: none; padding: 0; margin: 20px 0; max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;}
@@ -714,13 +729,11 @@
 		#variable-manager-modal .add-var-form input { flex-grow: 1; }
 		#variable-manager-modal .add-var-form button { background-color: var(--title-underline-color); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-		/* --- Debug Modal Styles --- */
 		#debug-modal .modal-content { max-width: 80vw; width: 100%; height: 80vh; display: flex; flex-direction: column; }
 		#debug-log { background-color: #000; flex-grow: 1; font-family: monospace; font-size: 14px; white-space: pre; overflow: auto; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; color: #ccc; }
 		#debug-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 		#debug-modal-header h2 { margin: 0; border: none; }
 
-		/* --- Custom Styles for About Editor --- */
 		#about-editor-modal .modal-content {
 			font-size: 14px;
 			max-width: 700px;
@@ -739,14 +752,13 @@
 			text-align: center;
 		}
 
-        /* --- Custom Prompt Styles --- */
         #custom-prompt-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 2000; /* Must be on top of other UI */
+            z-index: 2000;
         }
         #custom-prompt {
             position: absolute;
@@ -765,24 +777,17 @@
         #custom-prompt-input { font-size: 0.9em !important; padding: 8px !important; }
         #custom-prompt-buttons { display: flex; justify-content: flex-end; gap: 10px; }
 		
-		/* Style for the selected connection path */
 		#node-svg-layer .edge-group.is-selected-path .edge-path {
 			stroke: var(--primary-color);
-			stroke-width: 4px; /* Make the selected line slightly thicker */
+			stroke-width: 4px;
 		}
-
-		/* Style for the arrow of the selected connection */
 		#node-svg-layer .edge-group.is-selected-path .edge-arrow {
 			fill: var(--primary-color);
 		}
-
-		/* Style for the text background of the selected connection */
 		#node-svg-layer .edge-group.is-selected-path .edge-label-bg {
 			fill: var(--primary-color);
 			stroke: #fff;
 		}
-
-		/* Style for the text of the selected connection */
 		#node-svg-layer .edge-group.is-selected-path .edge-label {
 			fill: #fff;
 		}
@@ -875,6 +880,7 @@
     <div id="resizer"></div>
 
     <div id="editor-container">
+        <div id="editor-transition-overlay"></div>
         <fieldset id="editor-fieldset">
             <div class="header">
                  <button id="save-project-dirty-btn" class="btn-warning" title="Save Project (Ctrl+S)">
@@ -949,7 +955,6 @@
                             </span>
                             <input type="text" id="scene-image" data-asset-type="images" placeholder="e.g., images/trench.jpg or videos/intro.mp4">
 
-                            <!-- Video Controls -->
                             <div id="video-controls" style="display: none; gap: 10px;">
                                 <button id="toggle-video-mute-btn" class="btn-secondary file-icon-btn video-control-btn" title="Toggle Video Mute">
                                     <svg class="play-pause-icon" id="video-unmute-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z"/><path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z"/><path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z"/></svg>
@@ -986,7 +991,6 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM6.172 2a1 1 0 0 0-.707.293L4.646 3.114a1 1 0 0 1-.707.293H2.5a1 1 0 0 0-1 .981l.637 7a1 1 0 0 0 .992.919h10.348a1 1 0 0 0 .991-.919l.637-7a1 1 0 0 0-1-1.019h-3.982a1 1 0 0 1-.707-.293l-.828-.828A1 1 0 0 0 6.172 2H2.5z"/></svg>
                             </button>
                         </div>
-                        <!-- Speech/Audio Option Added Here -->
                         <div class="form-group inline">
                              <span class="media-icon-label" title="Speech/Voiceover Path">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/><path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3z"/></svg>
@@ -1231,6 +1235,33 @@
                 align-items: center;
             }
 
+			#transition-overlay {
+				position: fixed;
+				top: 0; left: 0; width: 100%; height: 100%;
+				z-index: 200;
+				background-size: cover;
+				background-position: center;
+				background-color: #000;
+				pointer-events: none;
+				opacity: 0;
+			}
+			#transition-overlay.active {
+				opacity: 1;
+			}
+			#content-container.cinematic-hidden,
+            #game-container.cinematic-hidden {
+				opacity: 0 !important;
+				pointer-events: none;
+				visibility: hidden;
+				transition: opacity 0.5s ease-in;
+			}
+			#content-container.cinematic-visible,
+            #game-container.cinematic-visible {
+				opacity: 1 !important;
+				pointer-events: auto;
+				visibility: visible;
+			}
+
             #background-video {
 				display: none;
 				position: absolute;
@@ -1370,7 +1401,7 @@
                 width: 90%;
                 max-width: 700px;
                 border-radius: 8px;
-                font-size: 14px; /* Smaller font size for about text */
+                font-size: 14px;
             }
             #about-modal .player-modal-close {
                 position: absolute;
@@ -1414,6 +1445,7 @@
         </style>
     </head>
     <body class="__LAYOUT_CLASS__">
+        <div id="transition-overlay"></div>
         <div id="loading-overlay">
             <div class="loading-spinner"></div>
             <p id="loading-status">Loading Game...</p>
@@ -1485,6 +1517,8 @@
                     <hr>
                     <div class="menu-item"><button id="save-btn">Save Progress</button><button id="load-btn">Load Progress</button></div>
                     <hr>
+                    <div class="menu-item"><button id="cinematic-toggle-btn">Cinematic Pacing</button></div>
+                    <hr>
                     <div class="menu-item"><span>Music</span><input type="range" id="volume-slider" min="0" max="1" step="0.01"></div>
                     <div class="menu-item"><span>Ambience</span><input type="range" id="ambience-volume-slider" min="0" max="1" step="0.01"></div>
                     <div class="menu-item"><span>Speech</span><input type="range" id="speech-volume-slider" min="0" max="1" step="0.01"></div>
@@ -1523,7 +1557,7 @@ const App = {
         pendingAssetCopies: new Map(),
         aiImageUrl: null,
         orphanSceneIds: new Set(),
-        typewriter: { intervalId: null, skipListener: null },
+        typewriter: { intervalId: null, cleanup: null },
         currentNavView: 'nodes', // 'nodes' or 'list'
         navViewsDirty: true,
         missingAssetWarnings: new Set(),
@@ -1532,10 +1566,11 @@ const App = {
         thumbnailLoadId: 0,
         player: {
             gameState: null,
-			typewriter: { intervalId: null, skipListener: null },
+			typewriter: { intervalId: null, cleanup: null },
             activeVideoElement: null,
+			cinematicEnabled: false,
         },
-        debugMode: false // Secret debug mode flag
+        debugMode: false
     },
     elements: {},
     constants: {
@@ -1598,8 +1633,8 @@ const App = {
 
     init() {
         this.cacheElements();
-        this.bindEvents(); // Bind generic events first
-        this.nodeEditor.init(); // Then initialize modules
+        this.bindEvents();
+        this.nodeEditor.init();
         this.debug.init();
 
         this.ui.enableEditor(false);
@@ -1624,7 +1659,8 @@ const App = {
                 id: "start", text: "Start here.", image: "", imagePrompt: "",
                 videoLoop: true, videoMuted: true,
                 ambienceSound: "", ambienceLoop: true, 
-                speechSound: "", speechLoop: false, // New default properties
+                speechSound: "", speechLoop: false,
+                cinematicModeOverride: 'default',
                 choices: [], visited: false,
                 lastModified: Date.now(),
                 mediaType: 'none', color: null,
@@ -1640,7 +1676,7 @@ const App = {
             'ambience-player', 'speech-player', 'music-player', 'export-data-modal', 'style-editor-modal', 'about-editor-modal',
             'tree-context-menu', 'editor-context-menu', 'save-project-dirty-btn',
             'save-story-btn', 'player-image', 'player-text', 'player-choices', 'player-content-container', 'player-inner-container',
-            'player-video-bg', 'player-video-fg',
+            'player-video-bg', 'player-video-fg', 'editor-transition-overlay',
             'editor-fieldset', 'ai-image-preview', 'render-ai-image-btn', 'add-ai-image-btn', 'image-preview',
             'story-title', 'creator-name', 'about-text',
             'notification-modal', 'notification-message', 'notification-close-btn',
@@ -1676,7 +1712,6 @@ const App = {
         document.getElementById('select-sound-btn').addEventListener('click', () => App.assets.selectFile('sounds', 'scene-sound'));
         document.getElementById('select-speech-btn').addEventListener('click', () => App.assets.selectFile('sounds', 'scene-speech'));
 
-        // Ambience Controls
         App.elements['toggle-ambience-btn'].addEventListener('click', () => App.player.toggleAmbienceSound());
         App.elements['ambience-player'].addEventListener('play', () => App.player.updateAmbienceButton(true));
         App.elements['ambience-player'].addEventListener('pause', () => App.player.updateAmbienceButton(false));
@@ -1687,19 +1722,19 @@ const App = {
             App.ui.renderCurrentView();
         });
 
-        // Speech Controls
         App.elements['toggle-speech-btn'].addEventListener('click', () => App.player.toggleSpeechSound());
         App.elements['speech-player'].addEventListener('play', () => App.player.updateSpeechButton(true));
         App.elements['speech-player'].addEventListener('pause', () => App.player.updateSpeechButton(false));
-        App.elements['toggle-speech-loop-btn'].addEventListener('click', (e) => {
-            e.currentTarget.classList.toggle('active');
-            App.editor.saveCurrentScene();
-            App.ui.invalidateNavViews();
-            App.ui.renderCurrentView();
+        const speechControls = ['toggle-speech-loop-btn'];
+        speechControls.forEach(id => {
+            const el = document.getElementById(id);
+            const eventType = el.tagName === 'BUTTON' ? 'click' : 'change';
+            el.addEventListener(eventType, (e) => {
+                if(e.currentTarget.tagName === 'BUTTON') e.currentTarget.classList.toggle('active');
+                App.editor.saveCurrentScene();
+            });
         });
 
-
-        // Video Controls
         App.elements['toggle-video-loop-btn'].addEventListener('click', (e) => {
             e.currentTarget.classList.toggle('active');
             App.editor.saveCurrentScene();
@@ -1721,8 +1756,6 @@ const App = {
         App.elements['preview-player-video'].addEventListener('play', () => App.editor.ui.updateVideoPlaybackButton(true));
         App.elements['preview-player-video'].addEventListener('pause', () => App.editor.ui.updateVideoPlaybackButton(false));
 
-
-        // Automatic saving and UI update listeners
         const saveAndPreview = () => { App.editor.saveCurrentScene(); App.editor.renderPreview(); };
         
         App.elements['scene-text'].addEventListener('input', saveAndPreview);
@@ -1748,7 +1781,6 @@ const App = {
             App.ui.invalidateNavViews();
             App.ui.renderCurrentView();
 		});
-
 
         ['story-title', 'creator-name', 'about-text'].forEach(id => {
             App.elements[id].addEventListener('input', (e) => {
@@ -1808,7 +1840,6 @@ const App = {
         document.getElementById('project-menu-btn').addEventListener('click', () => App.modals.show('project-menu-modal'));
         App.elements['notification-close-btn'].addEventListener('click', () => App.modals.hide(App.elements['notification-modal']));
 
-        // Variable Manager Events
         App.elements['manage-variables-btn'].addEventListener('click', () => App.editor.variables.showModal());
         const varModal = App.elements['variable-manager-modal'];
         const newVarInput = varModal.querySelector('#new-variable-name');
@@ -1861,7 +1892,6 @@ const App = {
         window.addEventListener('beforeunload', (e) => { if (App.state.isDirty) { e.preventDefault(); e.returnValue = ''; } });
 
         const searchInput = document.getElementById('scene-search-input');
-        // FIX: Invalidate view on search input to trigger live filtering
         searchInput.addEventListener('input', () => { App.ui.invalidateNavViews(); App.ui.renderCurrentView(); });
         document.getElementById('scene-search-btn').addEventListener('click', () => { App.ui.invalidateNavViews(); App.ui.renderCurrentView(); });
 
@@ -1870,13 +1900,11 @@ const App = {
         App.elements['toggle-scene-view-btn'].addEventListener('click', () => App.ui.setViewMode('list'));
         App.elements['scene-list-sort'].addEventListener('change', () => App.sceneList.render());
 
-        // Node Editor Controls
         document.getElementById('node-auto-arrange-btn').addEventListener('click', () => App.nodeEditor.autoArrange());
         document.getElementById('node-find-orphans-btn').addEventListener('click', () => App.nodeEditor.findNextOrphan());
         document.getElementById('node-zoom-in-btn').addEventListener('click', () => App.nodeEditor.zoom(1.2));
         document.getElementById('node-zoom-out-btn').addEventListener('click', () => App.nodeEditor.zoom(1 / 1.2));
         document.getElementById('node-fit-view-btn').addEventListener('click', () => App.nodeEditor.fitView());
-
 
         document.querySelectorAll('.thumbnail-fullscreen-icon').forEach(icon => {
             icon.addEventListener('click', (e) => {
@@ -1909,7 +1937,6 @@ const App = {
             }
         });
 
-        // Tooltip Logic
         const tooltip = document.getElementById('custom-tooltip');
         const thumbnailTooltip = document.getElementById('icon-thumbnail-tooltip');
         let activeTooltip = null;
@@ -2049,7 +2076,7 @@ const App = {
                 window.removeEventListener('mouseup', stopResize);
             }
             window.addEventListener('resize', updateConstraints);
-            updateConstraints(); // Initial call
+            updateConstraints();
         },
 		invalidateNavViews() {
 			if (!App.state.navViewsDirty) {
@@ -2063,7 +2090,7 @@ const App = {
 				this.cursor.wait();
 				App.debug.log('UI view is dirty. Re-rendering navigation views...', 'INFO');
 				try {
-					await App.io.checkAllProjectAssets(); // Check for broken links before rendering
+					await App.io.checkAllProjectAssets();
 					const filterTerm = document.getElementById('scene-search-input').value;
 					if (App.nodeEditor) await App.nodeEditor.render(filterTerm);
 					if (App.sceneList) await App.sceneList.render(filterTerm);
@@ -2085,7 +2112,7 @@ const App = {
 			App.elements['toggle-scene-view-btn'].classList.toggle('active', !isNodeView);
 
             if (isNodeView) {
-                App.nodeEditor.onResize(); // Ensure canvas is correctly sized
+                App.nodeEditor.onResize();
             }
 		},
 		async renderCurrentView() {
@@ -2125,13 +2152,11 @@ const App = {
 			const oldSceneId = App.state.currentSceneId;
 			App.state.currentSceneId = sceneId;
 
-            // Update Scene List View
             const oldCardNode = document.querySelector(`.scene-card.active`);
             if(oldCardNode) oldCardNode.classList.remove('active');
             const newCardNode = document.querySelector(`.scene-card[data-scene-id="${sceneId}"]`);
             if (newCardNode) newCardNode.classList.add('active');
 
-            // Update Node Editor View
             App.nodeEditor.updateSelection();
 
 			App.editor.render();
@@ -2209,7 +2234,7 @@ const App = {
 			defaultSpan.textContent = 'Thumbnail';
 			preview.appendChild(defaultSpan);
 
-			App.editor.renderPreview(); // Trigger a preview render to handle video/image switching
+			App.editor.renderPreview();
 			if (!path) return;
 
 			try {
@@ -2397,20 +2422,16 @@ const App = {
 
         async saveProject() {
             if (!App.state.projectDirectoryHandle) {
-                // If there's no directory handle, this will trigger the "Save As" flow
                 return await App.io.saveProjectAs();
             }
 
             try {
-                // The "Saving..." notification has been removed to make the final confirmation more prominent.
-        
                 const storyFileHandle = await App.state.projectDirectoryHandle.getFileHandle('story.json', { create: true });
                 const writable = await storyFileHandle.createWritable();
 
                 await writable.write(JSON.stringify(App.state.storyData, null, 2));
                 await writable.close();
 
-                // Copy any pending new assets (images, sounds, etc.)
                 if (App.state.pendingAssetCopies.size > 0) {
                     for (const [path, file] of App.state.pendingAssetCopies.entries()) {
                         const pathParts = path.split('/');
@@ -2428,7 +2449,6 @@ const App = {
                 }
 
                 App.setDirty(false);
-                // Now, show the single, clear confirmation pop-up.
                 App.ui.showNotification(`Project '${App.state.storyData.meta.title}' saved!`);
 
             } catch (err) {
@@ -2442,7 +2462,6 @@ const App = {
                 const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
                 if (dirHandle) {
                     App.state.projectDirectoryHandle = dirHandle;
-                    // After selecting a directory, call the main save function
                     await App.io.saveProject();
                 }
             } catch (err) {
@@ -2496,13 +2515,11 @@ const App = {
 
                 storyData.meta = { ...defaultStory.meta, ...(storyData.meta || {}) };
 
-                // Backwards compatibility for old layout name
                 if (storyData.meta.layout === 'layout-image-as-bg') {
                     storyData.meta.layout = 'layout-panel-bottom';
                     warnings.push("Updated 'layout-image-as-bg' to 'layout-panel-bottom'.");
                 }
 
-                // Remove obsolete container background image property
                 if (storyData.meta.styles && storyData.meta.styles['--container-bg-image']) {
                     delete storyData.meta.styles['--container-bg-image'];
                     warnings.push("Removed obsolete 'container-bg-image' style property.");
@@ -2525,7 +2542,7 @@ const App = {
                 const sceneEntries = Object.entries(storyData.scenes);
                 const totalScenes = sceneEntries.length;
                 let currentIndex = 0;
-                const CHUNK_SIZE = 25; // Process scenes in small batches
+                const CHUNK_SIZE = 25;
 
                 const processChunk = async () => {
                     const limit = Math.min(currentIndex + CHUNK_SIZE, totalScenes);
@@ -2534,7 +2551,6 @@ const App = {
                         const [key, sceneObj] = sceneEntries[i];
                         const scene = (typeof sceneObj === 'object' && sceneObj !== null) ? sceneObj : {};
 
-                        // BACKWARDS COMPATIBILITY: Ensure position exists
                         let position = scene.position;
                         if (typeof position !== 'object' || typeof position.x !== 'number' || typeof position.y !== 'number') {
                             warnings.push(`Scene '${key}' was missing position data. Auto-placing node.`);
@@ -2544,7 +2560,7 @@ const App = {
                         const safeChoices = (Array.isArray(scene.choices) ? scene.choices : []).map(c => {
                             if (!c || typeof c !== 'object') return null;
                             if (c.action === undefined) {
-                                if (i === currentIndex) { // Log this warning only once per chunk
+                                if (i === currentIndex) {
                                     warnings.push(`Upgraded old choice format in scene '${key}'.`);
                                 }
                                 return {
@@ -2552,7 +2568,6 @@ const App = {
                                     action: { text: c.text || '', target: c.target || '', set_variable: null, set_value: false }
                                 };
                             }
-                            // Sanitize modern choice format
                             return {
                                 condition: (c.condition && typeof c.condition.variable === 'string') ? { variable: c.condition.variable, value: c.condition.value === true } : null,
                                 action: {
@@ -2564,6 +2579,14 @@ const App = {
                             };
                         }).filter(Boolean);
 
+                        let cinematicModeOverride = 'default';
+                        if (typeof scene.waitForMedia === 'boolean') {
+                            cinematicModeOverride = scene.waitForMedia ? 'on' : 'off';
+                            warnings.push(`Upgraded 'waitForMedia' property in scene '${key}'.`);
+                        } else if (typeof scene.cinematicModeOverride === 'string') {
+                            cinematicModeOverride = scene.cinematicModeOverride;
+                        }
+
                         sanitizedScenes[key] = {
                             id: key,
                             text: typeof scene.text === 'string' ? scene.text : '',
@@ -2573,14 +2596,14 @@ const App = {
                             videoMuted: scene.videoMuted ?? true,
                             ambienceSound: typeof scene.ambienceSound === 'string' ? scene.ambienceSound : '',
                             ambienceLoop: scene.ambienceLoop ?? true,
-                            // --- NEW SPEECH FIELDS ---
                             speechSound: typeof scene.speechSound === 'string' ? scene.speechSound : '',
-                            speechLoop: scene.speechLoop ?? false, // Default to false for speech
+                            speechLoop: scene.speechLoop ?? false,
+                            cinematicModeOverride: cinematicModeOverride,
                             choices: safeChoices,
                             visited: scene.visited === true,
                             lastModified: typeof scene.lastModified === 'number' ? scene.lastModified : Date.now(),
-                            mediaType: scene.mediaType || 'none', // New property
-                            color: scene.color || null, // New property
+                            mediaType: scene.mediaType || 'none',
+                            color: scene.color || null,
                             position: position
                         };
                     }
@@ -2592,10 +2615,9 @@ const App = {
                     }
 
                     if (currentIndex < totalScenes) {
-                        await App.debug.yieldToMain(); // Yield to main thread
+                        await App.debug.yieldToMain();
                         await processChunk();
                     } else {
-                        // All scenes processed, finalize
                         storyData.scenes = sanitizedScenes;
                         if (Object.keys(storyData.scenes).length === 0) {
                             warnings.push("No valid scenes found. Added default 'start' scene.");
@@ -2611,7 +2633,7 @@ const App = {
                     }
                 };
 
-                await processChunk(); // Start the async processing
+                await processChunk();
             });
         },
         async newProject() {
@@ -2653,6 +2675,7 @@ const App = {
 
                 App.state.projectDirectoryHandle = projectHandle;
                 App.state.storyData = newStory;
+                App.state.player.cinematicEnabled = newStory.meta.styles['--cinematic-pacing-default'] === 'on'; // Sync default
                 App.state.pendingAssetCopies.clear();
                 App.modals.hideAll();
                 App.ui.enableEditor(true);
@@ -2760,6 +2783,8 @@ const App = {
                 App.ui.showProgress('Finishing up...');
                 App.debug.log('Populating application with project data...');
                 App.state.storyData = storyData;
+                // Force sync cinematic enabled state with project properties
+                App.state.player.cinematicEnabled = storyData.meta.styles['--cinematic-pacing-default'] === 'on';
                 App.state.projectDirectoryHandle = dirHandle;
                 App.styles.loadGoogleFont(App.state.storyData.meta.styles['--font-family']);
                 if(!App.state.debugMode) App.modals.hideAll();
@@ -2768,7 +2793,7 @@ const App = {
                 App.ui.invalidateNavViews();
                 await App.ui.setViewMode(App.state.currentNavView);
                 await App.ui.selectScene(App.state.storyData.meta.startSceneId);
-                App.nodeEditor.fitView(); // Fit view on load instead of centering
+                App.nodeEditor.fitView();
 
                 App.debug.log('Ensuring asset folders exist...');
                 await dirHandle.getDirectoryHandle('images', { create: true });
@@ -2797,18 +2822,16 @@ const App = {
         },
 
         async getFormattedPlayerHTML(isForExport = false) {
-            if (!App.state.storyData.meta) return ''; // Guard against no project
+            if (!App.state.storyData.meta) return '';
 				const storyData = JSON.parse(JSON.stringify(App.state.storyData));
 				let storyJsonString;
 
-				// Stringify the data first
 				if (isForExport) {
 					storyJsonString = JSON.stringify(storyData, null, 2);
 				} else {
 					storyJsonString = JSON.stringify(storyData);
 				}
 
-			// NOW, make it safe for HTML injection by escaping the '<' character.
 			storyJsonString = storyJsonString.replace(/</g, '\\u003c');
 
             let googleFontLink = '';
@@ -2828,9 +2851,11 @@ const App = {
                 const sceneImage = document.getElementById('scene-image'), sceneVideo = document.getElementById('scene-video'), sceneText = document.getElementById('scene-text'), choicesContainer = document.getElementById('choices-container'), ambiencePlayer = document.getElementById('ambience-player'), speechPlayer = document.getElementById('speech-player'), musicPlayer = document.getElementById('music-player'), playerMenuBtn = document.getElementById('player-menu-btn'), playerMenuModal = document.getElementById('player-menu-modal'), aboutModal = document.getElementById('about-modal'), gameContainer = document.getElementById('game-container'), contentContainer = document.getElementById('content-container'), backgroundVideo = document.getElementById('background-video');
                 let gameState = { currentSceneId: null, variables: {}, visited: {} };
                 let currentAmbienceSrc = '', currentSpeechSrc = '', currentMusicSrc = '', activeVideoElement = null;
-                let typewriterState = { intervalId: null, skipListener: null };
+                let typewriterState = { intervalId: null, cleanup: null };
                 let isGloballyPaused = false;
                 let restorePlayState = { music: false, ambience: false, speech: false, video: false };
+				let cinematicRevealCleanup = null;
+				let playerCinematicEnabled = false;
 
                 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
                 const isAndroid = /android/i.test(navigator.userAgent);
@@ -2845,14 +2870,13 @@ const App = {
 
 				function parseMarkdown(text) {
                     if (!text) return '';
-                    // This function mirrors the main app's markdown parser for consistency.
                     let html = text
-                        .replace(/</g, '&lt;') // IMPORTANT: Must be first to prevent HTML injection.
+                        .replace(/</g, '&lt;')
                         .replace(/>/g, '&gt;')
                         .replace(/\\[(.*?)\]\\((.*?)\\)/g, (match, text, url) => {
                             const safeUrl = url.trim();
                              if (safeUrl.startsWith('javascript:') || safeUrl.startsWith('data:') || safeUrl.startsWith('vbscript:')) {
-                                return \`[\${text}](javascript:void(0))\`; // Sanitize malicious links
+                                return \`[\${text}](javascript:void(0))\`;
                             }
                             return \`<a href="\${safeUrl}" target="_blank" rel="noopener noreferrer">\${text}</a>\`;
                         })
@@ -2945,6 +2969,20 @@ const App = {
                         });
                     }
 
+					const cinematicBtn = document.getElementById('cinematic-toggle-btn');
+					const updateCinematicButton = () => {
+						cinematicBtn.textContent = 'Cinematic Pacing: ' + (playerCinematicEnabled ? 'On' : 'Off');
+					};
+                    // FIX: Initialize from Project Properties only, ignore LocalStorage to force intended experience
+					playerCinematicEnabled = storyData.meta.styles['--cinematic-pacing-default'] === 'on';
+					
+					updateCinematicButton();
+					bindEvent(cinematicBtn, () => {
+						playerCinematicEnabled = !playerCinematicEnabled;
+						updateCinematicButton();
+					});
+
+
                     const setupSlider = (sliderId, player, storageKey, defaultKey) => {
                         const slider = document.getElementById(sliderId);
                         const savedVol = storageAvailable ? localStorage.getItem(storageKey) : null;
@@ -2995,9 +3033,9 @@ const App = {
 
                     const startAudio = () => { 
                         if (!isGloballyPaused) {
-                            if (restorePlayState.music && musicPlayer.paused) musicPlayer.play().catch(e => console.warn("Music start failed.", e)); 
-                            if (restorePlayState.ambience && ambiencePlayer.paused) ambiencePlayer.play().catch(e => console.warn("Ambience start failed.", e));
-                            if (restorePlayState.speech && speechPlayer.paused) speechPlayer.play().catch(e => console.warn("Speech start failed.", e));
+                            if (restorePlayState.music && musicPlayer.paused) musicPlayer.play().catch(e => {}); 
+                            if (restorePlayState.ambience && ambiencePlayer.paused) ambiencePlayer.play().catch(e => {});
+                            if (restorePlayState.speech && speechPlayer.paused) speechPlayer.play().catch(e => {});
                         }
                         document.body.removeEventListener('click', startAudio); document.body.removeEventListener('touchend', startAudio); 
                     };
@@ -3007,7 +3045,7 @@ const App = {
 
                 function typeWriter(text, choices) {
                     if (typewriterState.intervalId) clearInterval(typewriterState.intervalId);
-                    if (typewriterState.skipListener) document.body.removeEventListener('click', typewriterState.skipListener);
+                    if (typewriterState.cleanup) typewriterState.cleanup();
 
                     const originalMinHeight = contentContainer.style.minHeight;
                     contentContainer.style.minHeight = '';
@@ -3021,10 +3059,11 @@ const App = {
                     });
                     const finalHeight = contentContainer.offsetHeight;
                     contentContainer.style.minHeight = finalHeight + 'px';
-
                     choicesContainer.innerHTML = '';
                     sceneText.innerHTML = '';
+
                     let i = 0;
+                    let isScrolling = false;
 
                     const showChoices = () => {
                         choicesContainer.innerHTML = '';
@@ -3038,23 +3077,40 @@ const App = {
                         });
                     };
 
-                    const skipTyping = (e) => {
-                        if(e) e.stopPropagation();
+                    const cleanupListeners = () => {
+                        gameContainer.removeEventListener('click', clickHandler);
+                        gameContainer.removeEventListener('touchstart', touchStartHandler);
+                        gameContainer.removeEventListener('touchmove', touchMoveHandler);
+                        gameContainer.removeEventListener('touchend', touchEndHandler);
+                        typewriterState.cleanup = null;
+                        typewriterState.intervalId = null;
+                    };
+
+                    const skip = (e) => {
+                        if (e && e.target.closest('.choice-btn')) return;
+                        
                         clearInterval(typewriterState.intervalId);
-                        document.body.removeEventListener('click', typewriterState.skipListener);
+                        cleanupListeners();
+                        
                         sceneText.innerHTML = parseMarkdown(text);
                         showChoices();
                         contentContainer.style.minHeight = originalMinHeight;
-                        typewriterState.intervalId = null;
-                        typewriterState.skipListener = null;
                     };
 
-                    typewriterState.skipListener = skipTyping;
-                    document.body.addEventListener('click', skipTyping);
+                    const clickHandler = (e) => { if (!isTouchDevice) skip(e); };
+                    const touchStartHandler = () => { isScrolling = false; };
+                    const touchMoveHandler = () => { isScrolling = true; };
+                    const touchEndHandler = (e) => { if (!isScrolling) skip(e); };
+                    
+                    gameContainer.addEventListener('click', clickHandler);
+                    gameContainer.addEventListener('touchstart', touchStartHandler, { passive: true });
+                    gameContainer.addEventListener('touchmove', touchMoveHandler, { passive: true });
+                    gameContainer.addEventListener('touchend', touchEndHandler);
 
+                    typewriterState.cleanup = cleanupListeners;
                     typewriterState.intervalId = setInterval(() => {
                         if (i >= text.length) {
-                            skipTyping(null);
+                            skip(null);
                         } else {
                             sceneText.innerHTML = parseMarkdown(text.substring(0, i + 1));
                             i++;
@@ -3062,27 +3118,99 @@ const App = {
                     }, 30);
                 }
 
-
                 function processChoice(choice) {
+                    if (cinematicRevealCleanup) {
+                        cinematicRevealCleanup();
+                        cinematicRevealCleanup = null;
+                    }
                     const action = choice.action;
                     if (action.set_variable) gameState.variables[action.set_variable] = action.set_value;
                     if (action.target) renderScene(action.target);
                 }
+				
+				function handleCinematicReveal(scene, onReady) {
+                    if (cinematicRevealCleanup) cinematicRevealCleanup();
+                    
+                    const shouldWait = playerCinematicEnabled;
+
+                    const triggers = storyData.meta.styles['--cinematic-triggers'] || 'both';
+                    const watchVideo = (triggers === 'both' || triggers === 'video') && isVideo(scene.image);
+                    const watchSpeech = (triggers === 'both' || triggers === 'speech') && !!scene.speechSound;
+
+                    let triggerMedia = null;
+                    if (watchSpeech) triggerMedia = speechPlayer;
+                    else if (watchVideo && !activeVideoElement.loop) triggerMedia = activeVideoElement;
+                    
+                    const uiBox = document.getElementById('game-container');
+
+                    if (shouldWait && triggerMedia) {
+                        uiBox.classList.remove('cinematic-visible');
+                        uiBox.classList.add('cinematic-hidden');
+                        
+                        const reveal = (e) => {
+                            if(e && e.type !== 'ended' && e.type !== 'timeupdate') {
+                                e.stopPropagation();
+                            }
+                            uiBox.classList.remove('cinematic-hidden');
+                            uiBox.classList.add('cinematic-visible');
+                            if (cinematicRevealCleanup) cinematicRevealCleanup();
+                        };
+
+                        const clickHandler = (e) => { 
+                            if(!e.target.closest('.player-ui-btn, .choice-btn, a, button')) {
+                                reveal(e); 
+                            }
+                        };
+
+                        // Slight delay to ensure the previous click doesn't trigger this
+                        setTimeout(() => {
+                            document.body.addEventListener('click', clickHandler, { once: true });
+                            document.body.addEventListener('touchend', clickHandler, { once: true });
+                        }, 50);
+                        
+                        const mediaEndHandler = () => reveal();
+                        triggerMedia.addEventListener('ended', mediaEndHandler, { once: true });
+                        
+                        cinematicRevealCleanup = () => {
+                            document.body.removeEventListener('click', clickHandler);
+                            document.body.removeEventListener('touchend', clickHandler);
+                            triggerMedia.removeEventListener('ended', mediaEndHandler);
+                        };
+                    } else {
+                        uiBox.classList.remove('cinematic-hidden');
+                        uiBox.classList.add('cinematic-visible');
+                    }
+                    
+                    if(onReady) onReady();
+                }
 
                 function renderScene(sceneId) {
-                    const isLoopingBackToStart = sceneId === storyData.meta.startSceneId &&
-                                                 Object.keys(gameState.visited).length > 0;
-                    if (isLoopingBackToStart) {
-                        initializeGameState();
-                    }
+                    if (typewriterState.cleanup) typewriterState.cleanup();
+
+                    const isLoopingBackToStart = sceneId === storyData.meta.startSceneId && Object.keys(gameState.visited).length > 0;
+                    if (isLoopingBackToStart) initializeGameState();
+                    
                     try {
                         gameState.currentSceneId = sceneId;
                         gameState.visited[sceneId] = true;
-
                         const scene = storyData.scenes[sceneId];
                         if (!scene) { sceneText.innerHTML = 'Error: Scene "' + sceneId + '" not found.'; return; }
 
-                        // Apply volumes from sliders
+						const overlay = document.getElementById('transition-overlay');
+						if (activeVideoElement && activeVideoElement.readyState > 0) {
+							const canvas = document.createElement('canvas');
+							canvas.width = activeVideoElement.videoWidth;
+							canvas.height = activeVideoElement.videoHeight;
+							canvas.getContext('2d').drawImage(activeVideoElement, 0, 0, canvas.width, canvas.height);
+							overlay.style.backgroundImage = \`url(\${canvas.toDataURL()})\`;
+						} else if (sceneImage.style.display !== 'none' && sceneImage.src) {
+							overlay.style.backgroundImage = \`url('\${sceneImage.src}')\`;
+						} else {
+							overlay.style.backgroundImage = document.body.style.backgroundImage;
+						}
+						overlay.style.transition = 'opacity 0s';
+						overlay.classList.add('active');
+
                         musicPlayer.volume = document.getElementById('volume-slider').value;
                         ambiencePlayer.volume = document.getElementById('ambience-volume-slider').value;
                         speechPlayer.volume = document.getElementById('speech-volume-slider').value;
@@ -3096,122 +3224,92 @@ const App = {
                         gameContainer.className = layout;
 
                         const imageContainer = document.getElementById('image-container');
-
-                        [backgroundVideo, sceneVideo].forEach(v => {
-                             if(!v.paused) { v.pause(); v.removeAttribute('src'); v.load(); }
-                             v.style.display = 'none'; v.classList.remove('visible');
-                        });
-                        sceneImage.style.display = 'none';
+                        [backgroundVideo, sceneVideo, sceneImage].forEach(el => el.style.display = 'none');
+						[backgroundVideo, sceneVideo].forEach(v => { if(!v.paused) { v.pause(); v.removeAttribute('src'); v.load(); } });
                         imageContainer.style.display = 'none';
                         document.body.style.backgroundImage = 'var(--screen-bg-image)';
                         activeVideoElement = null;
                         restorePlayState.video = false;
                         document.getElementById('player-video-controls').style.display = 'none';
 
+						const onAssetReady = () => {
+							setTimeout(() => {
+								overlay.style.transition = 'opacity 0.5s ease-out';
+								overlay.classList.remove('active');
+							}, 16);
+						};
+
                         if (isMediaVideo && mediaUrl) {
                             activeVideoElement = isPanelLayout ? backgroundVideo : sceneVideo;
                             if (!isPanelLayout) imageContainer.style.display = 'block';
-
+							activeVideoElement.oncanplaythrough = onAssetReady;
                             if (activeVideoElement.src !== mediaUrl) activeVideoElement.src = mediaUrl;
                             activeVideoElement.style.display = 'block'; activeVideoElement.classList.add('visible');
                             activeVideoElement.loop = scene.videoLoop ?? true;
-                            activeVideoElement.muted = scene.videoMuted ?? true; // Scene-specific mute
+                            activeVideoElement.muted = scene.videoMuted ?? true;
                             activeVideoElement.volume = document.getElementById('video-volume-slider').value;
                             
                             restorePlayState.video = true;
-                            if (!isGloballyPaused) {
-                                activeVideoElement.play().catch(e => console.warn("Video autoplay failed:", e));
-                            }
+                            if (!isGloballyPaused) activeVideoElement.play().catch(e => {});
                             updateVideoControls(scene);
-                        } else {
-                           if (isPanelLayout && mediaUrl) {
+                        } else if (mediaUrl) {
+                           if (isPanelLayout) {
+								const img = new Image(); img.onload = onAssetReady; img.src = mediaUrl;
                                 document.body.style.backgroundImage = 'url("' + mediaUrl + '")';
-                           } else if (mediaUrl) {
-                                sceneImage.src = mediaUrl;
-                                sceneImage.style.display = 'block';
-                                imageContainer.style.display = 'block';
+                           } else {
+								sceneImage.onload = onAssetReady; sceneImage.src = mediaUrl;
+                                sceneImage.style.display = 'block'; imageContainer.style.display = 'block';
                            }
-                        }
+                        } else {
+						   onAssetReady();
+						}
 
                         let visibleChoices = [];
                         for(const choice of (scene.choices || [])) {
                             let conditionMet = true;
                             if(choice.condition) {
                                 const rawVarName = choice.condition.variable;
-                                // FIX: Check if this is a 'visited scene' check or a normal variable
                                 if (rawVarName.startsWith('visited_scene_')) {
-                                    const targetSceneId = rawVarName.substring(14);
-                                    conditionMet = (!!gameState.visited[targetSceneId]) === choice.condition.value;
+                                    conditionMet = (!!gameState.visited[rawVarName.substring(14)]) === choice.condition.value;
                                 } else {
-                                    // FIX: Handle variables.
-                                    // Ensure we handle cases where data might still have 'var_' prefix from old saves,
-                                    // but prefer the direct name.
-                                    let varKey = rawVarName;
-                                    if (varKey.startsWith('var_')) {
-                                        varKey = varKey.substring(4);
-                                    }
+                                    let varKey = rawVarName.startsWith('var_') ? rawVarName.substring(4) : rawVarName;
                                     conditionMet = gameState.variables[varKey] === choice.condition.value;
                                 }
                             }
-
                             if (conditionMet) {
                                 if (!choice.action.text && choice.action.target) {
-                                    if(choice.action.target === sceneId) { console.error('Infinite loop detected: silent action targets itself in scene ' + sceneId); continue; }
-                                    processChoice(choice);
-                                    return;
+                                    if(choice.action.target === sceneId) { console.error('Infinite loop detected in scene ' + sceneId); continue; }
+                                    processChoice(choice); return;
                                 }
                                 if (choice.action.text) visibleChoices.push(choice);
                                 else if (choice.action.set_variable) gameState.variables[choice.action.set_variable] = choice.action.set_value;
                             }
                         }
-
-                        if (storyData.meta.styles['--typewriter-effect'] === 'on') {
-                            typeWriter(scene.text, visibleChoices);
-                        } else {
-                            contentContainer.style.minHeight = '';
-                            sceneText.innerHTML = parseMarkdown(scene.text);
-                            choicesContainer.innerHTML = '';
-                            visibleChoices.forEach(choice => { const b = document.createElement('button'); b.textContent = choice.action.text; b.className = 'choice-btn'; bindEvent(b, () => processChoice(choice)); choicesContainer.appendChild(b); });
-                        }
-
-                        // AMBIENCE HANDLING
+						
+						handleCinematicReveal(scene, () => {
+							if (storyData.meta.styles['--typewriter-effect'] === 'on') {
+								typeWriter(scene.text, visibleChoices);
+							} else {
+								contentContainer.style.minHeight = '';
+								sceneText.innerHTML = parseMarkdown(scene.text);
+								choicesContainer.innerHTML = '';
+								visibleChoices.forEach(choice => { const b = document.createElement('button'); b.textContent = choice.action.text; b.className = 'choice-btn'; bindEvent(b, () => processChoice(choice)); choicesContainer.appendChild(b); });
+							}
+						});
+						
                         ambiencePlayer.loop = scene.ambienceLoop ?? true; 
                         const soundUrl = scene.ambienceSound || '';
-                        if (soundUrl !== currentAmbienceSrc) { 
-                            currentAmbienceSrc = soundUrl; 
-                            ambiencePlayer.src = soundUrl; 
-                        }
-                        
-                        if (soundUrl) {
-                            restorePlayState.ambience = true;
-                            if (!isGloballyPaused) {
-                                ambiencePlayer.play().catch(e => console.warn("Ambience autoplay blocked."));
-                            }
-                        } else {
-                            restorePlayState.ambience = false;
-                            ambiencePlayer.pause();
-                        }
+                        if (soundUrl !== currentAmbienceSrc) { currentAmbienceSrc = soundUrl; ambiencePlayer.src = soundUrl; }
+                        if (soundUrl) { restorePlayState.ambience = true; if (!isGloballyPaused) ambiencePlayer.play().catch(e => {}); } 
+						else { restorePlayState.ambience = false; ambiencePlayer.pause(); }
 
-                        // SPEECH HANDLING
                         speechPlayer.loop = scene.speechLoop ?? false; 
                         const speechUrl = scene.speechSound || '';
-                        if (speechUrl !== currentSpeechSrc) { 
-                            currentSpeechSrc = speechUrl; 
-                            speechPlayer.src = speechUrl; 
-                        }
-                        
-                        if (speechUrl) {
-                            restorePlayState.speech = true;
-                            if (!isGloballyPaused) {
-                                speechPlayer.play().catch(e => console.warn("Speech autoplay blocked."));
-                            }
-                        } else {
-                            restorePlayState.speech = false;
-                            speechPlayer.pause();
-                        }
+                        if (speechUrl !== currentSpeechSrc) { currentSpeechSrc = speechUrl; speechPlayer.src = speechUrl; }
+                        if (speechUrl) { restorePlayState.speech = true; if (!isGloballyPaused) speechPlayer.play().catch(e => {}); }
+						else { restorePlayState.speech = false; speechPlayer.pause(); }
 
-
-                    } catch(e) { console.error("Error rendering scene:", e); sceneText.innerHTML = "An error occurred. Check console for details."; }
+                    } catch(e) { console.error("Error rendering scene:", e); sceneText.innerHTML = "An error occurred."; }
                 }
 
                 function updateVideoControls(scene) {
@@ -3235,11 +3333,14 @@ const App = {
 
                     document.title = storyData.meta.title || 'Choose Your Own Adventure';
 
+                    // 1. Exported Game Logic (No window.opener)
                     if (!window.opener) {
                         statusEl.textContent = "Loading complete.";
                         if(loader) loader.style.opacity = '0';
                         setTimeout(() => loader.style.display = 'none', 500);
-                        setupMenu();
+                        
+                        setupMenu(); // This sets cinematic pacing based on Project Properties (ignoring local storage)
+
                         const savedStateJSON = storageAvailable ? localStorage.getItem(saveKey) : null;
                         if (savedStateJSON) {
                             initializeGameState();
@@ -3251,11 +3352,13 @@ const App = {
                             initializeGameState();
                             gameState.currentSceneId = storyData.meta.startSceneId;
                         }
+                        
                         setupGlobalStyles();
                         renderScene(gameState.currentSceneId);
                         return;
                     }
 
+                    // 2. Editor Preview Logic (Has window.opener)
                     progressContainer.style.display = 'block';
                     statusEl.textContent = 'Collecting assets...';
 
@@ -3263,7 +3366,7 @@ const App = {
                     Object.values(storyData.scenes).forEach(scene => {
                         if (scene.image) assetPaths.add(scene.image);
                         if (scene.ambienceSound) assetPaths.add(scene.ambienceSound);
-                        if (scene.speechSound) assetPaths.add(scene.speechSound); // Collect speech
+                        if (scene.speechSound) assetPaths.add(scene.speechSound);
                     });
                     if (storyData.meta.styles['--music-path']) assetPaths.add(storyData.meta.styles['--music-path']);
                     if (storyData.meta.styles['--screen-bg-image']) assetPaths.add(storyData.meta.styles['--screen-bg-image']);
@@ -3274,21 +3377,15 @@ const App = {
                     const assetDataUrls = {};
 
                     const requestAsset = (path) => {
-                        return new Promise((resolve, reject) => {
+                        return new Promise((resolve) => {
                             const requestId = Math.random().toString(36).substring(2);
-
                             const handler = (event) => {
                                 if (event.data.type === 'assetResponse' && event.data.requestId === requestId) {
                                     window.removeEventListener('message', handler);
-                                    if(event.data.success) {
-                                        resolve(event.data.dataUrl);
-                                    } else {
-                                        console.warn('Failed to load asset: ' + path);
-                                        resolve(null); // Resolve with null on failure to not break Promise.all
-                                    }
+                                    if(event.data.success) resolve(event.data.dataUrl);
+                                    else { console.warn('Failed to load asset: ' + path); resolve(null); }
                                 }
                             };
-
                             window.addEventListener('message', handler);
                             window.opener.postMessage({ type: 'requestAsset', path: path, requestId: requestId }, '*');
                         });
@@ -3316,7 +3413,6 @@ const App = {
 
                     setupMenu();
                     initializeGameState();
-                    // FIX: Ensure player always starts from startSceneId
                     gameState.currentSceneId = storyData.meta.startSceneId;
                     setupGlobalStyles();
                     renderScene(gameState.currentSceneId);
@@ -3385,7 +3481,6 @@ const App = {
         async previewProject() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to preview."); return; }
             App.editor.saveCurrentScene();
-            // FIX: Ensure the player starts from the designated start scene
             App.state.storyData.meta.currentSceneId = App.state.storyData.meta.startSceneId;
 
 
@@ -3662,7 +3757,7 @@ const App = {
             scenes.sort((a, b) => {
                 if (sortMethod === 'id') return a.id.localeCompare(b.id);
                 if (sortMethod === 'modified') return b.lastModified - a.lastModified;
-                return 0; // file-order is default
+                return 0;
             });
 
             listView.innerHTML = '';
@@ -3670,7 +3765,6 @@ const App = {
             scenes.forEach(scene => fragment.appendChild(this.createCard(scene)));
             listView.appendChild(fragment);
 
-            // Asynchronously load thumbnails
             const thumbnailDivs = listView.querySelectorAll('.scene-card-thumbnail');
             thumbnailDivs.forEach(async (div) => {
                 const sceneId = div.dataset.thumbnailFor;
@@ -3770,7 +3864,7 @@ const App = {
         }
     },
 
-        editor: {
+    editor: {
         render() {
             const scenes = App.state.storyData?.scenes;
             const scene = scenes ? scenes[App.state.currentSceneId] : null;
@@ -3785,10 +3879,8 @@ const App = {
 
             const editorPanel = document.getElementById('editor-panel');
             const previewWrapper = App.elements['scene-editor-preview-wrapper'];
-            // FIX: Remove "Scene Editor" text and underline
             const headerH1 = document.querySelector('#editor-container .header h1');
             if(headerH1) {
-                // Clear existing text nodes, but keep the button
                 Array.from(headerH1.childNodes).forEach(node => {
                     if (node.nodeType === Node.TEXT_NODE) {
                         node.textContent = '';
@@ -3815,23 +3907,19 @@ const App = {
             App.elements['scene-sound'].value = scene.ambienceSound || '';
             App.elements['toggle-loop-btn'].classList.toggle('active', scene.ambienceLoop ?? true);
             
-            // New Speech Fields
             App.elements['scene-speech'].value = scene.speechSound || '';
             App.elements['toggle-speech-loop-btn'].classList.toggle('active', scene.speechLoop ?? false);
 
             App.elements['manage-variables-btn'].innerHTML = App.editor.ui.iconManageVariables;
             this.ui.updateMediaButtonStates();
-            App.player.updateAmbienceButton(false); // Reset ambience button to "Play" icon
-            App.player.updateSpeechButton(false);   // Reset speech button
+            App.player.updateAmbienceButton(false);
+            App.player.updateSpeechButton(false);
 
-            // Video specific UI
             App.elements['toggle-video-loop-btn'].classList.toggle('active', scene.videoLoop ?? true);
             const isMuted = scene.videoMuted ?? true;
             App.elements['toggle-video-mute-btn'].classList.toggle('active', isMuted);
             this.ui.updateVideoMuteButton(isMuted);
-
             this.ui.updateVideoControlsVisibility();
-
             App.ui.updateAiImagePreview(null); App.state.aiImageUrl = null;
         },
         renderPreview() {
@@ -3884,7 +3972,6 @@ const App = {
 
 				if (currentLoadId !== App.state.previewLoadId) return;
 
-				// Reset all media displays
 				imageEl.style.display = 'none';
 				imageContainerEl.style.display = 'none';
 				[videoBgEl, videoFgEl].forEach(v => {
@@ -3895,7 +3982,7 @@ const App = {
 						v.load();
 					}
 				});
-                previewContainer.style.backgroundImage = 'none'; // Clear background image
+                previewContainer.style.backgroundImage = 'none';
 
                 const isPanelLayout = meta.layout === 'layout-panel-bottom' || meta.layout === 'layout-panel-left' || meta.layout === 'layout-panel-right';
 
@@ -3911,10 +3998,10 @@ const App = {
                     activeVideoEl.load();
                     App.editor.ui.updateVideoPlaybackButton(false);
 
-				} else { // This is an image or no media
+				} else {
 					if (isPanelLayout && sceneMediaUrl) {
                         previewContainer.style.backgroundImage = `url('${sceneMediaUrl}')`;
-                    } else if (sceneMediaUrl) { // Top-down or Side-by-side
+                    } else if (sceneMediaUrl) {
                         imageEl.src = sceneMediaUrl;
                         imageEl.style.display = 'block';
                         imageContainerEl.style.display = 'block';
@@ -3946,7 +4033,6 @@ const App = {
                     action: { text: actionText, target: null, set_variable: null, set_value: false } 
                 };
 
-                // FIX: Strip the 'var_' prefix when saving the condition variable
                 if (isConditional) {
                     const condVar = view.querySelector('.condition-select').value;
                     if(condVar) {
@@ -3976,14 +4062,10 @@ const App = {
 
             scene.image = App.elements['scene-image'].value.trim();
             scene.imagePrompt = App.elements['scene-image-prompt'].value.trim();
-            
             scene.ambienceSound = App.elements['scene-sound'].value.trim();
             scene.ambienceLoop = App.elements['toggle-loop-btn'].classList.contains('active');
-            
-            // Save Speech settings
             scene.speechSound = App.elements['scene-speech'].value.trim();
             scene.speechLoop = App.elements['toggle-speech-loop-btn'].classList.contains('active');
-
             scene.videoLoop = App.elements['toggle-video-loop-btn'].classList.contains('active');
             scene.videoMuted = App.elements['toggle-video-mute-btn'].classList.contains('active');
             scene.choices = newChoices;
@@ -4020,7 +4102,6 @@ const App = {
                 choiceDiv.querySelector('.toggle-condition-btn').innerHTML = App.editor.ui.iconRemoveCondition;
                 const cView = choiceDiv.querySelector('.condition-view');
                 
-                // FIX: Re-apply 'var_' prefix when loading into the dropdown if it's missing
                 const varName = choice.condition.variable;
                 const selectValue = varName.startsWith('visited_scene_') ? varName : (varName.startsWith('var_') ? varName : 'var_' + varName);
                 cView.querySelector('.condition-select').value = selectValue;
@@ -4078,6 +4159,7 @@ const App = {
                     <button class="icon-btn delete-choice-btn" onclick="this.parentElement.remove()" title="Delete Choice">&times;</button>
                 `;
             },
+
             populateDropdowns(selectElement, includeScenes, includeVariables, includeVisited) {
                 if (!selectElement) return;
                 const scenes = Object.keys(App.state.storyData.scenes).sort();
@@ -4280,7 +4362,6 @@ const App = {
 			});
 		},
         async selectFile(assetType, targetInputId) {
-            // Select appropriate input based on type (image or sound/speech)
             const isSound = assetType === 'sounds';
             const fileInput = document.getElementById(isSound ? 'sound-file-input' : 'image-file-input');
             
@@ -4396,15 +4477,9 @@ const App = {
 			const ambiencePlayer = App.elements['ambience-player'];
             const speechPlayer = App.elements['speech-player'];
 			const previewVideo = App.elements['preview-player-video'];
-			if (ambiencePlayer && !ambiencePlayer.paused) {
-				ambiencePlayer.pause();
-			}
-            if (speechPlayer && !speechPlayer.paused) {
-				speechPlayer.pause();
-			}
-			if (previewVideo && !previewVideo.paused) {
-				previewVideo.pause();
-			}
+			if (ambiencePlayer && !ambiencePlayer.paused) ambiencePlayer.pause();
+            if (speechPlayer && !speechPlayer.paused) speechPlayer.pause();
+			if (previewVideo && !previewVideo.paused) previewVideo.pause();
 		},
         async play(sceneId, fromStart = false) {
             if (!sceneId || !App.state.storyData.scenes[sceneId]) { App.ui.showNotification("Cannot play. Invalid start scene."); return; }
@@ -4432,18 +4507,14 @@ const App = {
         },
         processChoice(choice) {
             const action = choice.action;
-            if (action.set_variable) {
-                this.gameState.variables[action.set_variable] = action.set_value;
-            }
-            if (action.target) {
-                this.renderScene(action.target);
-            }
+            if (action.set_variable) this.gameState.variables[action.set_variable] = action.set_value;
+            if (action.target) this.renderScene(action.target);
         },
         typeWriter(text, choices) {
 			const { 'player-text': textEl, 'player-choices': choicesEl, 'player-content-container': contentContainer, 'player-container': playerContainer } = App.elements;
 
 			if (App.state.player.typewriter.intervalId) clearInterval(App.state.player.typewriter.intervalId);
-			if (App.state.player.typewriter.skipListener) playerContainer.removeEventListener('click', App.state.player.typewriter.skipListener);
+			if (App.state.player.typewriter.cleanup) App.state.player.typewriter.cleanup();
 
 			const originalMinHeight = contentContainer.style.minHeight;
 			contentContainer.style.minHeight = '';
@@ -4475,17 +4546,21 @@ const App = {
 			};
 
 			const skipTyping = (e) => {
-				if(e) e.stopPropagation();
-				clearInterval(App.state.player.typewriter.intervalId);
-				playerContainer.removeEventListener('click', App.state.player.typewriter.skipListener);
+				if(e && e.target.closest('.choice-btn')) return;
+				if (App.state.player.typewriter.cleanup) App.state.player.typewriter.cleanup();
 				textEl.innerHTML = App.markdown.parse(text);
 				showChoices();
 				contentContainer.style.minHeight = originalMinHeight;
-				App.state.player.typewriter.intervalId = null;
-				App.state.player.typewriter.skipListener = null;
 			};
-
-			App.state.player.typewriter.skipListener = skipTyping;
+			
+			const cleanup = () => {
+				clearInterval(App.state.player.typewriter.intervalId);
+				playerContainer.removeEventListener('click', skipTyping);
+				App.state.player.typewriter.intervalId = null;
+				App.state.player.typewriter.cleanup = null;
+			}
+			
+			App.state.player.typewriter.cleanup = cleanup;
 			playerContainer.addEventListener('click', skipTyping);
 
 			App.state.player.typewriter.intervalId = setInterval(() => {
@@ -4498,31 +4573,39 @@ const App = {
 			}, 30);
 		},
         async renderScene(sceneId) {
-            const isLoopingBackToStart = sceneId === App.state.storyData.meta.startSceneId &&
-                                         Object.keys(this.gameState.visited).length > 0;
-            if (isLoopingBackToStart) {
-                this.initializeGameState();
-            }
+            if (App.state.player.typewriter.cleanup) App.state.player.typewriter.cleanup();
+
+            const isLoopingBackToStart = sceneId === App.state.storyData.meta.startSceneId && Object.keys(this.gameState.visited).length > 0;
+            if (isLoopingBackToStart) this.initializeGameState();
+            
             App.state.currentSceneId = sceneId;
             this.gameState.visited[sceneId] = true;
 
             const scene = App.state.storyData.scenes[sceneId];
-            const { 'player-text': textEl, 'player-choices': choicesEl, 'ambience-player': audio, 'speech-player': speech, 'music-player': music, 'player-video-bg': videoBg, 'player-video-fg': videoFg, 'player-image': imageEl } = App.elements;
+            const { 'player-text': textEl, 'player-choices': choicesEl, 'ambience-player': audio, 'speech-player': speech, 'music-player': music, 'player-video-bg': videoBg, 'player-video-fg': videoFg, 'player-image': imageEl, 'editor-transition-overlay': overlay, 'player-content-container': contentContainer } = App.elements;
             const playerContainer = App.elements['player-container'];
-            const playerInnerContainer = App.elements['player-inner-container'];
             const playerImageContainer = document.getElementById('player-image-container');
 
             if (!scene) { textEl.innerHTML = `Error: Scene "${sceneId}" not found.`; return; }
 
+			if (App.state.player.activeVideoElement && App.state.player.activeVideoElement.readyState > 0) {
+				const canvas = document.createElement('canvas');
+				canvas.width = App.state.player.activeVideoElement.videoWidth;
+				canvas.height = App.state.player.activeVideoElement.videoHeight;
+				canvas.getContext('2d').drawImage(App.state.player.activeVideoElement, 0, 0, canvas.width, canvas.height);
+				overlay.style.backgroundImage = `url(${canvas.toDataURL()})`;
+			} else if (imageEl.style.display !== 'none' && imageEl.src) {
+				overlay.style.backgroundImage = `url('${imageEl.src}')`;
+			} else {
+				overlay.style.backgroundImage = playerContainer.style.backgroundImage;
+			}
+			overlay.style.transition = 'opacity 0s';
+			overlay.classList.add('active');
+
             App.styles.applyToContainer(playerContainer);
             App.styles.updateLivePlayerStyles();
-
             const styles = App.state.storyData.meta.styles;
-
-            const [sceneMediaUrl] = await Promise.all([
-                App.io.getAssetDataUrl(scene?.image),
-            ]);
-
+            const sceneMediaUrl = await App.io.getAssetDataUrl(scene?.image);
             const isMediaVideo = App.assets.isVideo(scene.image);
             const isPanelLayout = App.state.storyData.meta.layout.startsWith('layout-panel');
 
@@ -4533,32 +4616,103 @@ const App = {
 				if (!v.paused) { v.pause(); v.removeAttribute('src'); v.load(); }
 			});
 			playerContainer.style.backgroundImage = 'var(--screen-bg-image)';
-			playerContainer.style.backgroundColor = '';
 			App.state.player.activeVideoElement = null;
+			let cinematicRevealCleanup = null;
+			
+			const onAssetReady = () => {
+                // Fade out transition overlay
+                setTimeout(() => {
+                    overlay.style.transition = 'opacity 0.5s ease-out';
+                    overlay.classList.remove('active');
+                }, 16);
+                
+                // Clean up previous cinematic listeners if they exist
+                if (cinematicRevealCleanup) cinematicRevealCleanup();
+                
+                // Determine if we should enter cinematic mode
+                const shouldWait = App.state.player.cinematicEnabled;
+
+                // Check triggers defined in styles
+                const triggers = App.state.storyData.meta.styles['--cinematic-triggers'] || 'both';
+                const watchVideo = (triggers === 'both' || triggers === 'video') && isMediaVideo;
+                const watchSpeech = (triggers === 'both' || triggers === 'speech') && !!scene.speechSound;
+                
+                let triggerMedia = null;
+                if (watchSpeech) triggerMedia = speech;
+                else if (watchVideo && !scene.videoLoop) triggerMedia = App.state.player.activeVideoElement;
+
+                const uiBox = App.elements['player-inner-container'];
+
+                if (shouldWait && triggerMedia) {
+                    // Hide the UI initially
+                    uiBox.classList.remove('cinematic-visible');
+                    uiBox.classList.add('cinematic-hidden');
+
+                    // Function to show UI (called by click OR media end)
+                    const reveal = (e) => {
+                        if(e && e.type !== 'ended' && e.type !== 'timeupdate') {
+                            e.stopPropagation();
+                        }
+                        uiBox.classList.remove('cinematic-hidden');
+                        uiBox.classList.add('cinematic-visible');
+                        if (cinematicRevealCleanup) cinematicRevealCleanup();
+                    };
+
+                    // Click handler to interrupt cinematic mode (Reveal text, keep media playing)
+                    const clickHandler = (e) => { 
+                        // Ignore clicks on actual interactive elements (just in case)
+                        if(!e.target.closest('.player-ui-btn, .choice-btn, a, button')) {
+                            reveal(e); 
+                        }
+                    };
+
+                    // Attach interaction listeners to body (catches clicks even if container is hidden)
+                    setTimeout(() => {
+                        document.body.addEventListener('click', clickHandler, { once: true });
+                        document.body.addEventListener('touchend', clickHandler, { once: true });
+                    }, 50); // Slight delay to prevent the click that started the scene from triggering this immediately
+                    
+                    // Media event listeners
+                    const mediaEndHandler = () => reveal();
+                    triggerMedia.addEventListener('ended', mediaEndHandler, { once: true });
+                    
+                    // Cleanup function to remove all listeners once revealed
+                    cinematicRevealCleanup = () => {
+                        document.body.removeEventListener('click', clickHandler);
+                        document.body.removeEventListener('touchend', clickHandler);
+                        triggerMedia.removeEventListener('ended', mediaEndHandler);
+                    };
+                } else {
+                    // Not cinematic, show immediately
+                    uiBox.classList.remove('cinematic-hidden');
+                    uiBox.classList.add('cinematic-visible');
+                }
+			};
 
 			if (sceneMediaUrl) {
 				if (isMediaVideo) {
 					App.state.player.activeVideoElement = isPanelLayout ? videoBg : videoFg;
 					if (!isPanelLayout) playerImageContainer.style.display = 'block';
-
+					App.state.player.activeVideoElement.oncanplaythrough = onAssetReady;
 					App.state.player.activeVideoElement.src = sceneMediaUrl;
 					App.state.player.activeVideoElement.loop = scene.videoLoop ?? true;
 					App.state.player.activeVideoElement.muted = scene.videoMuted ?? true;
 					App.state.player.activeVideoElement.volume = parseFloat(styles['--video-volume'] || 1.0);
 					App.state.player.activeVideoElement.style.display = 'block';
-					App.state.player.activeVideoElement.play().catch(e => console.warn("In-editor player video playback failed.", e));
+					App.state.player.activeVideoElement.play().catch(e => {});
 				} else {
 					if (isPanelLayout) {
+						const img = new Image(); img.onload = onAssetReady; img.src = sceneMediaUrl;
 						playerContainer.style.backgroundImage = `url('${sceneMediaUrl}')`;
 					} else {
-						imageEl.src = sceneMediaUrl;
-						imageEl.style.display = 'block';
-						playerImageContainer.style.display = 'block';
+						imageEl.onload = onAssetReady; imageEl.src = sceneMediaUrl;
+						imageEl.style.display = 'block'; playerImageContainer.style.display = 'block';
 					}
 				}
 			} else {
                 playerContainer.style.backgroundImage = 'none';
                 playerContainer.style.backgroundColor = styles['--bg-color'] || App.styles.getDefaults()['--bg-color'];
+				onAssetReady();
 			}
 
             let visibleChoices = [];
@@ -4566,33 +4720,21 @@ const App = {
                 let conditionMet = true;
                 if(choice.condition) {
                     const varName = choice.condition.variable;
-                    if(varName.startsWith('visited_scene_')) {
-                        conditionMet = !!this.gameState.visited[varName.substring(14)] === choice.condition.value;
-                    } else {
-                        conditionMet = this.gameState.variables[varName.substring(4)] === choice.condition.value;
-                    }
+                    if(varName.startsWith('visited_scene_')) conditionMet = !!this.gameState.visited[varName.substring(14)] === choice.condition.value;
+                    else conditionMet = this.gameState.variables[varName] === choice.condition.value;
                 }
-
                 if (conditionMet) {
                     if (!choice.action.text && choice.action.target) {
-                        if (choice.action.target === sceneId) {
-                            console.error(`Infinite loop detected in scene '${sceneId}'. A silent action is targeting itself.`);
-                            continue;
-                        }
-                        this.processChoice(choice);
-                        return;
+                        if (choice.action.target === sceneId) { console.error(`Infinite loop detected in scene '${sceneId}'.`); continue; }
+                        this.processChoice(choice); return;
                     }
-                    if (choice.action.text) {
-                        visibleChoices.push(choice);
-                    } else if (choice.action.set_variable) {
-                         this.gameState.variables[choice.action.set_variable] = choice.action.set_value;
-                    }
+                    if (choice.action.text) visibleChoices.push(choice);
+                    else if (choice.action.set_variable) this.gameState.variables[choice.action.set_variable] = choice.action.set_value;
                 }
             }
 
-            if (styles['--typewriter-effect'] === 'on') {
-                this.typeWriter(scene.text, visibleChoices);
-            } else {
+            if (styles['--typewriter-effect'] === 'on') this.typeWriter(scene.text, visibleChoices);
+            else {
                 textEl.innerHTML = App.markdown.parse(scene.text);
                 choicesEl.innerHTML = '';
                 visibleChoices.forEach(choice => {
@@ -4604,25 +4746,20 @@ const App = {
                 });
             }
 
-            // Play Ambience
             audio.loop = scene.ambienceLoop ?? true;
             const soundUrl = await App.io.getAssetDataUrl(scene.ambienceSound);
-            if (soundUrl) { if(audio.src !== soundUrl) audio.src = soundUrl; audio.play().catch(e=>console.warn("Audio autoplay blocked.")); }
+            if (soundUrl) { if(audio.src !== soundUrl) audio.src = soundUrl; audio.play().catch(e=>{}); }
             else { audio.pause(); }
 
-            // Play Speech
             speech.loop = scene.speechLoop ?? false;
             const speechUrl = await App.io.getAssetDataUrl(scene.speechSound);
-            if (speechUrl) { if(speech.src !== speechUrl) speech.src = speechUrl; speech.play().catch(e=>console.warn("Speech autoplay blocked.")); }
+            if (speechUrl) { if(speech.src !== speechUrl) speech.src = speechUrl; speech.play().catch(e=>{}); }
             else { speech.pause(); }
-
         },
         stop() {
             App.elements['player-container'].style.display = 'none';
-
             App.elements['ambience-player'].pause(); App.elements['music-player'].pause(); App.elements['speech-player'].pause();
             App.elements['ambience-player'].src = ''; App.elements['music-player'].src = ''; App.elements['speech-player'].src = '';
-
             const videos = [App.elements['player-video-bg'], App.elements['player-video-fg']];
             videos.forEach(playerVideo => {
                 if(playerVideo) {
@@ -4634,7 +4771,6 @@ const App = {
             });
             App.state.player.activeVideoElement = null;
             App.editor.render();
-
             if (App.state.currentSceneId) App.ui.selectScene(App.state.currentSceneId);
         },
         async toggleAmbienceSound() {
@@ -4712,6 +4848,7 @@ const App = {
                 </select></label> </div>
                 <div class="grid-span-2"> <label>Font Family <select id="style-font-family">${fontOptions}</select></label> <label>Font Size (px) <input type="number" id="style-font-size" min="8" max="48" step="1"></label> </div>
                 <div class="grid-span-2"> <label>Text Color <input type="color" id="style-text-color"></label> <label>Typewriter Effect <select id="style-typewriter-effect"><option value="off">Off</option><option value="on">On</option></select></label> </div>
+				<div class="grid-span-2"> <label>Cinematic Default <select id="style-cinematic-pacing-default"><option value="off">Off by Default</option><option value="on">On by Default</option></select></label> <label>Cinematic Triggers <select id="style-cinematic-triggers"><option value="both">Video & Speech</option><option value="video">Video Only</option><option value="speech">Speech Only</option></select></label></div>
                 <hr class="grid-separator">
                 <label>Page BG Color <input type="color" id="style-bg-color"></label>
                 <div class="grid-full-width"> <label>Page BG Image <div class="form-group inline" style="margin:0;"><input type="text" id="style-screen-bg-image" class="path-input" data-asset-type="images" placeholder="images/bg.jpg"><button class="btn-warning file-icon-btn" title="Select Screen Background">📁</button></div></label> </div>
@@ -4742,7 +4879,7 @@ const App = {
             grid.oninput = (e) => this.handleUpdate(e);
             grid.querySelectorAll('.file-icon-btn').forEach(btn => { const input = btn.previousElementSibling; btn.onclick = () => App.assets.selectFile(input.dataset.assetType, input.id); });
             grid.querySelectorAll('.path-input').forEach(input => { input.addEventListener('dragover', App.assets.handleDragOver); input.addEventListener('dragleave', App.assets.handleDragLeave); input.addEventListener('drop', App.assets.handleFileDrop); });
-            this.handleUpdate({target: grid.querySelector('#style-container-effect')}); // Initial setup for outline visibility
+            this.handleUpdate({target: grid.querySelector('#style-container-effect')});
             App.modals.show('style-editor-modal');
         },
         handleUpdate(e) {
@@ -4755,7 +4892,7 @@ const App = {
             } else if (el.id === 'style-container-bg-opacity' || el.id === 'style-btn-opacity') {
                 const colorKey = el.id === 'style-container-bg-opacity' ? '--container-bg-color' : '--btn-color';
                 const colorInputId = el.id === 'style-container-bg-opacity' ? 'style-container-bg-color' : 'style-btn-color';
-                const hex = document.getElementById(colorInputId).value; // FIX: Read current color from picker
+                const hex = document.getElementById(colorInputId).value;
                 const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
                 meta.styles[colorKey] = `rgba(${r},${g},${b},${el.value})`;
             } else if (el.type === 'color') {
@@ -4769,7 +4906,7 @@ const App = {
                 }
             } else if (el.id === 'style-container-effect') {
                 document.getElementById('outline-color-label').style.display = el.value === 'outline' ? 'block' : 'none';
-                meta.styles[key] = el.value; // Save the effect type
+                meta.styles[key] = el.value;
             } else if (el.id.endsWith('-size') || el.id.endsWith('-padding')) {
                 meta.styles[key] = `${el.value}px`;
             } else {
@@ -4778,6 +4915,11 @@ const App = {
             
             if (key === '--font-family') {
                 this.loadGoogleFont(el.value);
+            }
+
+            // Sync cinematic default immediately to state for testing
+            if (key === '--cinematic-pacing-default') {
+                App.state.player.cinematicEnabled = el.value === 'on';
             }
             
             App.setDirty(true);
@@ -4793,22 +4935,18 @@ const App = {
             const meta = App.state.storyData.meta;
             const styles = meta.styles;
         
-            // 1. Apply all CSS variable-driven styles
             this.applyToContainer(playerContainer);
         
-            // 2. Handle layout change
             const currentLayout = meta.layout;
             playerContainer.className = currentLayout;
             App.elements['player-inner-container'].className = currentLayout;
         
-            // Re-evaluate media display based on the new layout
             const scene = App.state.storyData.scenes[App.state.currentSceneId];
             if (scene) {
                 const isMediaVideo = App.assets.isVideo(scene.image);
                 const sceneMediaUrl = await App.io.getAssetDataUrl(scene.image);
                 const isPanelLayout = currentLayout.startsWith('layout-panel');
                 
-                // Stop and hide all media first
                 App.elements['player-image'].style.display = 'none';
                 [App.elements['player-video-bg'], App.elements['player-video-fg']].forEach(v => {
                     if (!v.paused) v.pause();
@@ -4833,7 +4971,6 @@ const App = {
                 }
             }
         
-            // 3. Update Audio Volumes
             App.elements['music-player'].volume = parseFloat(styles['--music-volume'] || 0.4);
             App.elements['ambience-player'].volume = parseFloat(styles['--ambience-volume'] || 0.4);
             App.elements['speech-player'].volume = parseFloat(styles['--speech-volume'] || 0.4);
@@ -4841,7 +4978,6 @@ const App = {
                 App.state.player.activeVideoElement.volume = parseFloat(styles['--video-volume'] || 1.0);
             }
         
-            // 4. Handle Music Path Change
             const musicPath = styles['--music-path'];
             const musicUrl = await App.io.getAssetDataUrl(musicPath);
             const musicPlayer = App.elements['music-player'];
@@ -4896,17 +5032,16 @@ const App = {
 				innerContainer.className = meta.layout;
 				innerContainer.style.setProperty('--container-bg-color', styles['--container-bg-color'] || defaults['--container-bg-color']);
 
-				// Handle Shadow vs Outline
 				const effect = styles['--container-effect'] || defaults['--container-effect'];
 				if (effect === 'outline') {
 					innerContainer.style.setProperty('--container-shadow', 'none');
 					innerContainer.style.setProperty('--container-outline-width', '2px');
 					innerContainer.style.setProperty('--container-outline-color', styles['--container-outline-color'] || defaults['--container-outline-color']);
-				} else if (effect === 'shadow') { // Shadow
+				} else if (effect === 'shadow') {
 					innerContainer.style.setProperty('--container-shadow', '0 5px 20px rgba(0,0,0,.5)');
 					innerContainer.style.setProperty('--container-outline-width', '0px');
                     innerContainer.style.setProperty('--container-outline-color', 'transparent');
-				} else { // None
+				} else {
                     innerContainer.style.setProperty('--container-shadow', 'none');
                     innerContainer.style.setProperty('--container-outline-width', '0px');
                     innerContainer.style.setProperty('--container-outline-color', 'transparent');
@@ -4922,12 +5057,11 @@ const App = {
 				if (key.includes('-image') && value) {
 					value = `url('${value}')`;
 				}
-				if (!key.includes('path')) { // Keep all CSS vars
+				if (!key.includes('path') && !key.includes('pacing')) {
 					rootVars += `    ${key}: ${value};\n`;
 				}
 			});
 
-			// Add container effect variables
 			const effect = styles['--container-effect'] || defaults['--container-effect'];
 			if (effect === 'outline') {
 				rootVars += `    --container-shadow: none;\n`;
@@ -4936,7 +5070,7 @@ const App = {
 				rootVars += `    --container-shadow: 0 5px 20px rgba(0,0,0,.5);\n`;
 				rootVars += `    --container-outline-width: 0px;\n`;
                 rootVars += `    --container-outline-color: transparent;\n`;
-			} else { // None
+			} else {
                 rootVars += `    --container-shadow: none;\n`;
                 rootVars += `    --container-outline-width: 0px;\n`;
                 rootVars += `    --container-outline-color: transparent;\n`;
@@ -4944,7 +5078,7 @@ const App = {
 
 			return `:root {\n${rootVars}} body { background-image: var(--screen-bg-image); background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); } #game-container { font-size: var(--font-size); background-color: var(--container-bg-color); } .choice-btn { font-family: var(--font-family); background-color: var(--btn-color); color: var(--btn-text-color); border-width: var(--container-outline-width, 0px); border-style: solid; border-color: var(--container-outline-color, transparent); } .choice-btn:hover { background-color: var(--btn-hover-color); }`;
 		},
-        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--container-effect': 'shadow', '--container-outline-color': '#FFFFFF', '--music-path': '', '--music-volume': '0.4', '--ambience-volume': '0.4', '--speech-volume': '0.4', '--video-volume': '1.0', '--typewriter-effect': 'on' }; }
+        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--container-effect': 'shadow', '--container-outline-color': '#FFFFFF', '--music-path': '', '--music-volume': '0.4', '--ambience-volume': '0.4', '--speech-volume': '0.4', '--video-volume': '1.0', '--typewriter-effect': 'on', '--cinematic-pacing-default': 'off', '--cinematic-triggers': 'both' }; }
     },
 
     modals: {
@@ -5031,7 +5165,7 @@ const App = {
             if (generatedCount > 0) this.logInfo("IMPORTANT: Remember to Save Project!");
 
             this.isGenerating = false; this.abortRequested = false; fieldset.disabled = false; btn.disabled = false;
-            btn.innerHTML = `<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg> Generate`;
+            btn.innerHTML = `<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg> Generate`;
             App.editor.render(); App.ui.invalidateNavViews(); await App.ui.setViewMode(App.state.currentNavView);
         },
 
@@ -5076,7 +5210,7 @@ const App = {
 
                 App.state.pendingAssetCopies.set(destinationPath, imageBlob);
                 scene.image = destinationPath;
-                scene.mediaType = 'image'; // Set mediaType when adding an image
+                scene.mediaType = 'image';
                 App.setDirty(true);
 
                 this.logInfo(`Image successfully generated and queued for saving: ${destinationPath}`);
@@ -5089,7 +5223,6 @@ const App = {
         }
     },
 
-    // --- NODE EDITOR ---
     nodeEditor: {
         state: {
             pan: { x: 0, y: 0 },
@@ -5139,7 +5272,7 @@ const App = {
 			const target = e.target;
 			const nodeEl = target.closest('.node-editor-node');
 			
-			if (e.button === 0) { // Left mouse button
+			if (e.button === 0) {
 				if (target.classList.contains('node-handle-bottom')) {
 					e.preventDefault();
 					e.stopPropagation();
@@ -5163,7 +5296,7 @@ const App = {
 					nodeEl.style.zIndex = 1000;
 				} else if (nodeEl) {
 					App.ui.selectScene(nodeEl.dataset.sceneId);
-					if (e.detail === 2) { // Double-click
+					if (e.detail === 2) {
 						this.editNodeText(nodeEl);
 					}
 				} else {
@@ -5445,14 +5578,12 @@ const App = {
 			const container = App.elements['edge-group-container'];
 			container.innerHTML = '';
 			
-			// 1. Ensure <defs> exists
 			let defs = svg.querySelector('defs');
 			if (!defs) {
 				defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
 				svg.prepend(defs);
 			}
 
-			// 2. Define the "Selected" Blue Arrow Marker (if missing)
 			if (!document.getElementById('arrow-selected')) {
 				const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
 				marker.setAttribute('id', 'arrow-selected');
@@ -5464,33 +5595,27 @@ const App = {
 				marker.setAttribute('orient', 'auto');
 				const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 				path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
-				// Use CSS variable for color, fallback to blue
 				path.style.fill = 'var(--primary-color, #4a78ad)'; 
 				marker.appendChild(path);
 				defs.appendChild(marker);
 			}
 
-			// 3. Inject CSS overrides for Selection State
-			// This forces the "Selected" state to win over the inline colors
 			if (!svg.querySelector('#dynamic-edge-styles')) {
 				const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
 				style.id = 'dynamic-edge-styles';
 				style.textContent = `
-					/* Force Blue Line */
 					.edge-group.is-selected-path .edge-path {
 						stroke: var(--primary-color, #4a78ad) !important;
 						stroke-width: 4px !important;
 						marker-end: url(#arrow-selected) !important;
 						filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
 					}
-					/* Force Blue Background Box */
 					.edge-group.is-selected-path .edge-label-bg {
 						fill: var(--primary-color, #4a78ad) !important;
 						stroke: #fff !important;
 						stroke-width: 2px !important;
 						fill-opacity: 1 !important;
 					}
-					/* Force White Text */
 					.edge-group.is-selected-path .edge-label {
 						fill: #ffffff !important;
 						font-weight: bold;
@@ -5504,7 +5629,6 @@ const App = {
 
 			const fragment = document.createDocumentFragment();
 			
-			// --- CONFIGURATION ---
 			const LANE_HEIGHT = 40; 
 			const START_OFFSET = 30; 
 			const MAX_LABEL_CHARS = 20; 
@@ -5512,15 +5636,12 @@ const App = {
 			const BOX_PADDING = 12;     
 			const CORNER_RADIUS = 15;
 
-			// Helper: Darken hex color for label background
 			const darkenColor = (color, percent) => {
 				const num = parseInt(color.replace('#', ''), 16);
-				const amt = Math.round(2.55 * percent);
 				const R = (num >> 16);
 				const G = (num >> 8 & 0x00FF);
 				const B = (num & 0x0000FF);
 				
-				// Percentage subtractive darkening
 				const newR = Math.max(0, Math.floor(R * (1 - percent / 100)));
 				const newG = Math.max(0, Math.floor(G * (1 - percent / 100)));
 				const newB = Math.max(0, Math.floor(B * (1 - percent / 100)));
@@ -5536,14 +5657,11 @@ const App = {
 					const target = scenes[targetId];
 					if (!target) return;
 
-					// 4. Get Colors & Markers
 					const sourceColor = this.getNodeColor(source.id);
-					// Darken by 30% for text box
 					const labelBgColor = darkenColor(sourceColor, 30); 
 
 					const markerId = `arrow-${sourceColor.replace('#', '')}`;
 
-					// Define colored arrow marker if missing
 					if (!document.getElementById(markerId)) {
 						const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
 						marker.setAttribute('id', markerId);
@@ -5560,7 +5678,6 @@ const App = {
 						defs.appendChild(marker);
 					}
 
-					// 5. Geometry
 					const isLoopback = target.position.y <= source.position.y;
 					const laneOffset = START_OFFSET + (index * LANE_HEIGHT);
 					
@@ -5578,9 +5695,7 @@ const App = {
 					const endX = target.position.x + NODE_WIDTH / 2;
 					const endY = target.position.y;
 					
-					let pathStr = '';
-					let labelX = 0;
-					let labelY = 0;
+					let pathStr = '', labelX = 0, labelY = 0;
 
 					if (isLoopback) {
 						const sideDist = 100 + (index * 20);
@@ -5591,17 +5706,7 @@ const App = {
 						const midY = startY + laneOffset;
 						const r = CORNER_RADIUS;
 
-						pathStr = `M ${startX} ${startY} ` +
-								  `L ${startX} ${midY - r} ` +
-								  `Q ${startX} ${midY} ${startX + (dir * r)} ${midY} ` +
-								  `L ${sideX - (dir * r)} ${midY} ` +
-								  `Q ${sideX} ${midY} ${sideX} ${midY - r} ` +
-								  `L ${sideX} ${topY + r} ` +
-								  `Q ${sideX} ${topY} ${sideX - (dir * r)} ${topY} ` +
-								  `L ${endX + (dir * r)} ${topY} ` +
-								  `Q ${endX} ${topY} ${endX} ${topY + r} ` +
-								  `L ${endX} ${endY}`;
-
+						pathStr = `M ${startX} ${startY} L ${startX} ${midY - r} Q ${startX} ${midY} ${startX + (dir * r)} ${midY} L ${sideX - (dir * r)} ${midY} Q ${sideX} ${midY} ${sideX} ${midY - r} L ${sideX} ${topY + r} Q ${sideX} ${topY} ${sideX - (dir * r)} ${topY} L ${endX + (dir * r)} ${topY} Q ${endX} ${topY} ${endX} ${topY + r} L ${endX} ${endY}`;
 						labelX = sideX + (goRight ? 10 : -10);
 						labelY = (midY + topY) / 2;
 					} else {
@@ -5610,20 +5715,13 @@ const App = {
 						const dir = xDiff > 0 ? 1 : -1;
 						const r = Math.min(CORNER_RADIUS, Math.abs(xDiff) / 2);
 						
-						pathStr = `M ${startX} ${startY} ` +
-								  `L ${startX} ${midY - r} ` +
-								  `Q ${startX} ${midY} ${startX + (dir * r)} ${midY} ` +
-								  `L ${endX - (dir * r)} ${midY} ` +
-								  `Q ${endX} ${midY} ${endX} ${midY + r} ` +
-								  `L ${endX} ${endY}`;
+						pathStr = `M ${startX} ${startY} L ${startX} ${midY - r} Q ${startX} ${midY} ${startX + (dir * r)} ${midY} L ${endX - (dir * r)} ${midY} Q ${endX} ${midY} ${endX} ${midY + r} L ${endX} ${endY}`;
 						labelX = (startX + endX) / 2;
 						labelY = midY;
 					}
 
-					// 6. Elements
 					const edgeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 					edgeGroup.classList.add('edge-group');
-					// Used for hover logic if needed, but overridden by inline styles below for main look
 					edgeGroup.style.setProperty('--edge-color', sourceColor);
 					edgeGroup.dataset.sourceId = source.id;
 					edgeGroup.dataset.choiceIndex = index;
@@ -5643,7 +5741,6 @@ const App = {
 					path.setAttribute('marker-end', `url(#${markerId})`);
 					path.setAttribute('fill', 'none'); 
 
-					// Text Preparation
 					let rawText = choice.action.text || '...';
 					let displayText = rawText;
 					if (rawText.length > MAX_LABEL_CHARS) displayText = rawText.substring(0, MAX_LABEL_CHARS) + '...';
@@ -5658,7 +5755,6 @@ const App = {
 					text.classList.add('edge-label');
 					text.setAttribute('fill', '#ffffff');
 
-					// Background Box
 					const boxWidth = (displayText.length * CHAR_PX_WIDTH) + BOX_PADDING;
 					const boxHeight = 16;
 					const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -5668,7 +5764,6 @@ const App = {
 					bgRect.setAttribute('height', boxHeight);
 					bgRect.setAttribute('rx', 3);
 					
-					// Apply styles using !important to ensure they stick until selection class overrides them
 					bgRect.style.setProperty('fill', labelBgColor, 'important');
 					bgRect.style.setProperty('stroke', sourceColor, 'important');
 					bgRect.style.setProperty('stroke-width', '1px', 'important');
@@ -5755,7 +5850,7 @@ const App = {
                         return;
                     }
 
-                    const newScene = { id: newId, text: `This is the new scene '${newId}'.`, choices: [], position: finalPosition, lastModified: Date.now(), mediaType: 'none', color: null };
+                    const newScene = { id: newId, text: `This is the new scene '${newId}'.`, choices: [], position: finalPosition, lastModified: Date.now(), mediaType: 'none', color: null, cinematicModeOverride: 'default' };
                     App.state.storyData.scenes[newId] = newScene;
                     App.setDirty(true);
                     App.ui.invalidateNavViews();
@@ -5769,17 +5864,15 @@ const App = {
 			const startId = App.state.storyData.meta.startSceneId;
 			if (!scenes || !startId) return;
 
-			// --- CONFIGURATION ---
 			const NODE_WIDTH = 240; 
 			const CHAR_WIDTH = 8;        
 			const MIN_SIBLING_GAP = 100; 
 			const GAP_BETWEEN_LAYERS = 80; 
 			const LINE_HEIGHT_PER_CHOICE = 45; 
-			const TREE_VERTICAL_SPACING = 200; // Space between disconnected trees
+			const TREE_VERTICAL_SPACING = 200;
 			const START_X = 50;
 			const START_Y = 50;
 
-			// Helper: Dynamic Node Height
 			const getNodeHeight = (scene) => {
 				let h = 180; 
 				if (scene.image || (scene.mediaType && scene.mediaType !== 'none')) {
@@ -5790,8 +5883,6 @@ const App = {
 
 			const nodes = Object.keys(scenes);
 			
-			// 1. Initialize Data & Calculate In-Degrees
-			// We need to know which nodes are "Roots" (no other node points to them)
 			const hierarchy = {}; 
 			const inDegree = new Map();
 			
@@ -5800,7 +5891,6 @@ const App = {
 				inDegree.set(id, 0);
 			});
 
-			// Calculate In-Degrees
 			nodes.forEach(id => {
 				const s = scenes[id];
 				if (s.choices) {
@@ -5813,23 +5903,16 @@ const App = {
 				}
 			});
 
-			// 2. Determine Processing Order (The "Forest" of Trees)
-			// Priority: StartScene -> Disconnected Roots (InDegree 0) -> Any remaining unvisited (Cycles)
 			let processingQueue = [startId];
-			
 			const otherRoots = nodes.filter(id => id !== startId && inDegree.get(id) === 0).sort();
 			processingQueue = processingQueue.concat(otherRoots);
 			
-			// 3. Layout Loop
 			let currentTreeStartY = START_Y;
 
-			// Loop until every single node has been arranged
 			let safetyCounter = 0;
 			while (true) {
-				// Find the next unvisited root
 				let rootId = null;
 				
-				// Try the queue first
 				while (processingQueue.length > 0) {
 					const candidate = processingQueue.shift();
 					if (!hierarchy[candidate].visited) {
@@ -5838,19 +5921,15 @@ const App = {
 					}
 				}
 
-				// If queue empty, check if ANY node is left unvisited (e.g. disconnected loops A->B->A)
 				if (!rootId) {
 					const unvisited = nodes.find(id => !hierarchy[id].visited);
-					if (!unvisited) break; // ALL DONE
-					rootId = unvisited; // Pick one arbitrarily to break the cycle
+					if (!unvisited) break;
+					rootId = unvisited;
 				}
-
-				// --- PROCESS THIS TREE ---
 				
-				// A. Build Spanning Tree for this root (BFS)
 				const queue = [rootId];
 				hierarchy[rootId].visited = true;
-				const treeNodes = [rootId]; // Track nodes in this specific tree
+				const treeNodes = [rootId];
 
 				let head = 0;
 				while (head < queue.length) {
@@ -5861,12 +5940,10 @@ const App = {
 						scene.choices.forEach(choice => {
 							const targetId = choice.action.target;
 							if (targetId && scenes[targetId]) {
-								// Only enter if not visited globally
 								if (!hierarchy[targetId].visited) {
 									hierarchy[targetId].visited = true;
 									hierarchy[currentId].children.push(targetId);
 									
-									// Text Width Calc
 									const textLen = (choice.action.text || "").length * CHAR_WIDTH;
 									if (textLen > hierarchy[targetId].selfWidth) {
 										hierarchy[targetId].selfWidth = textLen + 60; 
@@ -5880,7 +5957,6 @@ const App = {
 					}
 				}
 
-				// B. Post-Order Width Calculation
 				const calculateSubtreeWidth = (nodeId) => {
 					const nodeData = hierarchy[nodeId];
 					if (nodeData.children.length === 0) {
@@ -5895,7 +5971,6 @@ const App = {
 				};
 				calculateSubtreeWidth(rootId);
 
-				// C. Pre-Order Positioning
 				let treeMaxY = currentTreeStartY;
 
 				const setPosition = (nodeId, x, y) => {
@@ -5905,17 +5980,14 @@ const App = {
 					const finalX = x + (nodeData.subtreeWidth / 2) - (NODE_WIDTH / 2);
 					scene.position = { x: finalX, y: y };
 
-					// Update bounds for the next tree
 					const h = getNodeHeight(scene);
 					if (y + h > treeMaxY) treeMaxY = y + h;
 
-					// Calc next layer Y
 					const connectionCount = scene.choices ? scene.choices.length : 0;
 					const nextLayerY = y + h + (connectionCount * LINE_HEIGHT_PER_CHOICE) + GAP_BETWEEN_LAYERS;
 
 					let currentChildX = x;
 					
-					// Center children group
 					let childrenTotalWidth = 0;
 					nodeData.children.forEach(c => childrenTotalWidth += hierarchy[c].subtreeWidth);
 					childrenTotalWidth += (nodeData.children.length - 1) * MIN_SIBLING_GAP;
@@ -5933,11 +6005,10 @@ const App = {
 
 				setPosition(rootId, START_X, currentTreeStartY);
 
-				// Prepare Y for the next disconnected tree
 				currentTreeStartY = treeMaxY + TREE_VERTICAL_SPACING;
 				
 				safetyCounter++;
-				if(safetyCounter > 10000) break; // Emergency break
+				if(safetyCounter > 10000) break;
 			}
 
 			App.setDirty(true);
@@ -5962,8 +6033,7 @@ const App = {
             const scene = App.state.storyData.scenes[sceneId];
             if (!scene?.position) return;
             const viewRect = App.elements['node-editor-view'].getBoundingClientRect();
-            const nodeWidth = 240;
-            const nodeHeight = 200;
+            const nodeWidth = 240, nodeHeight = 200;
 
             this.state.pan.x = -scene.position.x * this.state.zoom + (viewRect.width / 2) - (nodeWidth / 2 * this.state.zoom);
             this.state.pan.y = -scene.position.y * this.state.zoom + (viewRect.height / 2) - (nodeHeight / 2 * this.state.zoom);
@@ -6012,7 +6082,7 @@ const App = {
             if(menu) menu.style.display = 'none';
         },
 
-cloneScene(sceneId) {
+		cloneScene(sceneId) {
             const originalScene = App.state.storyData.scenes[sceneId];
             if (!originalScene) return;
             const newId = prompt("Enter a unique ID for the new duplicated scene:", `${sceneId}_copy`);
@@ -6089,36 +6159,19 @@ cloneScene(sceneId) {
             input.select();
 
             const saveAndClose = () => {
-                if (!document.body.contains(input)) {
-                    return;
-                }
-
+                if (!document.body.contains(input)) return;
                 choice.action.text = input.value;
                 App.setDirty(true);
                 this.renderEdges(); 
-
-                if (sourceSceneId === App.state.currentSceneId) {
-                    App.editor.render();
-                }
-                
+                if (sourceSceneId === App.state.currentSceneId) App.editor.render();
                 input.remove();
             };
 
-            const cancelAndClose = () => {
-                if (input.parentElement) {
-                    input.remove();
-                }
-            };
-
+            const cancelAndClose = () => { if (input.parentElement) input.remove(); };
             input.addEventListener('blur', saveAndClose);
-
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    input.blur(); 
-                } else if (e.key === 'Escape') {
-                    cancelAndClose();
-                }
+                if (e.key === 'Enter') { e.preventDefault(); input.blur(); } 
+				else if (e.key === 'Escape') { cancelAndClose(); }
             });
         },
         
@@ -6202,8 +6255,6 @@ cloneScene(sceneId) {
 
             return { path, labelPos };
         }
-		
-		
     },
 
     debug: {

@@ -90,7 +90,7 @@
 			opacity: 0 !important;
 			pointer-events: none;
 			visibility: hidden;
-			transition: opacity 0.5s ease-in;
+			transition: opacity 1s ease-in;
 		}
 
 		#player-inner-container.cinematic-visible,
@@ -667,7 +667,7 @@
 		#player-choices .choice-btn:hover { transform: translateY(-2px); background-color: var(--btn-hover-color); }
 		#player-choices .choice-btn:active { transform: translateY(1px); }
 		@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-		#player-choices .choice-btn.fade-in { animation: fadeIn 0.5s forwards; opacity: 0; }
+		#player-choices .choice-btn.fade-in { animation: fadeIn 1s forwards; opacity: 0; }
 
 		#stop-play-x { position: absolute; top: 10px; right: 10px; background: var(--danger-color); color: white; border: none; font-size: 1.5em; padding: 5px 10px; cursor: pointer; z-index: 10; }
 		#restart-play { position: absolute; top: 10px; right: 60px; z-index: 10; }
@@ -1253,7 +1253,7 @@
 				opacity: 0 !important;
 				pointer-events: none;
 				visibility: hidden;
-				transition: opacity 0.5s ease-in;
+				transition: opacity 1s ease-in;
 			}
 			#content-container.cinematic-visible,
             #game-container.cinematic-visible {
@@ -1330,7 +1330,7 @@
             .choice-btn:hover { transform: translateY(-2px); }
             .choice-btn:active { transform: translateY(1px); }
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-            .choice-btn.fade-in { animation: fadeIn 0.5s forwards; opacity: 0; }
+            .choice-btn.fade-in { animation: fadeIn 1s forwards; opacity: 0; }
 
             #game-container.layout-top-down { flex-direction: column; }
             #game-container.layout-top-down #image-container { width: 100%; margin-bottom: 20px; }
@@ -3234,7 +3234,7 @@ const App = {
 
 						const onAssetReady = () => {
 							setTimeout(() => {
-								overlay.style.transition = 'opacity 0.5s ease-out';
+								overlay.style.transition = 'opacity 1s ease-out';
 								overlay.classList.remove('active');
 							}, 16);
 						};
@@ -3293,7 +3293,14 @@ const App = {
 								contentContainer.style.minHeight = '';
 								sceneText.innerHTML = parseMarkdown(scene.text);
 								choicesContainer.innerHTML = '';
-								visibleChoices.forEach(choice => { const b = document.createElement('button'); b.textContent = choice.action.text; b.className = 'choice-btn'; bindEvent(b, () => processChoice(choice)); choicesContainer.appendChild(b); });
+								visibleChoices.forEach((choice, index) => { 
+									const b = document.createElement('button'); 
+									b.textContent = choice.action.text; 
+									b.className = 'choice-btn fade-in'; // Added fade-in class
+									b.style.animationDelay = (index * 0.2) + 's'; // Added stagger delay
+									bindEvent(b, () => processChoice(choice)); 
+									choicesContainer.appendChild(b); 
+								});
 							}
 						});
 						
@@ -4622,7 +4629,7 @@ const App = {
 			const onAssetReady = () => {
                 // Fade out transition overlay
                 setTimeout(() => {
-                    overlay.style.transition = 'opacity 0.5s ease-out';
+                    overlay.style.transition = 'opacity 1s ease-out';
                     overlay.classList.remove('active');
                 }, 16);
                 
@@ -4734,17 +4741,18 @@ const App = {
             }
 
             if (styles['--typewriter-effect'] === 'on') this.typeWriter(scene.text, visibleChoices);
-            else {
-                textEl.innerHTML = App.markdown.parse(scene.text);
-                choicesEl.innerHTML = '';
-                visibleChoices.forEach(choice => {
-                    const button = document.createElement('button');
-                    button.className = 'choice-btn';
-                    button.textContent = choice.action.text;
-                    button.onclick = () => this.processChoice(choice);
-                    choicesEl.appendChild(button);
-                });
-            }
+			else {
+				textEl.innerHTML = App.markdown.parse(scene.text);
+				choicesEl.innerHTML = '';
+				visibleChoices.forEach((choice, index) => {
+					const button = document.createElement('button');
+					button.className = 'choice-btn fade-in'; // Added fade-in class
+					button.textContent = choice.action.text;
+					button.style.animationDelay = (index * 0.2) + 's'; // Added stagger delay
+					button.onclick = () => this.processChoice(choice);
+					choicesEl.appendChild(button);
+				});
+			}
 
             audio.loop = scene.ambienceLoop ?? true;
             const soundUrl = await App.io.getAssetDataUrl(scene.ambienceSound);

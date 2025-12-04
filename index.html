@@ -667,8 +667,12 @@
 		#player-choices .choice-btn:hover { transform: translateY(-2px); background-color: var(--btn-hover-color); }
 		#player-choices .choice-btn:active { transform: translateY(1px); }
 		@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-		#player-choices .choice-btn.fade-in { animation: fadeIn 1s forwards; opacity: 0; }
-
+		#player-choices .choice-btn.fade-in { 
+			opacity: 0; 
+		}
+		#player-inner-container:not(.cinematic-hidden) #player-choices .choice-btn.fade-in {
+			animation: fadeIn 1s forwards;
+		}
 		#stop-play-x { position: absolute; top: 10px; right: 10px; background: var(--danger-color); color: white; border: none; font-size: 1.5em; padding: 5px 10px; cursor: pointer; z-index: 10; }
 		#restart-play { position: absolute; top: 10px; right: 60px; z-index: 10; }
 		#image-preview { width: 150px; height: 150px; background-color: #1e1e1e; border: 1px dashed var(--border-color); display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--text-secondary); text-align: center; flex-shrink: 0; position: relative; }
@@ -1330,8 +1334,12 @@
             .choice-btn:hover { transform: translateY(-2px); }
             .choice-btn:active { transform: translateY(1px); }
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-            .choice-btn.fade-in { animation: fadeIn 1s forwards; opacity: 0; }
-
+            .choice-btn.fade-in { 
+				opacity: 0; 
+			}
+			#game-container:not(.cinematic-hidden) .choice-btn.fade-in {
+				animation: fadeIn 1s forwards;
+			}
             #game-container.layout-top-down { flex-direction: column; }
             #game-container.layout-top-down #image-container { width: 100%; margin-bottom: 20px; }
             #game-container.layout-top-down #scene-image,
@@ -3297,7 +3305,7 @@ const App = {
 									const b = document.createElement('button'); 
 									b.textContent = choice.action.text; 
 									b.className = 'choice-btn fade-in'; // Added fade-in class
-									b.style.animationDelay = (index * 0.2) + 's'; // Added stagger delay
+									b.style.animationDelay = ((index * 0.2)) + 's';
 									bindEvent(b, () => processChoice(choice)); 
 									choicesContainer.appendChild(b); 
 								});
@@ -4748,7 +4756,7 @@ const App = {
 					const button = document.createElement('button');
 					button.className = 'choice-btn fade-in'; // Added fade-in class
 					button.textContent = choice.action.text;
-					button.style.animationDelay = (index * 0.2) + 's'; // Added stagger delay
+					button.style.animationDelay = ((index * 0.2)) + 's';
 					button.onclick = () => this.processChoice(choice);
 					choicesEl.appendChild(button);
 				});

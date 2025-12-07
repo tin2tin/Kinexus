@@ -454,6 +454,11 @@
 		#scene-editor-preview #preview-player-video-fg { max-width: 100%; max-height: 50vh; display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
 		#scene-editor-preview #preview-player-video { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; }
 		#scene-editor-preview #preview-player-text { white-space: pre-wrap; margin-bottom: 20px; line-height: 1.6; }
+		#player-text:empty, 
+		#scene-editor-preview #preview-player-text:empty { 
+			display: none; 
+			margin: 0; 
+		}
 		#scene-editor-preview #preview-player-choices { display: flex; flex-direction: column; gap: 12px; }
 
 		.layout-top-down #preview-player-inner-container { flex-direction: column; }
@@ -661,11 +666,6 @@
 		}
 		#player-image, #player-video-fg { max-width: 100%; max-height: 50vh; display: block; margin: 0 auto; border-radius: 8px; object-fit: cover; }
 		#player-text { white-space: pre-wrap; margin-bottom: 20px; line-height: 1.6; }
-		#player-text:empty, 
-		#scene-editor-preview #preview-player-text:empty { 
-			display: none; 
-			margin: 0; 
-		}
 		#player-text a { color: #8ab4f8; }
 		#player-choices { display: flex; flex-direction: column; gap: 12px; }
 		#player-choices .choice-btn { width: 100%; text-align: left; padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; transition: background-color .2s, transform .1s, border-color .2s; background-color: var(--btn-color); color: var(--btn-text-color); border: var(--container-outline-width, 0) solid var(--container-outline-color, transparent); font-family: var(--font-family); }
@@ -1333,10 +1333,10 @@
                 object-fit: cover;
             }
             #scene-text { white-space: pre-wrap; margin-bottom: 20px; line-height: 1.6; }
-			#scene-text:empty { 
-				display: none; 
-				margin: 0; 
-			}
+            #scene-text:empty { 
+                display: none; 
+                margin: 0; 
+            }
             #scene-text a { color: #8ab4f8; }
             #choices-container { display: flex; flex-direction: column; gap: 12px; }
             .choice-btn { padding: 15px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; text-align: left; transition: background-color .2s,transform .1s, border-color .2s; border: var(--container-outline-width, 0) solid var(--container-outline-color, transparent); }
@@ -1573,6 +1573,7 @@ const App = {
         lastAssetHandles: { images: null, sounds: null },
         pendingAssetCopies: new Map(),
         aiImageUrl: null,
+		aiImageBlob: null,
         orphanSceneIds: new Set(),
         typewriter: { intervalId: null, cleanup: null },
         currentNavView: 'nodes', // 'nodes' or 'list'
@@ -1591,6 +1592,7 @@ const App = {
     },
     elements: {},
     constants: {
+        POLLINATIONS_API_KEY: '', // Default fallback key
         GOOGLE_FONTS: [
             { name: "Default System Font", value: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' },
             { name: "Architects Daughter", value: "'Architects Daughter', cursive" },
@@ -1668,6 +1670,7 @@ const App = {
                 startSceneId: "start",
                 creatorName: "",
                 aboutText: "",
+                aiApiKey: "",
                 variables: [],
                 styles: App.styles.getDefaults(),
                 layout: 'layout-panel-bottom'
@@ -2209,6 +2212,26 @@ const App = {
 				}
 			}
 		},
+        updateAdvancedFeaturesVisibility() {
+            // Default to 'off' if not defined
+            const val = App.state.storyData.meta.styles['--advanced-features'] || 'off';
+            const isEnabled = val === 'on';
+
+            // 1. Menu > Batch Image Generation
+            const batchBtn = document.getElementById('batch-image-gen-btn');
+            if (batchBtn) batchBtn.style.display = isEnabled ? '' : 'none';
+
+            // 2. Scene Properties: Scene Text rewrite button
+            const textAiBtn = document.getElementById('process-text-ai-btn');
+            if (textAiBtn) textAiBtn.style.display = isEnabled ? '' : 'none';
+
+            // 3. Scene Properties: Ai Image Generation section
+            const aiGenDiv = document.getElementById('ai-image-generator');
+            if (aiGenDiv) {
+                const container = aiGenDiv.closest('.form-group');
+                if (container) container.style.display = isEnabled ? '' : 'none';
+            }
+        },
 		displayWelcomeMessage() {
             App.elements['node-element-container'].innerHTML = '';
 			const welcomeDiv = document.createElement('div');
@@ -2698,6 +2721,7 @@ const App = {
                 App.ui.enableEditor(true);
                 App.setDirty(false);
                 App.ui.updateMetaInputs();
+                App.ui.updateAdvancedFeaturesVisibility();
                 App.ui.invalidateNavViews();
                 await App.ui.setViewMode(App.state.currentNavView);
                 App.ui.selectScene('start');
@@ -2807,6 +2831,7 @@ const App = {
                 if(!App.state.debugMode) App.modals.hideAll();
                 App.ui.enableEditor(true);
                 App.ui.updateMetaInputs();
+                App.ui.updateAdvancedFeaturesVisibility();
                 App.ui.invalidateNavViews();
                 await App.ui.setViewMode(App.state.currentNavView);
                 await App.ui.selectScene(App.state.storyData.meta.startSceneId);
@@ -2841,7 +2866,13 @@ const App = {
         async getFormattedPlayerHTML(isForExport = false) {
             if (!App.state.storyData.meta) return '';
 				const storyData = JSON.parse(JSON.stringify(App.state.storyData));
-				let storyJsonString;
+                
+                // SECURITY: Remove the API Key before export
+                if (storyData.meta.aiApiKey) {
+                    delete storyData.meta.aiApiKey;
+                }
+				
+                let storyJsonString;
 
 				if (isForExport) {
 					storyJsonString = JSON.stringify(storyData, null, 2);
@@ -4443,57 +4474,133 @@ const App = {
 				App.setDirty(true);
 			}
 		},
-        renderPollinationImage() {
+        async renderPollinationImage() {
             const promptText = App.elements['scene-image-prompt'].value.trim();
             if (!promptText) { App.ui.showNotification("Please enter a prompt first."); return; }
-            App.state.aiImageUrl = null; App.ui.updateAiImagePreview(null, 'Rendering...');
+            App.state.aiImageUrl = null;
+            App.state.aiImageBlob = null;
+            App.ui.updateAiImagePreview(null, 'Rendering...');
 
-			const randomSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+            const baseUrl = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText);
             const layout = App.state.storyData.meta.layout;
-            let urlSuffix = (layout.startsWith('layout-panel') || layout === 'layout-top-down') ? '&width=1280&height=720' : '&width=1024&height=1024';
-            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText) + `?seed=${randomSeed}&safe=true&nologo=true&enhance=true&model=flux` + urlSuffix;
+            const isLandscape = layout.startsWith('layout-panel') || layout === 'layout-top-down';
+            
+            // DETERMINE KEY: Use user's key if exists, otherwise fallback to default
+            const userKey = App.state.storyData.meta.aiApiKey;
+            const apiKey = (userKey && userKey.trim() !== "") ? userKey : App.constants.POLLINATIONS_API_KEY;
 
-            const tempImg = new Image();
-            tempImg.onload = () => { App.state.aiImageUrl = url; App.ui.updateAiImagePreview(url); };
-            tempImg.onerror = () => { App.ui.updateAiImagePreview(null, 'Render failed.'); App.state.aiImageUrl = null; };
-            tempImg.src = url;
+            const params = new URLSearchParams();
+            params.append('model', 'flux');
+            params.append('seed', Math.floor(Math.random() * 1000000000));
+            params.append('width', isLandscape ? '1280' : '1024');
+            params.append('height', isLandscape ? '720' : '1024');
+            params.append('nologo', 'true');
+            params.append('enhance', 'true');
+            params.append('safe', 'true');
+            params.append('token', apiKey); // Use the determined key
+
+            const finalUrl = `${baseUrl}?${params.toString()}`;
+
+            try {
+                const response = await fetch(finalUrl);
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(`API Error (${response.status}): ${text}`);
+                }
+                const imageBlob = await response.blob();
+                
+                App.state.aiImageBlob = imageBlob;
+                const objectUrl = URL.createObjectURL(imageBlob);
+                App.state.aiImageUrl = objectUrl;
+                App.ui.updateAiImagePreview(objectUrl);
+
+            } catch (error) {
+                console.error("Image generation failed:", error);
+                App.ui.updateAiImagePreview(null, `Render failed: ${error.message}`);
+            }
         },
         async addPollinationImageToScene() {
-            if (!App.state.aiImageUrl) { App.ui.showNotification("Please render an image first."); return; }
-            App.ui.updateAiImagePreview(null, 'Downloading...');
+            // Check if we have the image data (blob), not the URL
+            if (!App.state.aiImageBlob) { App.ui.showNotification("Please render an image first."); return; }
+            
+            App.ui.updateAiImagePreview(null, 'Saving...');
             try {
-                const response = await fetch(App.state.aiImageUrl + '&t=' + Date.now());
-                if (!response.ok) throw new Error(`Fetch failed: ${response.statusText}`);
-                const imageBlob = await response.blob();
+                const imageBlob = App.state.aiImageBlob;
                 const filename = `${App.state.currentSceneId || 'image'}_${Date.now()}.jpg`;
                 const destinationPath = `images/${filename}`;
+
+                // Add the blob directly to pending copies
                 App.state.pendingAssetCopies.set(destinationPath, imageBlob);
+                
                 App.elements['scene-image'].value = destinationPath;
                 App.elements['scene-image'].dispatchEvent(new Event('input', { bubbles: true }));
+                
+                // Clear the state after use
                 App.ui.updateAiImagePreview(null, 'Ready');
+                App.state.aiImageUrl = null; 
+                App.state.aiImageBlob = null;
             } catch (err) {
                 console.error("Error adding AI image:", err);
-                App.ui.showNotification("Could not download or save the image.");
-                App.ui.updateAiImagePreview(App.state.aiImageUrl);
+                App.ui.showNotification("Could not save the image.");
+                App.ui.updateAiImagePreview(App.state.aiImageUrl); // Restore preview if it fails
             }
         },
         async processTextWithPollinations() {
             const instruction = App.elements['pollinations-instruction'].value.trim();
             const sceneText = App.elements['scene-text'].value.trim();
             if (!instruction || !sceneText) { App.ui.showNotification("Both an instruction and scene text are required."); return; }
-            App.modals.hide(App.elements['pollinations-text-modal']); App.ui.showNotification("Processing text with AI...");
-            const url = "https://text.pollinations.ai/" + encodeURIComponent(`${instruction}: ${sceneText}`);
+            
+            App.modals.hide(App.elements['pollinations-text-modal']);
+            App.ui.showNotification("Processing text with AI...");
+
+            // Use the OpenAI-compatible endpoint
+            const url = "https://gen.pollinations.ai/v1/chat/completions";
+            
+            // Construct the payload in OpenAI format
+            const payload = {
+                model: "openai", // Standard model selector
+                messages: [
+                    { role: "system", content: instruction }, // Instruction goes in system
+                    { role: "user", content: sceneText }      // Content goes in user
+                ]
+            };
+            
+            // DETERMINE KEY: Use user's key if exists, otherwise fallback to default
+            const userKey = App.state.storyData.meta.aiApiKey;
+            const apiKey = (userKey && userKey.trim() !== "") ? userKey : App.constants.POLLINATIONS_API_KEY;
+
             try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
-                const processedText = doc.body.innerText.trim();
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}` // Use the determined key
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`API Error! Status: ${response.status} - ${errText}`);
+                }
+
+                const data = await response.json();
+                
+                // Parse OpenAI-style response
+                const processedText = data.choices?.[0]?.message?.content?.trim();
+
                 if (processedText) {
                     App.elements['scene-text'].value += '\n\n' + processedText;
                     App.elements['scene-text'].dispatchEvent(new Event('input', { bubbles: true }));
-                    App.setDirty(true); App.ui.showNotification("Text processing complete!");
-                } else { throw new Error("No text found in the response."); }
-            } catch (error) { console.error("Error processing text:", error); App.ui.showNotification("Failed to process text. Check console."); }
+                    App.setDirty(true);
+                    App.ui.showNotification("Text processing complete!");
+                } else {
+                    throw new Error("No text returned in the API response.");
+                }
+            } catch (error) {
+                console.error("Error processing text:", error);
+                App.ui.showNotification(`Failed to process text: ${error.message}`);
+            }
         }
     },
 	player: {
@@ -4888,10 +4995,32 @@ const App = {
                 <div class="grid-full-width"> <label>Background Music <div class="form-group inline" style="margin:0;"><input type="text" id="style-music-path" class="path-input" data-asset-type="sounds" placeholder="sounds/music.mp3"><button class="btn-warning file-icon-btn" title="Select Music File">📁</button></div></label> </div>
                 <div class="grid-span-2"> <label>Music Volume <input type="range" id="style-music-volume" min="0" max="1" step="0.01"></label> <label>Ambience Volume <input type="range" id="style-ambience-volume" min="0" max="1" step="0.01"></label> </div>
                 <div class="grid-span-2"> <label>Speech Volume <input type="range" id="style-speech-volume" min="0" max="1" step="0.01"></label> <label>Video Volume <input type="range" id="style-video-volume" min="0" max="1" step="0.01"></label> </div>
+                <hr class="grid-separator">
+                <div class="grid-full-width"> <label>Advanced Features <select id="style-advanced-features"><option value="on">Enabled</option><option value="off">Disabled</option></select></label> </div>
+                
+                <!-- NEW API KEY SECTION -->
+                <div id="style-ai-settings" class="grid-full-width" style="display:none; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; margin-top: 5px;">
+                    <label>Pollinations API Key (Optional) 
+                        <div style="display:flex; gap:10px; margin-top: 5px;">
+                            <input type="text" id="style-ai-api-key" placeholder="Paste your private key here to bypass limits">
+                            <button class="btn-secondary" style="margin:0;" onclick="window.open('https://enter.pollinations.ai/', '_blank')">Get Pollen</button>
+                        </div>
+                        <small style="color:#888; font-weight:normal; display:block; margin-top:5px;">Your key is saved with the project file but is <b>REMOVED</b> from exported games for security.</small>
+                    </label>
+                </div>
             `;
 
             Object.keys(defaults).forEach(key => { const el = grid.querySelector(`#style-${key.replace(/--/g, '')}`); if(el) el.value = (el.type === 'number' || key.endsWith('-volume')) ? parseFloat(styles[key] || defaults[key]) : (styles[key] || defaults[key]).replace('px', ''); });
             grid.querySelector('#style-layout').value = App.state.storyData.meta.layout;
+
+            // NEW: Initialize the API key input value
+            const aiKeyInput = grid.querySelector('#style-ai-api-key');
+            if(aiKeyInput) aiKeyInput.value = App.state.storyData.meta.aiApiKey || '';
+
+            // NEW: Initialize visibility of the API settings block
+            const advFeatureVal = styles['--advanced-features'] || defaults['--advanced-features'];
+            const aiSettingsDiv = grid.querySelector('#style-ai-settings');
+            if(aiSettingsDiv) aiSettingsDiv.style.display = advFeatureVal === 'on' ? 'block' : 'none';
 
             const parseAndSetColor = (colorVar, hexId, opacityId = null) => {
                 const colorVal = styles[colorVar] || defaults[colorVar]; const match = colorVal.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/); const toHex = c => ('0' + parseInt(c).toString(16)).slice(-2);
@@ -4912,6 +5041,13 @@ const App = {
             const key = `--${el.id.replace('style-', '')}`;
             const meta = App.state.storyData.meta;
         
+            // NEW: Handle API Key Input
+            if (el.id === 'style-ai-api-key') {
+                meta.aiApiKey = el.value.trim();
+                App.setDirty(true);
+                return; // Don't process as a style
+            }
+
             if (el.id === 'style-layout') {
                 meta.layout = el.value;
             } else if (el.id === 'style-container-bg-opacity' || el.id === 'style-btn-opacity') {
@@ -4950,6 +5086,15 @@ const App = {
             App.setDirty(true);
             App.editor.renderPreview();
             this.updateLivePlayerStyles();
+
+            // Handle Visibility Toggle for API settings
+            if (key === '--advanced-features') {
+                App.ui.updateAdvancedFeaturesVisibility();
+                
+                // Update local modal UI
+                const aiSettings = document.getElementById('style-ai-settings');
+                if(aiSettings) aiSettings.style.display = el.value === 'on' ? 'block' : 'none';
+            }
         },
         async updateLivePlayerStyles() {
             if (App.elements['player-container'].style.display !== 'flex') {
@@ -5103,7 +5248,7 @@ const App = {
 
 			return `:root {\n${rootVars}} body { background-image: var(--screen-bg-image); background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-family); } #game-container { font-size: var(--font-size); background-color: var(--container-bg-color); } .choice-btn { font-family: var(--font-family); background-color: var(--btn-color); color: var(--btn-text-color); border-width: var(--container-outline-width, 0px); border-style: solid; border-color: var(--container-outline-color, transparent); } .choice-btn:hover { background-color: var(--btn-hover-color); }`;
 		},
-        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--container-effect': 'shadow', '--container-outline-color': '#FFFFFF', '--music-path': '', '--music-volume': '0.4', '--ambience-volume': '0.4', '--speech-volume': '0.4', '--video-volume': '1.0', '--typewriter-effect': 'on', '--cinematic-pacing-default': 'off', '--cinematic-triggers': 'both' }; }
+        getDefaults() { return { '--bg-color': '#212529', '--text-color': '#f8f9fa', '--btn-color': 'rgba(108, 117, 125, 1)', '--btn-text-color': '#ffffff', '--btn-hover-color': 'rgba(90, 98, 104, 1)', '--font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', '--font-size': '16px', '--padding': '30px', '--screen-bg-image': '', '--container-bg-color': 'rgba(0,0,0,0.15)', '--container-effect': 'shadow', '--container-outline-color': '#FFFFFF', '--music-path': '', '--music-volume': '0.4', '--ambience-volume': '0.4', '--speech-volume': '0.4', '--video-volume': '1.0', '--typewriter-effect': 'on', '--cinematic-pacing-default': 'off', '--cinematic-triggers': 'both', '--advanced-features': 'off' }; }
     },
 
     modals: {
@@ -5190,7 +5335,7 @@ const App = {
             if (generatedCount > 0) this.logInfo("IMPORTANT: Remember to Save Project!");
 
             this.isGenerating = false; this.abortRequested = false; fieldset.disabled = false; btn.disabled = false;
-            btn.innerHTML = `<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg> Generate`;
+            btn.innerHTML = `<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.657 6.247c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937zM3.794 1.148c.11-.33.576-.33.686 0l.645 1.937a2.89 2.89 0 0 0 1.829 1.828l1.936.645c.33.11.33.576 0 .686l-1.937.645a2.89 2.89 0 0 0-1.828 1.829l-.645 1.936a.361.361 0 0 1-.686 0l-.645-1.937a2.89 2.89 0 0 0-1.828-1.828l-1.937-.645a.361.361 0 0 1 0-.686l1.937.645a2.89 2.89 0 0 0 1.828-1.828l.645-1.937z"/></svg> Generate`;
             App.editor.render(); App.ui.invalidateNavViews(); await App.ui.setViewMode(App.state.currentNavView);
         },
 

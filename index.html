@@ -3929,7 +3929,8 @@ const App = {
             if (isPlayerActive && aiGeneratorPanel) {
                 aiGeneratorPanel.style.display = 'none';
             } else if (aiGeneratorPanel) {
-                aiGeneratorPanel.style.display = 'block';
+			const advancedFeaturesEnabled = App.state.storyData?.meta?.styles?.['--advanced-features'] === 'on';
+				aiGeneratorPanel.style.display = advancedFeaturesEnabled ? 'block' : 'none';
             }
 
             const editorPanel = document.getElementById('editor-panel');
@@ -4481,41 +4482,48 @@ const App = {
             App.state.aiImageBlob = null;
             App.ui.updateAiImagePreview(null, 'Rendering...');
 
-            const baseUrl = "https://image.pollinations.ai/prompt/" + encodeURIComponent(promptText);
+            // Correct endpoint based on the new documentation
+            const baseUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(promptText)}`;
+
             const layout = App.state.storyData.meta.layout;
             const isLandscape = layout.startsWith('layout-panel') || layout === 'layout-top-down';
-            
-            // DETERMINE KEY: Use user's key if exists, otherwise fallback to default
+
+            // Parameters from your working example
+            const params = new URLSearchParams({
+                model: 'zimage', // Model from the documentation example
+                width: isLandscape ? 1920 : 1024,
+                height: isLandscape ? 1088 : 1024,
+                seed: Math.floor(Math.random() * 1000000000),
+                nologo: 'true',
+                enhance: 'true',
+                safe: 'true'
+            });
+
+            const finalUrl = `${baseUrl}?${params.toString()}`;
             const userKey = App.state.storyData.meta.aiApiKey;
             const apiKey = (userKey && userKey.trim() !== "") ? userKey : App.constants.POLLINATIONS_API_KEY;
 
-            const params = new URLSearchParams();
-            params.append('model', 'flux');
-            params.append('seed', Math.floor(Math.random() * 1000000000));
-            params.append('width', isLandscape ? '1280' : '1024');
-            params.append('height', isLandscape ? '720' : '1024');
-            params.append('nologo', 'true');
-            params.append('enhance', 'true');
-            params.append('safe', 'true');
-            params.append('token', apiKey); // Use the determined key
-
-            const finalUrl = `${baseUrl}?${params.toString()}`;
-
             try {
-                const response = await fetch(finalUrl);
+                const response = await fetch(finalUrl, {
+                    headers: {
+                        // Correct authentication method from the documentation
+                        'Authorization': `Bearer ${apiKey}`
+                    }
+                });
+
                 if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(`API Error (${response.status}): ${text}`);
+                    throw new Error(`API Error! Status: ${response.status} - ${await response.text()}`);
                 }
+
+                // This endpoint returns the image directly, not a JSON response
                 const imageBlob = await response.blob();
                 
                 App.state.aiImageBlob = imageBlob;
-                const objectUrl = URL.createObjectURL(imageBlob);
-                App.state.aiImageUrl = objectUrl;
-                App.ui.updateAiImagePreview(objectUrl);
+                App.state.aiImageUrl = URL.createObjectURL(imageBlob);
+                App.ui.updateAiImagePreview(App.state.aiImageUrl);
 
             } catch (error) {
-                console.error("Image generation failed:", error);
+                console.error("Error processing image generation:", error);
                 App.ui.updateAiImagePreview(null, `Render failed: ${error.message}`);
             }
         },
@@ -5363,17 +5371,39 @@ const App = {
             const fullPrompt = (prompt + ' ' + suffix).trim();
             this.logInfo(`Generating image with prompt: "${fullPrompt}"`);
 
+            // Correct endpoint based on the new documentation
+            const baseUrl = `https://gen.pollinations.ai/image/${encodeURIComponent(fullPrompt)}`;
+            
             const layout = App.state.storyData.meta.layout;
-            let urlSuffix = (layout.startsWith('layout-panel') || layout === 'layout-top-down')
-                ? '&width=1280&height=720'
-                : '&width=1024&height=1024';
+            const isLandscape = layout.startsWith('layout-panel') || layout === 'layout-top-down';
 
-            const randomSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-            const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(fullPrompt) + `?seed=${randomSeed}&safe=true&nologo=true&enhance=true&model=flux` + urlSuffix;
+            const params = new URLSearchParams({
+                model: 'zimage', // Model from the documentation example
+                width: isLandscape ? 1920 : 1024,
+                height: isLandscape ? 1088 : 1024,
+                seed: Math.floor(Math.random() * 1000000000),
+                nologo: 'true',
+                enhance: 'true',
+                safe: 'true'
+            });
+
+            const finalUrl = `${baseUrl}?${params.toString()}`;
+            const userKey = App.state.storyData.meta.aiApiKey;
+            const apiKey = (userKey && userKey.trim() !== "") ? userKey : App.constants.POLLINATIONS_API_KEY;
 
             try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`Fetch failed: ${response.status} ${response.statusText}`);
+                const response = await fetch(finalUrl, {
+                    headers: {
+                        // Correct authentication method from the documentation
+                        'Authorization': `Bearer ${apiKey}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error! Status: ${response.status} - ${await response.text()}`);
+                }
+                
+                // This endpoint returns the image directly
                 const imageBlob = await response.blob();
                 const filename = `${scene.id}_${Date.now()}.jpg`;
                 const destinationPath = `images/${filename}`;

@@ -116,6 +116,7 @@ Creating your first game is a straightforward process. The app handles all the f
 First, open Kinexus in your browser. From the **Menu**, you have two options:
 *   **New Project:** Creates a complete project folder for you, including sub-folders for `images` and `sounds`, and the main `story.json` file.
 *   **Open Existing Project:** Lets you select a project folder you previously created.
+*   The shortcut to enable the debug import mode is Ctrl + Alt + D.
 
 ### 2. Create Your Story
 *   **Create Scenes:** Use the **round blue '+' button** above the scene list to create new scenes. Give them short, unique IDs (e.g., `start`, `cockpit`, `alien_encounter`).

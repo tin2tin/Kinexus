@@ -1,0 +1,186 @@
+{
+  "meta": {
+    "title": "Template",
+    "startSceneId": "start",
+    "creatorName": "",
+    "aboutText": "",
+    "aiApiKey": "",
+    "variables": [],
+    "styles": {
+      "--bg-color": "#212529",
+      "--text-color": "#f8f9fa",
+      "--btn-color": "rgba(108, 117, 125, 1)",
+      "--btn-text-color": "#ffffff",
+      "--btn-hover-color": "rgba(90, 98, 104, 1)",
+      "--font-family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+      "--font-size": "16px",
+      "--padding": "30px",
+      "--screen-bg-image": "",
+      "--container-bg-color": "rgba(0,0,0,0.15)",
+      "--container-effect": "shadow",
+      "--container-outline-color": "#FFFFFF",
+      "--music-path": "",
+      "--music-volume": "0.4",
+      "--ambience-volume": "0.4",
+      "--speech-volume": "0.4",
+      "--video-volume": "1.0",
+      "--typewriter-effect": "on",
+      "--cinematic-pacing-default": "off",
+      "--cinematic-triggers": "both",
+      "--advanced-features": "off"
+    },
+    "layout": "layout-panel-bottom",
+    "currentSceneId": "start"
+  },
+  "scenes": {
+    "start": {
+      "id": "start",
+      "text": "Start here.",
+      "image": "",
+      "imagePrompt": "",
+      "videoLoop": true,
+      "videoMuted": true,
+      "ambienceSound": "",
+      "ambienceLoop": true,
+      "speechSound": "",
+      "speechLoop": false,
+      "cinematicModeOverride": "default",
+      "choices": [
+        {
+          "condition": null,
+          "action": {
+            "text": "Go Left",
+            "target": "Left",
+            "set_variable": null,
+            "set_value": false
+          }
+        },
+        {
+          "condition": null,
+          "action": {
+            "text": "Go Right",
+            "target": "Right",
+            "set_variable": null,
+            "set_value": false
+          }
+        }
+      ],
+      "visited": false,
+      "lastModified": 1767686629479,
+      "mediaType": "none",
+      "color": null,
+      "position": {
+        "x": 200,
+        "y": 50
+      }
+    },
+    "Left": {
+      "id": "Left",
+      "text": "This is the new scene 'Left'.",
+      "choices": [
+        {
+          "condition": null,
+          "action": {
+            "text": "Continue",
+            "target": "Direction_Check",
+            "set_variable": null,
+            "set_value": false
+          }
+        }
+      ],
+      "position": {
+        "x": 1334.8181924819946,
+        "y": -251.0454330444336
+      },
+      "lastModified": 1767686659524,
+      "mediaType": "none",
+      "color": null,
+      "cinematicModeOverride": "default",
+      "image": "",
+      "imagePrompt": "",
+      "ambienceSound": "",
+      "ambienceLoop": true,
+      "speechSound": "",
+      "speechLoop": false,
+      "videoLoop": true,
+      "videoMuted": true
+    },
+    "Right": {
+      "id": "Right",
+      "text": "This is the new scene 'Right'.",
+      "choices": [
+        {
+          "condition": null,
+          "action": {
+            "text": "Continue",
+            "target": "Direction_Check",
+            "set_variable": null,
+            "set_value": false
+          }
+        }
+      ],
+      "position": {
+        "x": 1336.8181924819946,
+        "y": -256.0454330444336
+      },
+      "lastModified": 1767686669636,
+      "mediaType": "none",
+      "color": null,
+      "cinematicModeOverride": "default",
+      "image": "",
+      "imagePrompt": "",
+      "ambienceSound": "",
+      "ambienceLoop": true,
+      "speechSound": "",
+      "speechLoop": false,
+      "videoLoop": true,
+      "videoMuted": true
+    },
+    "Direction_Check": {
+      "id": "Direction_Check",
+      "text": "This is the new scene 'Direction_Check'.",
+      "choices": [
+        {
+          "condition": {
+            "variable": "visited_scene_Left",
+            "value": true
+          },
+          "action": {
+            "text": "You went left. Restart.",
+            "target": "start",
+            "set_variable": null,
+            "set_value": false
+          }
+        },
+        {
+          "condition": {
+            "variable": "visited_scene_Right",
+            "value": true
+          },
+          "action": {
+            "text": "You went right. Restart.",
+            "target": "start",
+            "set_variable": null,
+            "set_value": false
+          }
+        }
+      ],
+      "position": {
+        "x": 250,
+        "y": 100
+      },
+      "lastModified": 1767686699493,
+      "mediaType": "none",
+      "color": null,
+      "cinematicModeOverride": "default",
+      "image": "",
+      "imagePrompt": "",
+      "ambienceSound": "",
+      "ambienceLoop": true,
+      "speechSound": "",
+      "speechLoop": false,
+      "videoLoop": true,
+      "videoMuted": true
+    }
+  }
+}

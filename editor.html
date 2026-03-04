@@ -72,6 +72,7 @@
 			background-size: cover;
 			background-repeat: no-repeat;
 			background-position: center;
+			background-color: var(--bg-color);
 			font-family: var(--font-family);
 			font-size: var(--font-size);
 			color: var(--text-color);
@@ -894,9 +895,12 @@
         <fieldset id="editor-fieldset">
             <div class="header">
                  <button id="save-project-dirty-btn" class="btn-warning" title="Save Project (Ctrl+S)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.5 0h-2A1.5 1.5 0 0 0 1 1.5V15a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2.5A1.5 1.5 0 0 0 13.5 1h-2a.5.5 0 0 1 0-1h-2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H4.5zM3 14V2.5A.5.5 0 0 1 3.5 2H5v1.5A1.5 1.5 0 0 0 6.5 5h3A1.5 1.5 0 0 0 11 3.5V2h1.5a.5.5 0 0 1 .5.5V14a.5.5 0 0 1-.5-.5H3.5a.5.5 0 0 1-.5-.5z"/></svg>
-                </button>
-                <div style="flex-grow: 1; display: flex; justify-content: center; align-items: center;">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.5 0h-2A1.5 1.5 0 0 0 1 1.5V15a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2.5A1.5 1.5 0 0 0 13.5 1h-2a.5.5 0 0 1 0-1h-2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H4.5zM3 14V2.5A.5.5 0 0 1 3.5 2H5v1.5A1.5 1.5 0 0 0 6.5 5h3A1.5 1.5 0 0 0 11 3.5V2h1.5a.5.5 0 0 1 .5.5V14a.5.5 0 0 1-.5-.5H3.5a.5.5 0 0 1-.5-.5z"/></svg>
+					</button>
+					<button id="refresh-scene-btn" class="btn-secondary" title="Refresh Scene Media" style="padding: 6px; margin-left: 10px; line-height: 1; min-width: 0; width: 32px; height: 32px; border-radius: 50%; vertical-align: middle; display: inline-flex; justify-content: center; align-items: center;">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966a.25.25 0 0 1 0 .384l-2.36 1.966A.25.25 0 0 1 8 4.466z"/></svg>
+					</button>
+					<div style="flex-grow: 1; display: flex; justify-content: center; align-items: center;">
                     <div class="form-group inline" id="scene-id-group" style="margin-bottom: 0; min-width: 250px;">
                         <label for="scene-id" style="margin-bottom: 0; white-space: nowrap;">Scene ID</label>
                         <input type="text" id="scene-id" disabled style="padding-top: 10px; padding-bottom: 10px;">
@@ -1722,9 +1726,18 @@ const App = {
         document.getElementById('new-project-btn').addEventListener('click', () => App.io.newProject());
         document.getElementById('open-project-btn').addEventListener('click', () => App.io.openProject());
         App.elements['save-story-btn'].addEventListener('click', () => App.io.saveProject());
-        this.elements['save-project-dirty-btn'].addEventListener('click', () => App.io.saveProject());
+			this.elements['save-project-dirty-btn'].addEventListener('click', () => App.io.saveProject());
+			
+			document.getElementById('refresh-scene-btn').addEventListener('click', () => {
+				App.editor.saveCurrentScene();
+				App.editor.ui.updateVideoControlsVisibility();
+				App.editor.ui.updateMediaButtonStates();
+				App.ui.updateImageThumbnail(document.getElementById('scene-image').value);
+				App.ui.invalidateNavViews();
+				App.ui.renderCurrentView();
+			});
 
-        document.getElementById('new-scene-btn').addEventListener('click', (e) => App.nodeEditor.addNewScene(null, e));
+		document.getElementById('new-scene-btn').addEventListener('click', (e) => App.nodeEditor.addNewScene(null, e));
         document.getElementById('rename-scene-btn').addEventListener('click', () => App.tree.renameScene());
         document.getElementById('delete-scene-btn').addEventListener('click', () => App.tree.deleteCurrentScene());
         document.getElementById('add-choice-btn').addEventListener('click', () => App.editor.addChoiceToDOM());
@@ -3168,14 +3181,15 @@ const App = {
                 }
 
                 function processChoice(choice) {
-                    if (cinematicRevealCleanup) {
-                        cinematicRevealCleanup();
-                        cinematicRevealCleanup = null;
-                    }
-                    const action = choice.action;
-                    if (action.set_variable) gameState.variables[action.set_variable] = action.set_value;
-                    if (action.target) renderScene(action.target);
-                }
+					if (cinematicRevealCleanup) {
+						cinematicRevealCleanup();
+						cinematicRevealCleanup = null;
+					}
+					const action = choice.action;
+					if (action.set_variable) gameState.variables[action.set_variable] = action.set_value;
+					if (action.target) renderScene(action.target);
+					else renderScene(gameState.currentSceneId);
+				}
 				
 				function handleCinematicReveal(scene, onReady) {
                     if (cinematicRevealCleanup) cinematicRevealCleanup();
@@ -3273,11 +3287,12 @@ const App = {
                         gameContainer.className = layout;
 
                         const imageContainer = document.getElementById('image-container');
-                        [backgroundVideo, sceneVideo, sceneImage].forEach(el => el.style.display = 'none');
+						[backgroundVideo, sceneVideo, sceneImage].forEach(el => el.style.display = 'none');
 						[backgroundVideo, sceneVideo].forEach(v => { if(!v.paused) { v.pause(); v.removeAttribute('src'); v.load(); } });
-                        imageContainer.style.display = 'none';
-                        document.body.style.backgroundImage = 'var(--screen-bg-image)';
-                        activeVideoElement = null;
+						imageContainer.style.display = 'none';
+						document.body.style.backgroundImage = 'var(--screen-bg-image)';
+						document.body.style.backgroundColor = 'var(--bg-color)';
+						activeVideoElement = null;
                         restorePlayState.video = false;
                         document.getElementById('player-video-controls').style.display = 'none';
 
@@ -3319,20 +3334,22 @@ const App = {
                             if(choice.condition) {
                                 const rawVarName = choice.condition.variable;
                                 if (rawVarName.startsWith('visited_scene_')) {
-                                    conditionMet = (!!gameState.visited[rawVarName.substring(14)]) === choice.condition.value;
-                                } else {
-                                    let varKey = rawVarName.startsWith('var_') ? rawVarName.substring(4) : rawVarName;
-                                    conditionMet = gameState.variables[varKey] === choice.condition.value;
-                                }
-                            }
-                            if (conditionMet) {
-                                if (!choice.action.text && choice.action.target) {
-                                    if(choice.action.target === sceneId) { console.error('Infinite loop detected in scene ' + sceneId); continue; }
-                                    processChoice(choice); return;
-                                }
-                                if (choice.action.text) visibleChoices.push(choice);
-                                else if (choice.action.set_variable) gameState.variables[choice.action.set_variable] = choice.action.set_value;
-                            }
+							conditionMet = (!!gameState.visited[rawVarName.substring(14)]) === choice.condition.value;
+								} else {
+									let varKey = rawVarName.startsWith('var_') ? rawVarName.substring(4) : rawVarName;
+									conditionMet = (!!gameState.variables[varKey]) === choice.condition.value;
+								}
+							}
+							if (conditionMet) {
+								if (!choice.action.text && choice.action.target) {
+									if(choice.action.target === sceneId) { console.error('Infinite loop detected in scene ' + sceneId); continue; }
+									processChoice(choice); return;
+								}
+								if (choice.action.text) visibleChoices.push(choice);
+								else if (choice.action.set_variable) {
+									gameState.variables[choice.action.set_variable] = choice.action.set_value;
+								}
+							}
                         }
 						
 						handleCinematicReveal(scene, () => {
@@ -3757,29 +3774,29 @@ const App = {
 				App.nodeEditor.showContextMenu(e, menu);
 			};
 
-            const choicesToSceneCount = scene.choices.filter(c => c.action.target).length;
-            const isDeadEnd = choicesToSceneCount === 0;
-            const hasConditions = scene.choices.some(c => c.condition);
-            
-            const mediaType = scene.mediaType || 'none';
-            const hasMedia = mediaType === 'image' || mediaType === 'video';
+            const choicesWithTargets = (scene.choices ||[]).filter(c => c.action && c.action.target);
+			const isDeadEnd = choicesWithTargets.length === 0;
+			const hasConditions = (scene.choices ||[]).some(c => c.condition);
+			
+			const mediaType = scene.mediaType || 'none';
+			const hasMedia = mediaType === 'image' || mediaType === 'video';
 
-            let iconsHTML = `
-                ${scene.id === App.state.storyData.meta.startSceneId ? this.ICONS.start : ''}
-				<span class="scene-card-icon-group">
-					${hasMedia ? (mediaType === 'video' ? this.ICONS.video + (scene.videoLoop ? this.ICONS.videoLoop : '') : this.ICONS.image) : ''}
-				</span>
-                <span class="scene-card-icon-group">
-                    ${scene.ambienceSound ? this.ICONS.audio + (scene.ambienceLoop ? this.ICONS.audioLoop : '') : ''}
-                </span>
-                <span class="scene-card-icon-group">
-                    ${scene.speechSound ? this.ICONS.speech : ''}
-                </span>
-                ${isDeadEnd ? this.ICONS.end : ''}
-                ${hasConditions ? this.ICONS.condition : ''}
-                ${App.state.orphanSceneIds.has(scene.id) ? this.ICONS.orphan : ''}
-                ${choicesToSceneCount > 0 ? `<span class="choice-count-icon">${choicesToSceneCount}</span>` : ''}
-            `;
+			let iconsHTML = `
+			${scene.id === App.state.storyData.meta.startSceneId ? this.ICONS.start : ''}
+					<span class="scene-card-icon-group">
+						${hasMedia ? (mediaType === 'video' ? this.ICONS.video + (scene.videoLoop ? this.ICONS.videoLoop : '') : this.ICONS.image) : ''}
+					</span>
+			<span class="scene-card-icon-group">
+			${scene.ambienceSound ? this.ICONS.audio + (scene.ambienceLoop ? this.ICONS.audioLoop : '') : ''}
+			</span>
+			<span class="scene-card-icon-group">
+			${scene.speechSound ? this.ICONS.speech : ''}
+			</span>
+			${isDeadEnd ? this.ICONS.end : ''}
+			${hasConditions ? this.ICONS.condition : ''}
+			${App.state.orphanSceneIds.has(scene.id) ? this.ICONS.orphan : ''}
+			${choicesWithTargets.length > 0 ? `<span class="choice-count-icon">${choicesWithTargets.length}</span>` : ''}
+			`;
 
             card.innerHTML = `
                 <div class="scene-card-thumbnail" data-thumbnail-for="${scene.id}"><span>No Img</span></div>
@@ -4030,8 +4047,7 @@ const App = {
 				if (currentLoadId !== App.state.previewLoadId) return;
 
 				imageEl.style.display = 'none';
-				imageContainerEl.style.display = 'none';
-				[videoBgEl, videoFgEl].forEach(v => {
+				imageContainerEl.style.display = 'none';[videoBgEl, videoFgEl].forEach(v => {
 					v.style.display = 'none';
 					if (v && !v.paused) {
 						v.pause();
@@ -4039,9 +4055,10 @@ const App = {
 						v.load();
 					}
 				});
-                previewContainer.style.backgroundImage = 'none';
+				previewContainer.style.backgroundImage = 'var(--screen-bg-image)';
+				previewContainer.style.backgroundColor = 'var(--bg-color)';
 
-                const isPanelLayout = meta.layout === 'layout-panel-bottom' || meta.layout === 'layout-panel-left' || meta.layout === 'layout-panel-right';
+				const isPanelLayout = meta.layout === 'layout-panel-bottom' || meta.layout === 'layout-panel-left' || meta.layout === 'layout-panel-right';
 
 				if (isMediaVideo && sceneMediaUrl) {
 					let activeVideoEl = isPanelLayout ? videoBgEl : videoFgEl;
@@ -4646,10 +4663,11 @@ const App = {
             });
         },
         processChoice(choice) {
-            const action = choice.action;
-            if (action.set_variable) this.gameState.variables[action.set_variable] = action.set_value;
-            if (action.target) this.renderScene(action.target);
-        },
+			const action = choice.action;
+			if (action.set_variable) this.gameState.variables[action.set_variable] = action.set_value;
+			if (action.target) this.renderScene(action.target);
+			else this.renderScene(this.gameState.currentSceneId);
+		},
         typeWriter(text, choices) {
 			const { 'player-text': textEl, 'player-choices': choicesEl, 'player-content-container': contentContainer, 'player-container': playerContainer } = App.elements;
 
@@ -4756,6 +4774,7 @@ const App = {
 				if (!v.paused) { v.pause(); v.removeAttribute('src'); v.load(); }
 			});
 			playerContainer.style.backgroundImage = 'var(--screen-bg-image)';
+			playerContainer.style.backgroundColor = 'var(--bg-color)';
 			App.state.player.activeVideoElement = null;
 			let cinematicRevealCleanup = null;
 			
@@ -4850,8 +4869,6 @@ const App = {
 					}
 				}
 			} else {
-                playerContainer.style.backgroundImage = 'none';
-                playerContainer.style.backgroundColor = styles['--bg-color'] || App.styles.getDefaults()['--bg-color'];
 				onAssetReady();
 			}
 
@@ -4861,16 +4878,18 @@ const App = {
                 if(choice.condition) {
                     const varName = choice.condition.variable;
                     if(varName.startsWith('visited_scene_')) conditionMet = !!this.gameState.visited[varName.substring(14)] === choice.condition.value;
-                    else conditionMet = this.gameState.variables[varName] === choice.condition.value;
-                }
-                if (conditionMet) {
-                    if (!choice.action.text && choice.action.target) {
-                        if (choice.action.target === sceneId) { console.error(`Infinite loop detected in scene '${sceneId}'.`); continue; }
-                        this.processChoice(choice); return;
-                    }
-                    if (choice.action.text) visibleChoices.push(choice);
-                    else if (choice.action.set_variable) this.gameState.variables[choice.action.set_variable] = choice.action.set_value;
-                }
+						else conditionMet = (!!this.gameState.variables[varName]) === choice.condition.value;
+					}
+					if (conditionMet) {
+						if (!choice.action.text && choice.action.target) {
+							if (choice.action.target === sceneId) { console.error(`Infinite loop detected in scene '${sceneId}'.`); continue; }
+							this.processChoice(choice); return;
+						}
+						if (choice.action.text) visibleChoices.push(choice);
+						else if (choice.action.set_variable) {
+							this.gameState.variables[choice.action.set_variable] = choice.action.set_value;
+						}
+					}
             }
 
             if (styles['--typewriter-effect'] === 'on') this.typeWriter(scene.text, visibleChoices);
@@ -5127,13 +5146,14 @@ const App = {
                 const isPanelLayout = currentLayout.startsWith('layout-panel');
                 
                 App.elements['player-image'].style.display = 'none';
-                [App.elements['player-video-bg'], App.elements['player-video-fg']].forEach(v => {
-                    if (!v.paused) v.pause();
-                    v.style.display = 'none';
-                });
-                playerContainer.style.backgroundImage = 'none';
-        
-                if (sceneMediaUrl) {
+				[App.elements['player-video-bg'], App.elements['player-video-fg']].forEach(v => {
+					if (!v.paused) v.pause();
+					v.style.display = 'none';
+				});
+				playerContainer.style.backgroundImage = 'var(--screen-bg-image)';
+				playerContainer.style.backgroundColor = 'var(--bg-color)';
+				
+				if (sceneMediaUrl) {
                     if (isMediaVideo) {
                         const videoEl = isPanelLayout ? App.elements['player-video-bg'] : App.elements['player-video-fg'];
                         videoEl.style.display = 'block';
@@ -5331,11 +5351,14 @@ const App = {
                 }
 
                 if (!prompt) { this.logInfo("No prompt, skipping."); continue; }
-                const success = await this.generateAndSaveImage(scene, prompt, suffix);
-                if (!success) { this.logInfo("Error during image generation. ABORTING."); break; }
+				const success = await this.generateAndSaveImage(scene, prompt, suffix);
+				if (!success) { this.logInfo("Error during image generation. ABORTING."); break; }
 
-                App.ui.selectScene(sceneId); generatedCount++;
-                if (this.abortRequested) break;
+				if (App.state.currentSceneId === sceneId) {
+					App.editor.render();
+				}
+				App.ui.selectScene(sceneId); generatedCount++;
+				if (this.abortRequested) break;
                 if (cooldown > 0) { this.logInfo(`Cooldown ${cooldown/1000}s...`); await new Promise(r => setTimeout(r, cooldown)); }
             }
 

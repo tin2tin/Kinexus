@@ -1,0 +1,191 @@
+Here is a **practical Text-to-Speech (TTS) Cleanup Checklist** used for **audiobooks, narration, podcasts, and voice assistants**. It ensures text sounds **natural when spoken** instead of robotic.
+
+---
+
+# Text-to-Speech (TTS) Cleanup Checklist
+
+## 1. Expand Titles and Honorifics
+
+Always convert **abbreviated titles** into full words.
+
+| Original | TTS-Ready |
+| -------- | --------- |
+| Mr.      | Mister    |
+| Mrs.     | Missus    |
+| Ms.      | Miz       |
+| Dr.      | Doctor    |
+| Prof.    | Professor |
+
+Example:
+**Original:**
+Mr. Johnson spoke to Dr. Smith.
+
+**TTS-Ready:**
+Mister Johnson spoke to Doctor Smith.
+
+---
+
+## 2. Convert Abbreviations
+
+Write the full word instead of the shortened form.
+
+| Abbreviation | Spoken Form |
+| ------------ | ----------- |
+| etc.         | and so on   |
+| e.g.         | for example |
+| i.e.         | that is     |
+| vs.          | versus      |
+
+Example:
+Original: *We sell apples, oranges, etc.*
+TTS: *We sell apples, oranges, and so on.*
+
+---
+
+## 3. Handle Initialisms (Letter-by-Letter)
+
+If letters are spoken individually, **separate them with spaces**.
+
+| Initialism | TTS     |
+| ---------- | ------- |
+| AI         | A I     |
+| FBI        | F B I   |
+| CPU        | C P U   |
+| HTML       | H T M L |
+
+Example:
+Original: *AI is transforming technology.*
+TTS: *A I is transforming technology.*
+
+---
+
+## 4. Handle Acronyms (Spoken as Words)
+
+If the abbreviation is pronounced as a word, leave it or expand it.
+
+| Acronym | Spoken |
+| ------- | ------ |
+| NASA    | NASA   |
+| NATO    | NATO   |
+| UNESCO  | UNESCO |
+
+Optional:
+*N A S A, the National Aeronautics and Space Administration.*
+
+---
+
+## 5. Replace Symbols With Words
+
+| Symbol | Replace With |
+| ------ | ------------ |
+| &      | and          |
+| @      | at           |
+| %      | percent      |
+| $      | dollars      |
+| +      | plus         |
+| =      | equals       |
+
+Example:
+Original: *R&D increased by 15%.*
+TTS: *Research and development increased by fifteen percent.*
+
+---
+
+## 6. Spell Out Numbers
+
+Numbers often sound better written as words.
+
+| Number | Spoken                   |
+| ------ | ------------------------ |
+| 5      | five                     |
+| 21     | twenty-one               |
+| 2024   | two thousand twenty-four |
+
+Example:
+Original: *The meeting is at 3 PM.*
+TTS: *The meeting is at three P M.*
+
+---
+
+## 7. Improve Dates
+
+Dates should be readable in natural speech.
+
+Example:
+
+Original:
+*March 5, 2026*
+
+TTS:
+*March fifth, two thousand twenty-six*
+
+---
+
+## 8. Clarify Units
+
+| Original | TTS            |
+| -------- | -------------- |
+| km       | kilometers     |
+| kg       | kilograms      |
+| lb       | pounds         |
+| mph      | miles per hour |
+
+Example:
+*The car travels at 120 km/h.*
+→ *The car travels at one hundred twenty kilometers per hour.*
+
+---
+
+## 9. Add Natural Pauses
+
+Use punctuation to control speech rhythm.
+
+| Symbol     | Effect         |
+| ---------- | -------------- |
+| ,          | short pause    |
+| .          | full stop      |
+| —          | dramatic pause |
+| line break | longer pause   |
+
+Example:
+
+Instead of
+*Today we will discuss artificial intelligence and its impact*
+
+Write
+*Today we will discuss artificial intelligence, and its impact.*
+
+---
+
+## 10. Remove Difficult Formatting
+
+Avoid things that confuse speech engines:
+
+Remove:
+
+* URLs
+* hashtags
+* excessive capitalization
+* emojis (unless needed)
+
+Example:
+
+Original:
+*Visit [https://example.com](https://example.com) for more info!*
+
+TTS:
+*Visit our website for more information.*
+
+---
+
+# Example: Full Conversion
+
+### Original
+
+> Mr. Brown works in AI at NASA & manages 12 engineers. The team improved CPU speed by 25%.
+
+### TTS-Ready
+
+> Mister Brown works in A I at NASA and manages twelve engineers. The team improved C P U speed by twenty-five percent.
+
+

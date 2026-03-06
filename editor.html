@@ -2512,6 +2512,10 @@ const App = {
         },
 
         async saveProjectAs() {
+            if (!('showDirectoryPicker' in window)) {
+                App.ui.showNotification("Saving to folders is unsupported on this browser. Use the 'Export Standalone Game' option instead.");
+                return;
+            }
             try {
                 const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
                 if (dirHandle) {
@@ -2691,6 +2695,10 @@ const App = {
             });
         },
         async newProject() {
+			if (!('showDirectoryPicker' in window)) {
+                App.ui.showNotification("Your browser does not support the local file access required by Kinexus. Please use Chrome, Edge, or Opera.");
+                return;
+            }
             try {
                 const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite', startIn: App.state.projectDirectoryHandle || 'documents' });
 
@@ -2761,19 +2769,16 @@ const App = {
             try {
                 App.player.stop();
                 if (!dirHandle) {
+                    if (!('showDirectoryPicker' in window)) {
+                        App.ui.showNotification("Your browser does not support the local file access required by Kinexus. Please use Chrome, Edge, or Opera.");
+                        App.ui.hideProgress();
+                        App.ui.cursor.default();
+                        return;
+                    }
                     App.debug.log('Opening directory picker...');
                     dirHandle = await window.showDirectoryPicker({ mode: 'readwrite', startIn: App.state.projectDirectoryHandle || 'documents' });
                     App.debug.log('Directory handle acquired.', 'SUCCESS');
                 }
-
-                App.debug.log(`Verifying permissions for directory: ${dirHandle.name}...`, 'INFO');
-                const hasPermission = await this.verifyPermission(dirHandle);
-                if (!hasPermission) {
-                    App.debug.log('Permission to access directory was denied.', 'ERROR');
-                    App.ui.showNotification('Permission to access the project folder was denied. Please try opening the project again.');
-                    return;
-                }
-                App.debug.log('Permissions verified successfully.', 'SUCCESS');
 
                 App.debug.log('Resetting application state...');
                 App.ui.enableEditor(false);
@@ -4288,6 +4293,40 @@ const App = {
             },
             toggleCondition(button) {
                 const choiceDiv = button.closest('.choice-editor');
+                const isCurrentlyConditional = choiceDiv.classList.contains('is-conditional');
+                
+                // Get both views
+                const defaultView = choiceDiv.querySelector('.default-view');
+                const conditionView = choiceDiv.querySelector('.condition-view');
+                
+                // Get inputs from default view
+                const defText = defaultView.querySelector('.action-text-input');
+                const defDest = defaultView.querySelector('.destination-select');
+                const defBool = defaultView.querySelector('.action-boolean-select');
+                
+                // Get inputs from condition view
+                const condText = conditionView.querySelector('.action-text-input');
+                const condDest = conditionView.querySelector('.destination-select');
+                const condBool = conditionView.querySelector('.action-boolean-select');
+
+                if (!isCurrentlyConditional) {
+                    // Switching FROM Default TO Conditional
+                    if (!condText.value && defText.value) condText.value = defText.value;
+                    if (!condDest.value && defDest.value) {
+                        condDest.value = defDest.value;
+                        App.editor.ui.handleDropdownChange(condDest);
+                        condBool.value = defBool.value;
+                    }
+                } else {
+                    // Switching FROM Conditional TO Default
+                    if (!defText.value && condText.value) defText.value = condText.value;
+                    if (!defDest.value && condDest.value) {
+                        defDest.value = condDest.value;
+                        App.editor.ui.handleDropdownChange(defDest);
+                        defBool.value = condBool.value;
+                    }
+                }
+
                 choiceDiv.classList.toggle('is-conditional');
                 button.innerHTML = choiceDiv.classList.contains('is-conditional') ? this.iconRemoveCondition : this.iconAddCondition;
                 button.title = choiceDiv.classList.contains('is-conditional') ? 'Remove condition' : 'Add a condition';
@@ -6316,7 +6355,8 @@ const App = {
             const newScene = JSON.parse(JSON.stringify(originalScene));
             newScene.id = newId;
             newScene.position = { x: originalScene.position.x + 40, y: originalScene.position.y + 40 };
-            newScene.choices = []; 
+            
+            // REMOVE THIS LINE: newScene.choices = []; 
 
             App.state.storyData.scenes[newId] = newScene;
             App.setDirty(true);

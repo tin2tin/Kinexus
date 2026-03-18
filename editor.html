@@ -2924,9 +2924,7 @@ const App = {
 				let cinematicRevealCleanup = null;
 				let playerCinematicEnabled = false;
 
-                const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
                 const isAndroid = /android/i.test(navigator.userAgent);
-                const clickEvent = isTouchDevice ? 'touchend' : 'click';
                 const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.ogv'];
                 const isVideo = (path) => {
                     if (!path) return false;
@@ -2959,8 +2957,13 @@ const App = {
 
                 function bindEvent(element, handler) {
                     if(!element) return;
-                    element.addEventListener(clickEvent, (e) => {
-                        if (isTouchDevice) e.preventDefault();
+                    // 1. Handle standard mouse/trackpad clicks
+                    element.addEventListener('click', (e) => {
+                        handler(e);
+                    });
+                    // 2. Handle fast touch events
+                    element.addEventListener('touchend', (e) => {
+                        if (e.cancelable) e.preventDefault(); // Prevent touch from generating a "ghost click"
                         handler(e);
                     });
                 }
@@ -3164,10 +3167,15 @@ const App = {
                         contentContainer.style.minHeight = originalMinHeight;
                     };
 
-                    const clickHandler = (e) => { if (!isTouchDevice) skip(e); };
+                    const clickHandler = (e) => { skip(e); };
                     const touchStartHandler = () => { isScrolling = false; };
                     const touchMoveHandler = () => { isScrolling = true; };
-                    const touchEndHandler = (e) => { if (!isScrolling) skip(e); };
+                    const touchEndHandler = (e) => { 
+                        if (!isScrolling) {
+                            if (e.cancelable) e.preventDefault(); // Prevent ghost click
+                            skip(e); 
+                        }
+                    };
                     
                     gameContainer.addEventListener('click', clickHandler);
                     gameContainer.addEventListener('touchstart', touchStartHandler, { passive: true });
@@ -3555,7 +3563,6 @@ const App = {
                 App.ui.showNotification("Could not export project. Check console for details.");
             });
         },
-
         async previewProject() {
             if (!App.state.projectDirectoryHandle) { App.ui.showNotification("Please open a project to preview."); return; }
             App.editor.saveCurrentScene();
@@ -6617,3 +6624,4 @@ document.addEventListener('DOMContentLoaded', () => App.init());
 </script>
 </body>
 </html>
+			

@@ -125,9 +125,11 @@ First, open Kinexus in your browser. From the **Menu**, you have two options:
 *   **Add Choices:** Click the **round blue '+' button** below the choices list. Write the text the player will see and select the target scene from the dropdown menu.
 
 ### 3. Create Dynamic Stories with Variables and Conditions
-*   **Manage Variables:** Click the turquoise `[X]` button next to "Add Choice". In the modal, add new true/false variables to track game state (e.g., `has_key`).
-*   **Set a Variable:** Create a choice and in its destination dropdown, select a variable (e.g., `var_has_key`). You can then set it to `true` or `false`. Leave the button text blank for a silent, automatic action.
-*   **Add a Condition:** Click the turquoise condition icon (`→`) on any choice. In the new view, you can set the choice only to appear if a variable is true/false or if a specific scene has been visited.
+Make your story interactive by tracking player choices and gating content behind logic.
+*   **Manage Variables:** Click the turquoise `[X]` icon above your choices to open the Variable Manager. Here, you can add true/false variables to track the game state (e.g., `has_key`, `is_poisoned`).
+*   **Set a Variable:** Create a choice and select its **Target Scene**. Then, click the turquoise **`+`** button next to it. This reveals a new menu where you can select a variable and set it to `True` or `False`. The variable will update seamlessly when the player clicks the choice.
+*   **Add a Condition:** Click the turquoise branch icon (`o-o`) on the left side of any choice. You can now set the choice to only appear if a specific variable is `True`/`False`, or if a specific scene has been visited.
+*   **⚠️ Important Note on Dead Ends:** A choice should **always** have a Target Scene. Setting a variable without providing a destination scene creates a dead end and breaks the game flow. Even on "Game Over" screens, you should add a choice that targets your start scene so players can restart!
 
 ### 4. Add Media (Image & Audio)
 You have multiple ways to add media:

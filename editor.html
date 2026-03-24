@@ -1598,7 +1598,7 @@ const App = {
     elements: {},
     constants: {
         POLLINATIONS_API_KEY: '', // Default fallback key
-        GOOGLE_FONTS: [
+        GOOGLE_FONTS:[
             { name: "Default System Font", value: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' },
             { name: "Architects Daughter", value: "'Architects Daughter', cursive" },
 			{ name: "Asset", value: "'Asset', cursive" },
@@ -1676,7 +1676,7 @@ const App = {
                 creatorName: "",
                 aboutText: "",
                 aiApiKey: "",
-                variables: [],
+                variables:[],
                 styles: App.styles.getDefaults(),
                 layout: 'layout-panel-bottom'
             },
@@ -1686,7 +1686,7 @@ const App = {
                 ambienceSound: "", ambienceLoop: true, 
                 speechSound: "", speechLoop: false,
                 cinematicModeOverride: 'default',
-                choices: [], visited: false,
+                choices:[], visited: false,
                 lastModified: Date.now(),
                 mediaType: 'none', color: null,
                 position: { x: 200, y: 50 }
@@ -1695,7 +1695,7 @@ const App = {
     },
 
     cacheElements() {
-        const ids = [
+        const ids =[
             'editor-container', 'player-container', 'scene-id', 'scene-image',
             'scene-image-prompt', 'scene-sound', 'scene-speech', 'scene-text', 'choices-container',
             'ambience-player', 'speech-player', 'music-player', 'export-data-modal', 'style-editor-modal', 'about-editor-modal',
@@ -1814,9 +1814,7 @@ const App = {
 			App.ui.updateImageThumbnail(e.target.value);
             App.ui.invalidateNavViews();
             App.ui.renderCurrentView();
-		});
-
-        ['story-title', 'creator-name', 'about-text'].forEach(id => {
+		});['story-title', 'creator-name', 'about-text'].forEach(id => {
             App.elements[id].addEventListener('input', (e) => {
                 const key = id === 'story-title' ? 'title' : id === 'creator-name' ? 'creatorName' : 'aboutText';
                 App.state.storyData.meta[key] = e.target.value;
@@ -2473,7 +2471,6 @@ const App = {
             }
             return false;
         },
-
         async saveProject() {
             if (!App.state.projectDirectoryHandle) {
                 return await App.io.saveProjectAs();
@@ -2562,7 +2559,7 @@ const App = {
         async validateProjectData(rawStoryData, { autofix = true, onProgress = null } = {}) {
             return new Promise(async (resolve) => {
                 const warnings = [];
-                const errors = [];
+                const errors =[];
                 const defaultStory = App.getNewStoryObject();
                 let storyData = rawStoryData;
 
@@ -2588,7 +2585,7 @@ const App = {
                     storyData.meta.variables = Object.keys(storyData.meta.variables);
                 } else if (!Array.isArray(storyData.meta.variables)) {
                     warnings.push("'meta.variables' was not an array. Reset to empty array.");
-                    storyData.meta.variables = [];
+                    storyData.meta.variables =[];
                 }
 
                 if (typeof storyData.scenes !== 'object' || storyData.scenes === null) {
@@ -2615,7 +2612,7 @@ const App = {
                             position = { x: (i % 5) * 280, y: Math.floor(i / 5) * 250 };
                         }
 
-                        const safeChoices = (Array.isArray(scene.choices) ? scene.choices : []).map(c => {
+                        const safeChoices = (Array.isArray(scene.choices) ? scene.choices :[]).map(c => {
                             if (!c || typeof c !== 'object') return null;
                             if (c.action === undefined) {
                                 if (i === currentIndex) {
@@ -3201,7 +3198,7 @@ const App = {
 					const action = choice.action;
 					if (action.set_variable) gameState.variables[action.set_variable] = action.set_value;
 					if (action.target) renderScene(action.target);
-					else renderScene(gameState.currentSceneId);
+					else renderScene(gameState.currentSceneId); // If no target scene, apply variables and refresh
 				}
 				
 				function handleCinematicReveal(scene, onReady) {
@@ -3299,8 +3296,7 @@ const App = {
                         document.body.className = layout;
                         gameContainer.className = layout;
 
-                        const imageContainer = document.getElementById('image-container');
-						[backgroundVideo, sceneVideo, sceneImage].forEach(el => el.style.display = 'none');
+                        const imageContainer = document.getElementById('image-container');[backgroundVideo, sceneVideo, sceneImage].forEach(el => el.style.display = 'none');
 						[backgroundVideo, sceneVideo].forEach(v => { if(!v.paused) { v.pause(); v.removeAttribute('src'); v.load(); } });
 						imageContainer.style.display = 'none';
 						document.body.style.backgroundImage = 'var(--screen-bg-image)';
@@ -3341,13 +3337,13 @@ const App = {
 						   onAssetReady();
 						}
 
-                        let visibleChoices = [];
-                        for(const choice of (scene.choices || [])) {
+                        let visibleChoices =[];
+                        for(const choice of (scene.choices ||[])) {
                             let conditionMet = true;
                             if(choice.condition) {
                                 const rawVarName = choice.condition.variable;
                                 if (rawVarName.startsWith('visited_scene_')) {
-							conditionMet = (!!gameState.visited[rawVarName.substring(14)]) === choice.condition.value;
+							        conditionMet = (!!gameState.visited[rawVarName.substring(14)]) === choice.condition.value;
 								} else {
 									let varKey = rawVarName.startsWith('var_') ? rawVarName.substring(4) : rawVarName;
 									conditionMet = (!!gameState.variables[varKey]) === choice.condition.value;
@@ -3375,7 +3371,7 @@ const App = {
 								visibleChoices.forEach((choice, index) => { 
 									const b = document.createElement('button'); 
 									b.textContent = choice.action.text; 
-									b.className = 'choice-btn fade-in'; // Added fade-in class
+									b.className = 'choice-btn fade-in';
 									b.style.animationDelay = ((index * 0.2)) + 's';
 									bindEvent(b, () => processChoice(choice)); 
 									choicesContainer.appendChild(b); 
@@ -3620,7 +3616,7 @@ const App = {
 
 		async checkProjectAssets() {
             if (!App.state.storyData?.scenes) return { isValid: true, errors: [], found: new Set() };
-			const errors = [];
+			const errors =[];
 			const found = new Set();
 			const assetMap = new Map();
 
@@ -3667,7 +3663,7 @@ const App = {
             if (!App.state.storyData?.scenes) return;
             App.state.brokenAssetLinks.clear();
             for (const scene of Object.values(App.state.storyData.scenes)) {
-                const brokenPaths = [];
+                const brokenPaths =[];
                 if(scene.image) {
                     const file = await App.io.getAssetFile(scene.image);
                     if(!file) brokenPaths.push(scene.image);
@@ -3985,7 +3981,7 @@ const App = {
             App.elements['scene-id'].value = App.state.currentSceneId;
             App.elements['scene-text'].value = scene.text || '';
             App.elements['choices-container'].innerHTML = '';
-            (scene.choices || []).forEach(choice => this.addChoiceToDOM(choice));
+            (scene.choices ||[]).forEach(choice => this.addChoiceToDOM(choice));
             App.elements['scene-image'].value = scene.image || '';
             App.ui.updateImageThumbnail(scene.image);
             App.elements['scene-image-prompt'].value = scene.imagePrompt || '';
@@ -4024,7 +4020,7 @@ const App = {
                 const view = isConditional ? div.querySelector('.condition-view') : div.querySelector('.default-view');
                 const textInput = view.querySelector('.action-text-input');
 
-                if (textInput && !textInput.classList.contains('display-none') && textInput.value) {
+                if (textInput && textInput.value) {
                     const button = document.createElement('button');
                     button.className = 'choice-btn';
                     button.textContent = textInput.value;
@@ -4111,8 +4107,11 @@ const App = {
                 const view = isConditional ? div.querySelector('.condition-view') : div.querySelector('.default-view');
                 
                 const actionText = view.querySelector('.action-text-input').value;
-                const destSelectVal = view.querySelector('.destination-select').value;
+                const targetSelectVal = view.querySelector('.target-scene-select').value;
+                const actionVarSelect = view.querySelector('.action-variable-select');
+                const varSelectVal = actionVarSelect ? actionVarSelect.value : '';
                 const actionBool = view.querySelector('.action-boolean-select').value === 'true';
+                const isSetVarActive = !view.querySelector('.set-variable-ui').classList.contains('display-none');
 
                 const choice = { 
                     condition: null, 
@@ -4129,10 +4128,12 @@ const App = {
                     }
                 }
 
-                if (destSelectVal.startsWith('scene_')) {
-                    choice.action.target = destSelectVal.substring(6);
-                } else if (destSelectVal.startsWith('var_')) {
-                    choice.action.set_variable = destSelectVal.substring(4);
+                if (targetSelectVal && targetSelectVal.startsWith('scene_')) {
+                    choice.action.target = targetSelectVal.substring(6);
+                }
+                
+                if (isSetVarActive && varSelectVal && varSelectVal.startsWith('var_')) {
+                    choice.action.set_variable = varSelectVal.substring(4);
                     choice.action.set_value = actionBool;
                 }
                 
@@ -4181,8 +4182,23 @@ const App = {
             this.ui.repopulateAllChoiceDropdowns(choiceDiv);
             
             const action = choice.action || {};
-            const view = choice.condition ? choiceDiv.querySelector('.condition-view') : choiceDiv.querySelector('.default-view');
             
+            // Initialize both views so data is synced when toggling
+            ['.default-view', '.condition-view'].forEach(viewSelector => {
+                const view = choiceDiv.querySelector(viewSelector);
+                if (action.target) {
+                    view.querySelector('.target-scene-select').value = 'scene_' + action.target;
+                }
+                if (action.set_variable) {
+                    view.querySelector('.action-variable-select').value = 'var_' + action.set_variable;
+                    view.querySelector('.action-boolean-select').value = String(action.set_value);
+                    view.querySelector('.add-var-btn').classList.add('display-none');
+                    view.querySelector('.set-variable-ui').classList.remove('display-none');
+                }
+                view.querySelector('.action-text-input').value = action.text || '';
+                this.ui.handleTargetChange(view.querySelector('.target-scene-select'));
+            });
+
             if (choice.condition) {
                 choiceDiv.classList.add('is-conditional');
                 choiceDiv.querySelector('.toggle-condition-btn').innerHTML = App.editor.ui.iconRemoveCondition;
@@ -4197,15 +4213,6 @@ const App = {
                 choiceDiv.querySelector('.toggle-condition-btn').innerHTML = App.editor.ui.iconAddCondition;
             }
             
-            if (action.set_variable) {
-                view.querySelector('.destination-select').value = 'var_' + action.set_variable;
-                view.querySelector('.action-boolean-select').value = String(action.set_value);
-            } else if (action.target) {
-                view.querySelector('.destination-select').value = 'scene_' + action.target;
-            }
-
-            view.querySelector('.action-text-input').value = action.text || '';
-            this.ui.handleDropdownChange(view.querySelector('.destination-select'));
             container.appendChild(choiceDiv);
         },
         ui: {
@@ -4214,124 +4221,152 @@ const App = {
             iconManageVariables: `<svg viewBox="0 0 24 24"><path d="M5 7 V17 M19 7 V17 M8 12 L12 8 L16 12 L12 16 Z" stroke-width="2" /></svg>`,
             
             getChoiceHTML() {
+                // Ampersand: Scaled down to 14px to match the optical weight of stroke-based icons
+                const ampersandSvg = `
+                    <svg class="icon-symbol" viewBox="0 0 220 260" style="fill: white; stroke: none; width: 14px; height: 14px; margin: 0 5px; align-self: center;">
+                        <path d="m 99.090898,23.935718 c 10.943892,0 19.699012,2.762498 26.265352,8.978116 5.83675,5.524995 8.75512,12.431238 8.75512,21.409353 0,14.50311 -11.30869,27.970284 -33.92608,40.40152 -2.918375,1.381249 -5.471952,2.762497 -7.660733,4.143746 C 84.863827,90.580961 79.027079,84.020031 75.379113,79.185661 67.353586,68.826297 63.705618,60.538806 63.705618,53.977875 c 0,-9.668739 2.918374,-16.920295 9.484715,-21.754665 5.836746,-5.524994 14.591867,-8.287492 25.900565,-8.287492 z M 68.447977,111.645 37.075461,128.21998 c -22.617395,15.53905 -33.9260926,34.87653 -33.9260926,57.66713 0,23.13592 8.7551196,41.09215 26.6301586,54.21401 16.41585,11.74061 37.938855,17.95623 64.569014,17.95623 34.655679,0 64.931599,-12.90832 86.819399,-36.38955 l 35.13389,34.5989 22.07744,-13.80326 -42.98206,-41.03728 c 0,0 13.2108,-22.46351 29.31978,-60.39012 l -29.48408,-5.68308 c -8.23325,19.36738 -11.87399,25.32637 -21.35869,44.66385 l -65.29862,-65.264 c 10.5791,-6.21562 20.79342,-12.77655 31.00772,-18.992166 16.05106,-12.431237 24.44138,-26.589035 24.44138,-43.164018 0,-15.884358 -6.56634,-28.315595 -18.96942,-37.293711 C 133.38177,6.3247998 118.06031,1.8357419 99.820491,1.8357419 c -18.604631,0 -33.926092,4.4890579 -45.964382,13.4671731 -13.132682,9.66874 -19.699022,22.445289 -19.699022,39.020272 0,9.668741 3.283169,19.682792 10.579103,30.042157 4.377561,6.56093 12.038292,15.539046 23.711787,27.279656 z m 24.806175,121.20456 c -17.510243,0 -31.737314,-4.14374 -42.681214,-12.43123 -11.673495,-8.97812 -17.510241,-20.37342 -17.510241,-34.1859 0,-13.81249 6.201544,-26.24373 19.334225,-36.60309 9.84951,-7.25156 20.793411,-14.50312 32.466905,-21.40936 l 74.418513,74.93274 c -16.78064,19.68279 -38.66845,29.69684 -66.028188,29.69684 z" />
+                    </svg>`;
+
                 return `
                     <button class="icon-btn toggle-condition-btn" onclick="App.editor.ui.toggleCondition(this)" title="Add a condition"></button>
                     <div class="default-view">
                         <div class="ui-box">
                             <input type="text" class="action-text-input" placeholder="Button text...">
-                            <select class="destination-select" onchange="App.editor.ui.handleDropdownChange(this)"></select>
-                            <div class="set-variable-ui display-none">
+                            <select class="target-scene-select" onchange="App.editor.ui.handleTargetChange(this)"></select>
+                            <button class="icon-btn add-var-btn" style="background-color: #5FB5AC; width: 24px; height: 24px; min-width: 24px;" onclick="App.editor.ui.showVarUI(this)" title="Set a variable">+</button>
+                            <div class="set-variable-ui display-none" style="display: flex; align-items: center; gap: 5px;">
+                                ${ampersandSvg}
+                                <select class="action-variable-select" onchange="App.editor.saveCurrentScene()"></select>
                                 <svg class="icon-symbol" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"></path></svg>
-                                <select class="action-boolean-select"><option value="true">True</option><option value="false">False</option></select>
+                                <select class="action-boolean-select" onchange="App.editor.saveCurrentScene()"><option value="true">True</option><option value="false">False</option></select>
+                                <button class="icon-btn remove-var-btn" style="background-color: var(--danger-color); width: 20px; height: 20px; min-width: 20px;" onclick="App.editor.ui.hideVarUI(this)" title="Remove variable assignment">-</button>
                             </div>
                         </div>
                     </div>
                     <div class="condition-view">
                         <div class="ui-box">
                             <svg class="icon-symbol" viewBox="0 0 24 24"><path d="M8 8a3.5 3 0 0 1 3.5 -3h1a3.5 3 0 0 1 3.5 3a3 3 0 0 1 -2 3a3 4 0 0 0 -2 4" /><line x1="12" y1="19" x2="12" y2="19.01" /></svg>
-                            <select class="condition-select"></select>
+                            <select class="condition-select" onchange="App.editor.saveCurrentScene()"></select>
                             <svg class="icon-symbol" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"></path></svg>
-                            <select class="condition-boolean-select"><option value="true">True</option><option value="false">False</option></select>
+                            <select class="condition-boolean-select" onchange="App.editor.saveCurrentScene()"><option value="true">True</option><option value="false">False</option></select>
                             <svg class="icon-symbol" viewBox="0 0 24 24"><path d="M5 12l14 0l-4 -4m4 4l-4 4"></path></svg>
                             <input type="text" class="action-text-input" placeholder="Button text...">
-                            <select class="destination-select" onchange="App.editor.ui.handleDropdownChange(this)"></select>
-                            <div class="set-variable-ui display-none">
+                            <select class="target-scene-select" onchange="App.editor.ui.handleTargetChange(this)"></select>
+                            <button class="icon-btn add-var-btn" style="background-color: #5FB5AC; width: 24px; height: 24px; min-width: 24px;" onclick="App.editor.ui.showVarUI(this)" title="Set a variable">+</button>
+                            <div class="set-variable-ui display-none" style="display: flex; align-items: center; gap: 5px;">
+                                ${ampersandSvg}
+                                <select class="action-variable-select" onchange="App.editor.saveCurrentScene()"></select>
                                 <svg class="icon-symbol" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"></path></svg>
-                                <select class="action-boolean-select"><option value="true">True</option><option value="false">False</option></select>
+                                <select class="action-boolean-select" onchange="App.editor.saveCurrentScene()"><option value="true">True</option><option value="false">False</option></select>
+                                <button class="icon-btn remove-var-btn" style="background-color: var(--danger-color); width: 20px; height: 20px; min-width: 20px;" onclick="App.editor.ui.hideVarUI(this)" title="Remove variable assignment">-</button>
                             </div>
                         </div>
                     </div>
                     <button class="btn-success go-to-scene-btn display-none" title="Go to selected scene">▶</button>
-                    <button class="icon-btn delete-choice-btn" onclick="this.parentElement.remove()" title="Delete Choice">&times;</button>
+                    <button class="icon-btn delete-choice-btn" onclick="this.parentElement.remove(); App.editor.saveCurrentScene();" title="Delete Choice">&times;</button>
                 `;
             },
+            
+            showVarUI(btn) {
+                btn.classList.add('display-none');
+                btn.nextElementSibling.classList.remove('display-none');
+            },
+            
+            hideVarUI(btn) {
+                const varUI = btn.closest('.set-variable-ui');
+                varUI.classList.add('display-none');
+                varUI.previousElementSibling.classList.remove('display-none');
+                varUI.querySelector('.action-variable-select').value = '';
+            },
 
-            populateDropdowns(selectElement, includeScenes, includeVariables, includeVisited) {
+            populateDropdowns(selectElement, type) {
                 if (!selectElement) return;
                 const scenes = Object.keys(App.state.storyData.scenes).sort();
-                const variables = App.state.storyData.meta.variables || [];
+                const variables = App.state.storyData.meta.variables ||[];
                 const currentValue = selectElement.value;
                 selectElement.innerHTML = '';
 
-                const defaultOption = new Option('-- Select --', '');
-                selectElement.appendChild(defaultOption);
+                let defaultText = '-- Select --';
+                if (type === 'scenes') defaultText = '-- Target Scene --';
+                if (type === 'variables') defaultText = '-- Set Variable --';
+
+                selectElement.appendChild(new Option(defaultText, ''));
                 
-                if (includeVisited) {
+                if (type === 'conditions') {
                     const sceneGroup = document.createElement('optgroup');
                     sceneGroup.label = 'Scenes (Visited?)';
-                    scenes.forEach(sceneId => { const option = new Option(sceneId, `visited_scene_${sceneId}`); sceneGroup.appendChild(option); });
+                    scenes.forEach(sceneId => sceneGroup.appendChild(new Option(sceneId, `visited_scene_${sceneId}`)));
                     selectElement.appendChild(sceneGroup);
-                }
-                if (includeScenes) {
-                    const sceneGroup = document.createElement('optgroup');
-                    sceneGroup.label = 'Scenes (Go To)';
-                    scenes.forEach(sceneId => { const option = new Option(sceneId, `scene_${sceneId}`); sceneGroup.appendChild(option); });
-                    selectElement.appendChild(sceneGroup);
-                }
-                if (includeVariables) {
+                    
                     const variableGroup = document.createElement('optgroup');
                     variableGroup.label = 'Variables';
-                    variables.forEach(variable => { const option = new Option(variable, `var_${variable}`); variableGroup.appendChild(option); });
+                    variables.forEach(variable => variableGroup.appendChild(new Option(variable, `var_${variable}`)));
                     selectElement.appendChild(variableGroup);
+                } else if (type === 'scenes') {
+                    scenes.forEach(sceneId => selectElement.appendChild(new Option(sceneId, `scene_${sceneId}`)));
+                } else if (type === 'variables') {
+                    variables.forEach(variable => selectElement.appendChild(new Option(variable, `var_${variable}`)));
                 }
                 selectElement.value = currentValue;
             },
+            
             repopulateAllChoiceDropdowns(context = document) {
-                context.querySelectorAll('.destination-select').forEach(sel => this.populateDropdowns(sel, true, true, false));
-                context.querySelectorAll('.condition-select').forEach(sel => this.populateDropdowns(sel, false, true, true));
+                context.querySelectorAll('.target-scene-select').forEach(sel => this.populateDropdowns(sel, 'scenes'));
+                context.querySelectorAll('.action-variable-select').forEach(sel => this.populateDropdowns(sel, 'variables'));
+                context.querySelectorAll('.condition-select').forEach(sel => this.populateDropdowns(sel, 'conditions'));
             },
-            handleDropdownChange(selectElement) {
+            
+            handleTargetChange(selectElement) {
                 const choiceEditor = selectElement.closest('.choice-editor');
-                const parentBox = selectElement.closest('.ui-box');
-                const textInput = parentBox.querySelector('.action-text-input');
-                const setVariableUI = parentBox.querySelector('.set-variable-ui');
                 const goToBtn = choiceEditor.querySelector('.go-to-scene-btn');
                 
-                const isVarSelected = selectElement.value.startsWith('var_');
-                const isSceneSelected = selectElement.value.startsWith('scene_');
-
-                textInput.classList.toggle('display-none', isVarSelected);
-                setVariableUI.classList.toggle('display-none', !isVarSelected);
+                const isSceneSelected = selectElement.value && selectElement.value.startsWith('scene_');
                 goToBtn.classList.toggle('display-none', !isSceneSelected);
 
                 if(isSceneSelected) {
                     goToBtn.onclick = () => App.ui.selectScene(selectElement.value.substring(6));
                 }
             },
+            
             toggleCondition(button) {
                 const choiceDiv = button.closest('.choice-editor');
                 const isCurrentlyConditional = choiceDiv.classList.contains('is-conditional');
                 
-                // Get both views
                 const defaultView = choiceDiv.querySelector('.default-view');
                 const conditionView = choiceDiv.querySelector('.condition-view');
                 
-                // Get inputs from default view
-                const defText = defaultView.querySelector('.action-text-input');
-                const defDest = defaultView.querySelector('.destination-select');
-                const defBool = defaultView.querySelector('.action-boolean-select');
-                
-                // Get inputs from condition view
-                const condText = conditionView.querySelector('.action-text-input');
-                const condDest = conditionView.querySelector('.destination-select');
-                const condBool = conditionView.querySelector('.action-boolean-select');
+                const syncViews = (source, target) => {
+                    const sourceText = source.querySelector('.action-text-input');
+                    const sourceTarget = source.querySelector('.target-scene-select');
+                    const sourceVar = source.querySelector('.action-variable-select');
+                    const sourceBool = source.querySelector('.action-boolean-select');
+                    const sourceVarUIActive = !source.querySelector('.set-variable-ui').classList.contains('display-none');
+                    
+                    const targetText = target.querySelector('.action-text-input');
+                    const targetTarget = target.querySelector('.target-scene-select');
+                    const targetVar = target.querySelector('.action-variable-select');
+                    const targetBool = target.querySelector('.action-boolean-select');
+                    const targetVarUI = target.querySelector('.set-variable-ui');
+                    const targetAddBtn = target.querySelector('.add-var-btn');
+
+                    if (!targetText.value && sourceText.value) targetText.value = sourceText.value;
+                    if (!targetTarget.value && sourceTarget.value) {
+                        targetTarget.value = sourceTarget.value;
+                        App.editor.ui.handleTargetChange(targetTarget);
+                    }
+                    
+                    if (sourceVarUIActive) {
+                        targetAddBtn.classList.add('display-none');
+                        targetVarUI.classList.remove('display-none');
+                        if (!targetVar.value && sourceVar.value) targetVar.value = sourceVar.value;
+                        targetBool.value = sourceBool.value;
+                    }
+                };
 
                 if (!isCurrentlyConditional) {
-                    // Switching FROM Default TO Conditional
-                    if (!condText.value && defText.value) condText.value = defText.value;
-                    if (!condDest.value && defDest.value) {
-                        condDest.value = defDest.value;
-                        App.editor.ui.handleDropdownChange(condDest);
-                        condBool.value = defBool.value;
-                    }
+                    syncViews(defaultView, conditionView);
                 } else {
-                    // Switching FROM Conditional TO Default
-                    if (!defText.value && condText.value) defText.value = condText.value;
-                    if (!defDest.value && condDest.value) {
-                        defDest.value = condDest.value;
-                        App.editor.ui.handleDropdownChange(defDest);
-                        defBool.value = condBool.value;
-                    }
+                    syncViews(conditionView, defaultView);
                 }
 
                 choiceDiv.classList.toggle('is-conditional');
@@ -4391,7 +4426,7 @@ const App = {
             renderList() {
                 const list = document.getElementById('variable-list');
                 list.innerHTML = '';
-                (App.state.storyData.meta.variables || []).forEach((variable, index) => {
+                (App.state.storyData.meta.variables ||[]).forEach((variable, index) => {
                     const li = document.createElement('li');
                     li.innerHTML = `<span>${variable}</span><button class="remove-var-btn" onclick="App.editor.variables.remove(${index})">✕</button>`;
                     list.appendChild(li);
@@ -4501,16 +4536,16 @@ const App = {
             if (window.showOpenFilePicker) {
                 try {
                     const options = {
-                        types: [{
+                        types:[{
                             description: isSound ? 'Sounds' : 'Images/Videos',
                             accept: isSound
                                 ? {'audio/*': ['.mp3', '.wav', '.ogg', '.m4a']}
-                                : {'media/*': ['.png', '.gif', '.jpeg', '.jpg', '.webp', ...App.constants.VIDEO_EXTENSIONS]}
+                                : {'media/*':['.png', '.gif', '.jpeg', '.jpg', '.webp', ...App.constants.VIDEO_EXTENSIONS]}
                         }],
                         multiple: false,
                         startIn: App.state.lastAssetHandles[assetType] || App.state.projectDirectoryHandle || 'pictures'
                     };
-                    const [fileHandle] = await window.showOpenFilePicker(options);
+                    const[fileHandle] = await window.showOpenFilePicker(options);
                     App.state.lastAssetHandles[assetType] = fileHandle;
                     const file = await fileHandle.getFile();
                     await handleFile(file);
@@ -4631,7 +4666,7 @@ const App = {
             // Construct the payload in OpenAI format
             const payload = {
                 model: "openai", // Standard model selector
-                messages: [
+                messages:[
                     { role: "system", content: instruction }, // Instruction goes in system
                     { role: "user", content: sceneText }      // Content goes in user
                 ]
@@ -4704,7 +4739,7 @@ const App = {
         },
         initializeGameState() {
             this.gameState = { variables: {}, visited: {} };
-            (App.state.storyData.meta.variables || []).forEach(varName => {
+            (App.state.storyData.meta.variables ||[]).forEach(varName => {
                 this.gameState.variables[varName] = false;
             });
         },
@@ -4712,7 +4747,7 @@ const App = {
 			const action = choice.action;
 			if (action.set_variable) this.gameState.variables[action.set_variable] = action.set_value;
 			if (action.target) this.renderScene(action.target);
-			else this.renderScene(this.gameState.currentSceneId);
+			else this.renderScene(this.gameState.currentSceneId); // If no target scene, apply variables and refresh
 		},
         typeWriter(text, choices) {
 			const { 'player-text': textEl, 'player-choices': choicesEl, 'player-content-container': contentContainer, 'player-container': playerContainer } = App.elements;
@@ -4918,8 +4953,8 @@ const App = {
 				onAssetReady();
 			}
 
-            let visibleChoices = [];
-            for(const choice of (scene.choices || [])) {
+            let visibleChoices =[];
+            for(const choice of (scene.choices ||[])) {
                 let conditionMet = true;
                 if(choice.condition) {
                     const varName = choice.condition.variable;
@@ -4944,7 +4979,7 @@ const App = {
 				choicesEl.innerHTML = '';
 				visibleChoices.forEach((choice, index) => {
 					const button = document.createElement('button');
-					button.className = 'choice-btn fade-in'; // Added fade-in class
+					button.className = 'choice-btn fade-in';
 					button.textContent = choice.action.text;
 					button.style.animationDelay = ((index * 0.2)) + 's';
 					button.onclick = () => this.processChoice(choice);
@@ -5507,7 +5542,7 @@ const App = {
             isConnecting: false,
             connectionStart: null,
         },
-        colorPalette: [
+        colorPalette:[
             '#e57373', '#f06292', '#ba68c8', '#9575cd', '#7986cb',
             '#4db6ac', '#81c784', '#aed581', '#dce775', '#fff176',
             '#ffb74d', '#ff8a65', '#a1887f', '#90a4ae', '#5c6bc0',
@@ -5763,8 +5798,8 @@ const App = {
             const isStart = scene.id === App.state.storyData.meta.startSceneId;
             const hasSound = !!scene.ambienceSound;
             const hasSpeech = !!scene.speechSound;
-            const hasConditions = (scene.choices || []).some(c => c.condition);
-            const choicesWithTargets = (scene.choices || []).filter(c => c.action?.target);
+            const hasConditions = (scene.choices ||[]).some(c => c.condition);
+            const choicesWithTargets = (scene.choices ||[]).filter(c => c.action?.target);
             const isDeadEnd = choicesWithTargets.length === 0;
             
             if (scene.image) {
@@ -6065,7 +6100,7 @@ const App = {
 
             if (!selectedSceneId) return;
 
-            const selectedEdges = [];
+            const selectedEdges =[];
             allEdges.forEach(edge => {
                 const sourceId = edge.dataset.sourceId;
                 const choiceIndex = parseInt(edge.dataset.choiceIndex, 10);
@@ -6120,7 +6155,7 @@ const App = {
                         return;
                     }
 
-                    const newScene = { id: newId, text: `This is the new scene '${newId}'.`, choices: [], position: finalPosition, lastModified: Date.now(), mediaType: 'none', color: null, cinematicModeOverride: 'default' };
+                    const newScene = { id: newId, text: `This is the new scene '${newId}'.`, choices:[], position: finalPosition, lastModified: Date.now(), mediaType: 'none', color: null, cinematicModeOverride: 'default' };
                     App.state.storyData.scenes[newId] = newScene;
                     App.setDirty(true);
                     App.ui.invalidateNavViews();
@@ -6157,7 +6192,7 @@ const App = {
 			const inDegree = new Map();
 			
 			nodes.forEach(id => {
-				hierarchy[id] = { children: [], subtreeWidth: 0, selfWidth: NODE_WIDTH, visited: false };
+				hierarchy[id] = { children:[], subtreeWidth: 0, selfWidth: NODE_WIDTH, visited: false };
 				inDegree.set(id, 0);
 			});
 
@@ -6199,7 +6234,7 @@ const App = {
 				
 				const queue = [rootId];
 				hierarchy[rootId].visited = true;
-				const treeNodes = [rootId];
+				const treeNodes =[rootId];
 
 				let head = 0;
 				while (head < queue.length) {
@@ -6363,8 +6398,6 @@ const App = {
             newScene.id = newId;
             newScene.position = { x: originalScene.position.x + 40, y: originalScene.position.y + 40 };
             
-            // REMOVE THIS LINE: newScene.choices = []; 
-
             App.state.storyData.scenes[newId] = newScene;
             App.setDirty(true);
             App.ui.invalidateNavViews();
@@ -6624,4 +6657,3 @@ document.addEventListener('DOMContentLoaded', () => App.init());
 </script>
 </body>
 </html>
-			

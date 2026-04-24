@@ -73,8 +73,8 @@
 			background-repeat: no-repeat;
 			background-position: center;
 			background-color: var(--bg-color);
-			font-family: var(--font-family);
-			font-size: var(--font-size);
+			-family: var(---family);
+			-size: var(---size);
 			color: var(--text-color);
 		}
         #editor-transition-overlay {
@@ -188,7 +188,7 @@
 			border: 1px solid #444;
 			border-radius: 6px;
 			width: 240px;
-			font-size: 13px;
+			-size: 13px;
 			text-align: left;
 			overflow: visible;
 			box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -222,18 +222,18 @@
 		.node-editor-node.has-broken-link { border: 2px dashed var(--danger-color) !important; }
 		.node-editor-node.is-filtered-out { pointer-events: none; filter: grayscale(80%); }
 
-		.node-header { padding: 8px 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; cursor: move; user-select: none; background-color: var(--header-none-bg); color: #fff; transition: background-color 0.3s; border-radius: 5px 5px 0 0; }
+		.node-header { padding: 8px 12px; -weight: bold; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; cursor: move; user-select: none; background-color: var(--header-none-bg); color: #fff; transition: background-color 0.3s; border-radius: 5px 5px 0 0; }
         .node-header.media-image { background-color: var(--header-image-bg); }
         .node-header.media-video { background-color: var(--header-video-bg); }
 		.node-body { padding: 12px; transition: border-left 0.3s; background-color: var(--bg-element); }
-		.node-thumbnail { width: 100%; aspect-ratio: 16/9; background-color: #111; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--text-secondary); overflow: hidden; border: 1px solid #444; margin-bottom: 8px; }
+		.node-thumbnail { width: 100%; aspect-ratio: 16/9; background-color: #111; border-radius: 4px; display: flex; justify-content: center; align-items: center; -size: 0.8em; color: var(--text-secondary); overflow: hidden; border: 1px solid #444; margin-bottom: 8px; }
 		.node-thumbnail img, .node-thumbnail canvas { width: 100%; height: 100%; object-fit: cover; }
         .node-thumbnail svg { width: 48px; height: 48px; color: var(--text-secondary); opacity: 0.5; }
 		.node-text-display { color: #aaa; max-height: 80px; overflow-y: auto; white-space: pre-wrap; word-break: break-word; }
 		.node-text-display::-webkit-scrollbar { width: 8px; }
 		.node-text-display::-webkit-scrollbar-thumb { background-color: #444; }
 
-		.node-footer { padding: 8px 12px; background-color: rgba(0,0,0,0.2); border-top: 1px solid #444; display: flex; justify-content: space-between; align-items: center; font-size: 11px; border-radius: 0 0 5px 5px; }
+		.node-footer { padding: 8px 12px; background-color: rgba(0,0,0,0.2); border-top: 1px solid #444; display: flex; justify-content: space-between; align-items: center; -size: 11px; border-radius: 0 0 5px 5px; }
 		.node-icons { display: flex; gap: 8px; align-items: center; }
 		.node-icons .icon-group { display: flex; align-items: center; gap: 2px; }
 		.node-icons svg, .scene-card-icon { width: 16px; height: 16px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -245,7 +245,7 @@
 		.icon-condition { color: var(--condition-icon-color); }
 		.icon-orphan { color: #fff; }
 
-		.choice-count-icon { background-color: #6c757d; color: white; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; line-height: 1; flex-shrink: 0; }
+		.choice-count-icon { background-color: #6c757d; color: white; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; -size: 11px; -weight: bold; line-height: 1; flex-shrink: 0; }
 		#node-svg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
         #edge-group-container { transform-origin: 0 0; }
 		.node-handle {background: #6c757d;}
@@ -1637,6 +1637,7 @@ const App = {
             { name: "Mochiy Pop One", value: "'Mochiy Pop One', sans-serif" },
             { name: "Modern Antiqua", value: "'Modern Antiqua', serif" },
             { name: "Montserrat", value: "'Montserrat', sans-serif" },
+			{ name: "Mynerve", value: "'Mynerve', sans-serif" },
             { name: "Nosifer", value: "'Nosifer', cursive" },
             { name: "Nothing You Could Do", value: "'Nothing You Could Do', cursive" },
             { name: "Nova Oval", value: "'Nova Oval', serif" },

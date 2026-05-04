@@ -1771,7 +1771,7 @@ const App = {
         App.elements['toggle-speech-btn'].addEventListener('click', () => App.player.toggleSpeechSound());
         App.elements['speech-player'].addEventListener('play', () => App.player.updateSpeechButton(true));
         App.elements['speech-player'].addEventListener('pause', () => App.player.updateSpeechButton(false));
-        const speechControls = ['toggle-speech-loop-btn'];
+        const speechControls =['toggle-speech-loop-btn'];
         speechControls.forEach(id => {
             const el = document.getElementById(id);
             const eventType = el.tagName === 'BUTTON' ? 'click' : 'change';
@@ -2615,7 +2615,7 @@ const App = {
                     const limit = Math.min(currentIndex + CHUNK_SIZE, totalScenes);
 
                     for (let i = currentIndex; i < limit; i++) {
-                        const [key, sceneObj] = sceneEntries[i];
+                        const[key, sceneObj] = sceneEntries[i];
                         const scene = (typeof sceneObj === 'object' && sceneObj !== null) ? sceneObj : {};
 
                         let position = scene.position;
@@ -2917,7 +2917,11 @@ const App = {
 
             if (isGoogleFont) {
                 const formattedFontName = fontName.replace(/ /g, '+');
-                googleFontLink = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${formattedFontName}:wght@400;700&display=swap">`;
+                if (isForExport) {
+                    googleFontLink = '<!-- LOCAL_FONT_STYLE_PLACEHOLDER -->';
+                } else {
+                    googleFontLink = `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${formattedFontName}:wght@400;700&display=swap">`;
+                }
             }
 
             const playerScript = `
@@ -2934,7 +2938,7 @@ const App = {
 				let playerCinematicEnabled = false;
 
                 const isAndroid = /android/i.test(navigator.userAgent);
-                const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.ogv'];
+                const VIDEO_EXTENSIONS =['.mp4', '.webm', '.ogv'];
                 const isVideo = (path) => {
                     if (!path) return false;
                     const lowerPath = path.toLowerCase();
@@ -2985,7 +2989,7 @@ const App = {
 
                 function initializeGameState() {
                     gameState.variables = {};
-                    (storyData.meta.variables || []).forEach(varName => { gameState.variables[varName] = false; });
+                    (storyData.meta.variables ||[]).forEach(varName => { gameState.variables[varName] = false; });
                     gameState.visited = {};
                 }
 
@@ -3541,7 +3545,49 @@ const App = {
             App.ui.showNotification("Collecting used assets and preparing export...");
             const zip = new window.JSZip();
 
-            const playerHtml = await App.io.getFormattedPlayerHTML(true);
+            let localFontStyles = '';
+            const fontFamily = App.state.storyData.meta.styles['--font-family'] || App.styles.getDefaults()['--font-family'];
+            const fontName = fontFamily.split(',')[0].replace(/'/g, '').trim();
+            const isGoogleFont = App.constants.GOOGLE_FONTS.find(f => f.name === fontName && !f.value.startsWith('-'));
+
+            if (isGoogleFont) {
+                try {
+                    App.ui.showNotification("Downloading Google Font for offline use...");
+                    const formattedFontName = fontName.replace(/ /g, '+');
+                    const cssUrl = `https://fonts.googleapis.com/css2?family=${formattedFontName}:wght@400;700&display=swap`;
+                    
+                    const cssResponse = await fetch(cssUrl);
+                    let cssText = await cssResponse.text();
+
+                    const urlRegex = /url\((https:\/\/[^)]+)\)/g;
+                    let match;
+                    const fontUrls =[];
+                    while ((match = urlRegex.exec(cssText)) !== null) {
+                        fontUrls.push(match[1]);
+                    }
+
+                    for (let i = 0; i < fontUrls.length; i++) {
+                        const fontUrl = fontUrls[i];
+                        const fontResponse = await fetch(fontUrl);
+                        const fontBlob = await fontResponse.blob();
+                        
+                        const urlParts = fontUrl.split('/');
+                        const filename = urlParts[urlParts.length - 1];
+                        
+                        zip.file(`fonts/${filename}`, fontBlob);
+                        
+                        cssText = cssText.replace(fontUrl, `fonts/${filename}`);
+                    }
+                    
+                    localFontStyles = `<style>\n${cssText}\n</style>`;
+                } catch (e) {
+                    console.error("Failed to download Google Fonts", e);
+                    App.ui.showNotification("Failed to download fonts. Kinexus will fall back to system fonts.");
+                }
+            }
+
+            let playerHtml = await App.io.getFormattedPlayerHTML(true);
+            playerHtml = playerHtml.replace('<!-- LOCAL_FONT_STYLE_PLACEHOLDER -->', localFontStyles);
             zip.file("index.html", playerHtml);
 
             const usedAssetPaths = validationResult.found;
@@ -5238,8 +5284,7 @@ const App = {
                 const sceneMediaUrl = await App.io.getAssetDataUrl(scene.image);
                 const isPanelLayout = currentLayout.startsWith('layout-panel');
                 
-                App.elements['player-image'].style.display = 'none';
-				[App.elements['player-video-bg'], App.elements['player-video-fg']].forEach(v => {
+                App.elements['player-image'].style.display = 'none';[App.elements['player-video-bg'], App.elements['player-video-fg']].forEach(v => {
 					if (!v.paused) v.pause();
 					v.style.display = 'none';
 				});

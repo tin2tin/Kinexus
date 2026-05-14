@@ -2908,7 +2908,7 @@ const App = {
 					storyJsonString = JSON.stringify(storyData);
 				}
 
-			storyJsonString = storyJsonString.replace(/</g, '\\u003c');
+			storyJsonString = storyJsonString.replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 
             let googleFontLink = '';
             const fontFamily = storyData.meta.styles['--font-family'] || App.styles.getDefaults()['--font-family'];
@@ -3521,11 +3521,11 @@ const App = {
 		`;
 
 		return document.getElementById('player-template').innerHTML
-			.replace(/__STORY_TITLE__/g, App.state.storyData.meta.title || 'My Story')
-			.replace(/__LAYOUT_CLASS__/g, App.state.storyData.meta.layout)
-			.replace('__GOOGLE_FONT_LINK__', googleFontLink)
-			.replace('__CUSTOM_STYLES__', App.styles.generateCSS())
-			.replace('__PLAYER_SCRIPT__', playerScript);
+			.replace(/__STORY_TITLE__/g, () => App.state.storyData.meta.title || 'My Story')
+			.replace(/__LAYOUT_CLASS__/g, () => App.state.storyData.meta.layout)
+			.replace('__GOOGLE_FONT_LINK__', () => googleFontLink)
+			.replace('__CUSTOM_STYLES__', () => App.styles.generateCSS())
+			.replace('__PLAYER_SCRIPT__', () => playerScript);
         },
 
         async exportProjectZip() {
@@ -3587,7 +3587,7 @@ const App = {
             }
 
             let playerHtml = await App.io.getFormattedPlayerHTML(true);
-            playerHtml = playerHtml.replace('<!-- LOCAL_FONT_STYLE_PLACEHOLDER -->', localFontStyles);
+            playerHtml = playerHtml.replace('<!-- LOCAL_FONT_STYLE_PLACEHOLDER -->', () => localFontStyles);
             zip.file("index.html", playerHtml);
 
             const usedAssetPaths = validationResult.found;

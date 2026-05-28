@@ -47,7 +47,7 @@
             color: var(--accent-gold-hover);
         }
 
-        /* --- Foreground Global Canvas Animation --- */
+        /* Global Canvas Animation */
         #nexus-canvas {
             position: fixed;
             top: 0;
@@ -60,7 +60,7 @@
             opacity: 0.6;
         }
 
-        /* --- Scroll Animation Classes --- */
+        /* Scroll Animation Classes */
         .reveal {
             opacity: 0;
             transform: translateY(40px);
@@ -71,7 +71,7 @@
             transform: translateY(0);
         }
 
-        /* --- Universal Section Parallax Backgrounds --- */
+        /* Universal Section Parallax Backgrounds */
         section {
             position: relative;
             z-index: 2;
@@ -88,10 +88,9 @@
             filter: brightness(0.25) contrast(1.1) grayscale(0.3);
         }
 
-        .bg-hero::before { background-image: url('https://github.com/user-attachments/assets/c9fb771f-5a07-4be4-aa73-8294e3c21879'); filter: brightness(0.4) contrast(1.1); }
-        .bg-carousel::before { background-image: url('https://github.com/user-attachments/assets/0a544a00-f62a-4ffc-a3c9-0bb05e63eef2'); }
+        .bg-portal::before { background-image: url('https://github.com/user-attachments/assets/c9fb771f-5a07-4be4-aa73-8294e3c21879'); filter: brightness(0.4) contrast(1.1); }
         .bg-craft::before { background-image: url('https://github.com/user-attachments/assets/280c2baf-ae03-401a-add3-da439cc0d730'); }
-        .bg-toolkit::before { background-image: url('https://github.com/user-attachments/assets/b2fc925b-7f20-4211-86ee-560b6ab4a56a'); }
+        .bg-toolkit::before { background-image: url('https://github.com/user-attachments/assets/0a544a00-f62a-4ffc-a3c9-0bb05e63eef2'); }
         .bg-cta::before { background-image: url('https://github.com/user-attachments/assets/9efbb7b8-d471-4be1-8879-7bd51d8a3b7a'); }
 
         .section-overlay {
@@ -103,46 +102,7 @@
             z-index: -1;
         }
 
-        /* --- Hero Section --- */
-        .hero {
-            height: 100vh;
-            min-height: 800px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .hero-content {
-            position: relative;
-            max-width: 900px;
-            padding: 3rem;
-            background: rgba(10, 10, 12, 0.45);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-        }
-
-        .hero h1 {
-            font-size: 5.5rem;
-            letter-spacing: 8px;
-            margin-bottom: 1rem;
-            color: #fff;
-            text-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
-        }
-
-        .hero p {
-            font-size: 1.25rem;
-            margin-bottom: 2.5rem;
-            color: #d1d1d1;
-            font-weight: 300;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
+        /* Global Button Styling */
         .btn-group {
             display: flex;
             gap: 1.5rem;
@@ -193,129 +153,407 @@
             transform: translateY(-2px);
         }
 
-        /* --- Carousel Section (ITCH GAMES) --- */
-        .carousel-section {
-            padding: 5rem 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .btn-sm {
+            padding: 0.75rem 1.8rem;
+            font-size: 0.9rem;
         }
 
-        .carousel-title {
+        /* Premium Game Portal Layout */
+        .portal-section {
+            padding: 4rem 2rem 6rem;
+            background: rgba(7, 7, 9, 0.85);
+        }
+
+        .portal-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .portal-header-group {
             text-align: center;
-            font-size: 2rem;
             margin-bottom: 3rem;
-            color: var(--text-light);
-            letter-spacing: 3px;
-            text-transform: uppercase;
+            position: relative;
+            z-index: 5;
         }
 
-        .carousel-title span { color: var(--accent-gold); }
+        .hero-title {
+            font-size: 5.5rem;
+            letter-spacing: 8px;
+            margin-bottom: 1rem;
+            color: #fff;
+            text-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
+            font-family: 'Cinzel', serif;
+        }
 
-        .carousel-container {
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            color: #d1d1d1;
+            font-weight: 300;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        /* Billboard Spotlight */
+        .billboard-spotlight {
             position: relative;
             width: 100%;
+            height: 440px;
+            border-radius: 12px;
             overflow: hidden;
-        }
-
-        .carousel-container::before,
-        .carousel-container::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            width: 15%;
-            height: 100%;
-            z-index: 10;
-            pointer-events: none;
-        }
-        .carousel-container::before {
-            left: 0;
-            background: linear-gradient(to right, var(--bg-dark) 0%, rgba(7,7,9,0.8) 40%, transparent 100%);
-        }
-        .carousel-container::after {
-            right: 0;
-            background: linear-gradient(to left, var(--bg-dark) 0%, rgba(7,7,9,0.8) 40%, transparent 100%);
-        }
-
-        .carousel-track {
+            margin-bottom: 5rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
             display: flex;
-            gap: 2rem;
-            width: max-content;
-            animation: scroll-marquee 120s linear infinite; /* Adjusted speed for more text */
+            align-items: center;
+            scroll-margin-top: 4rem;
         }
 
-        .carousel-track:hover {
-            animation-play-state: paused;
+        .billboard-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.35) contrast(1.15);
+            z-index: 1;
+            transition: background-image 0.8s ease-in-out;
         }
 
-        @keyframes scroll-marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(calc(-50% - 1rem)); }
-        }
-
-        .carousel-card {
+        .billboard-content {
             position: relative;
-            width: 315px;
-            height: 250px;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            display: block;
-            transition: transform 0.3s, border-color 0.3s;
-            background: #111;
+            z-index: 2;
+            padding: 4rem;
+            max-width: 650px;
+            transition: opacity 0.5s ease;
         }
 
-        .carousel-card img {
+        .billboard-badge {
+            background: var(--accent-gold);
+            color: #000;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 3px;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .billboard-title {
+            font-size: 3rem;
+            color: #fff;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        .billboard-description {
+            color: #ddd;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 1.8rem;
+        }
+
+        .billboard-meta {
+            display: flex;
+            gap: 0.6rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .billboard-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #eee;
+        }
+
+        /* Shelf Rows (Dynamic Categorized Playlists) */
+        .portal-row-wrapper {
+            margin-bottom: 4.5rem;
+            position: relative;
+        }
+
+        .row-title {
+            font-size: 1.6rem;
+            margin-bottom: 1.2rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding-left: 0.5rem;
+        }
+
+        .row-count {
+            font-size: 1rem;
+            color: var(--accent-gold);
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+        }
+
+        .portal-row {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .portal-shelf {
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 1rem 0.5rem;
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s;
         }
 
-        .carousel-card:hover {
-            transform: scale(1.03);
+        .portal-shelf::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .portal-shelf::-webkit-scrollbar-thumb {
+            background: rgba(212, 175, 55, 0.2);
+            border-radius: 3px;
+        }
+
+        .portal-shelf::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-gold);
+        }
+
+        /* Nav Control Buttons */
+        .scroll-btn {
+            background: rgba(7, 7, 9, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            position: absolute;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .scroll-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .scroll-btn:hover {
+            background: var(--accent-gold);
+            color: var(--bg-dark);
             border-color: var(--accent-gold);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.7), 0 0 15px rgba(212, 175, 55, 0.3);
-        }
-
-        .carousel-card:hover img {
             transform: scale(1.1);
         }
 
-        .card-overlay {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            padding: 2.5rem 1rem 1rem 1rem;
-            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.7), transparent);
-            text-align: left;
+        .scroll-btn.prev { left: -22px; }
+        .scroll-btn.next { right: -22px; }
+
+        /* Individual Cards */
+        .portal-card {
+            flex: 0 0 300px;
+            height: 350px;
+            background: rgba(18, 18, 22, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
         }
 
-        .card-overlay h4 {
+        .portal-card-img {
+            width: 100%;
+            height: 190px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .portal-card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .portal-card-content {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .portal-card-content h4 {
             font-family: 'Inter', sans-serif;
-            font-size: 1.05rem;
+            font-size: 1.15rem;
             color: #fff;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.4rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .card-overlay p {
+        .portal-card-content p {
             font-size: 0.85rem;
-            color: #ccc;
-            font-weight: 400;
-            line-height: 1.4;
-            /* For handling longer subtitles gracefully */
+            color: #b0b0b5;
+            line-height: 1.5;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            text-overflow: ellipsis;
+            margin-bottom: auto;
         }
 
-        /* --- Showcase Section (Craft) --- */
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--accent-gold);
+            margin-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 0.8rem;
+        }
+
+        .card-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Hover Mechanics */
+        .portal-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-gold);
+            box-shadow: 0 12px 30px rgba(212, 175, 55, 0.15);
+        }
+
+        .portal-card:hover .portal-card-img img {
+            transform: scale(1.08);
+        }
+
+        /* Dynamic Details Modal */
+        .portal-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .portal-modal.active {
+            display: flex;
+        }
+
+        .modal-backdrop {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(4, 4, 6, 0.9);
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-window {
+            position: relative;
+            background: #0d0d11;
+            width: 100%;
+            max-width: 700px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            z-index: 2;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+            animation: modalEntrance 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalEntrance {
+            from { opacity: 0; transform: translateY(40px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.25rem; right: 1.25rem;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--accent-gold);
+            color: #000;
+            border-color: var(--accent-gold);
+        }
+
+        .modal-hero {
+            height: 280px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .modal-hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 70%;
+            background: linear-gradient(to top, #0d0d11 0%, rgba(13, 13, 17, 0.4) 70%, transparent 100%);
+        }
+
+        .modal-details {
+            padding: 2.5rem;
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-size: 2.2rem;
+            color: #fff;
+            margin-bottom: 0.6rem;
+        }
+
+        .modal-tag-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .modal-desc {
+            color: #ccc;
+            line-height: 1.8;
+            font-size: 1.05rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1.25rem;
+        }
+
+        /* Showcase Section (Craft) */
         .showcase { padding: 8rem 2rem; }
 
         .showcase-container {
@@ -390,7 +628,7 @@
         
         .showcase-image:hover img { transform: scale(1.02); }
 
-        /* --- Features Section (Toolkit) --- */
+        /* Features Section (Toolkit) */
         .features {
             padding: 8rem 2rem;
             max-width: 1300px;
@@ -436,7 +674,6 @@
         .feature-card:hover::before { opacity: 1; }
 
         .feature-icon {
-            font-size: 2.5rem;
             color: var(--accent-gold);
             margin-bottom: 1.5rem;
             display: inline-block;
@@ -477,7 +714,7 @@
         .feature-ai .feature-icon { color: #888; }
         .feature-ai h3 { color: #bbb; }
 
-        /* --- CTA Section --- */
+        /* CTA Section */
         .cta-bottom {
             padding: 10rem 2rem;
             text-align: center;
@@ -509,7 +746,7 @@
             margin-right: auto;
         }
 
-        /* --- Footer --- */
+        /* Footer */
         footer {
             padding: 3rem 2rem;
             text-align: center;
@@ -537,15 +774,22 @@
         
         footer .social-links a:hover { color: var(--accent-gold); }
 
-        /* Responsive */
+        /* Responsive Fixes */
         @media (max-width: 900px) {
             .feature-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
             .showcase-row, .showcase-row:nth-child(even) { flex-direction: column; padding: 2rem; }
             .showcase-row { gap: 3rem; }
+            .billboard-spotlight { height: auto; flex-direction: column-reverse; align-items: stretch; }
+            .billboard-bg { position: relative; height: 220px; width: 100%; filter: brightness(0.65); }
+            .billboard-content { padding: 2rem; }
+            .billboard-title { font-size: 2.2rem; }
         }
         @media (max-width: 768px) {
-            .hero h1 { font-size: 3rem; }
+            .hero-title { font-size: 3rem; }
             .section-title { font-size: 2.2rem; }
+            .modal-details { padding: 1.5rem; }
+            .modal-actions { flex-direction: column; }
+            .scroll-btn { display: none !important; }
         }
     </style>
 </head>
@@ -553,314 +797,118 @@
 
     <canvas id="nexus-canvas"></canvas>
 
-    <!-- Hero Section -->
-    <section class="hero parallax-bg bg-hero">
-        <div class="section-overlay"></div>
-        <div class="hero-content reveal">
-            <h1>KINEXUS</h1>
-            <p>Write. Direct. Play. The free zero-code game editing studio for creating cinematic interactive fiction, visual novels, and complex branching adventures right in your browser.</p>
-            <div class="btn-group">
-                <a href="editor.html" class="btn btn-primary">Launch Studio</a>
-                <a href="https://itch.io/c/6268695/interactive-cinematic-fiction-created-in-kinexus" target="_blank" class="btn btn-secondary">Play Games</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Carousel Section (All 20 Itch Games) -->
-    <section class="carousel-section parallax-bg bg-carousel">
-        <div class="section-overlay" style="background: rgba(7,7,9,0.85);"></div>
+    <!-- Combined Hero & Game Portal Section -->
+    <section class="portal-section parallax-bg bg-portal">
+        <div class="section-overlay" style="background: rgba(7,7,9,0.92);"></div>
         
-        <h3 class="carousel-title reveal">Authored In <span>Kinexus</span></h3>
-        
-        <div class="carousel-container reveal">
-            <!-- The track contains 2 identical sets of items to create a seamless infinite loop -->
-            <div class="carousel-track">
-                
-                <!-- ====== SET 1 (20 Games) ====== -->
-                <a href="https://tintwotin.itch.io/meta-morphosis" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI1NTE4MTUxLnBuZw==/315x250%23c/78WpWy.png" alt="META-MORPHOSIS">
-                    <div class="card-overlay">
-                        <h4>META-MORPHOSIS</h4>
-                        <p>Gregor Samsa, a high-level executive, awakes to find himself transformed into AI-Slop.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/it-cant-happen-here" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI1MDg2NDYzLnBuZw==/315x250%23c/QaenHu.png" alt="It Can't Happen Here">
-                    <div class="card-overlay">
-                        <h4>It Can't Happen Here</h4>
-                        <p>A populist demagogue wins the U.S. presidency and gradually turns America into a fascist dictatorship.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/twenty-thirty" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI1MDI1NDg0LmpwZw==/315x250%23c/KVmvLY.jpg" alt="TWENTY-THIRTY">
-                    <div class="card-overlay">
-                        <h4>TWENTY-THIRTY</h4>
-                        <p>Nineteen Eighty-Four updated to TWENTY-THIRTY.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/the-caisson" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI1MDEwMzI5LmpwZw==/315x250%23c/L%2BhpVU.jpg" alt="The Caisson">
-                    <div class="card-overlay">
-                        <h4>The Caisson</h4>
-                        <p>The storm is coming, and so is the truth.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/katharismos" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI0OTAyMzE0LmpwZw==/315x250%23c/1wckq1.jpg" alt="Katharismós">
-                    <div class="card-overlay">
-                        <h4>Katharismós</h4>
-                        <p>Big Pharma/Small Family.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/heart-of-darkness" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI1MjQzMTc4LnBuZw==/315x250%23c/N4z2aa.png" alt="Heart of Darkness: Tech-Colonialism">
-                    <div class="card-overlay">
-                        <h4>Heart of Darkness</h4>
-                        <p>Zero Carbon. Infinite Profit. Total Madness.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/kaspar-hauser-the-soul-murdered" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI0NzMyOTY0LmpwZw==/315x250%23c/tZ2QOa.jpg" alt="Kaspar Hauser - The Soul Murdered">
-                    <div class="card-overlay">
-                        <h4>Kaspar Hauser</h4>
-                        <p>Your choices determine Kaspar Hauser's fate and the nature of his soul.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/azraels-manuscript" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI0NjAzNjgzLnBuZw==/315x250%23c/Or4%2Fvh.png" alt="Azrael's Manuscript">
-                    <div class="card-overlay">
-                        <h4>Azrael's Manuscript</h4>
-                        <p>A Strindberg Phantasmagoria.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/the-fire" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI0MzY2MTA1LnBuZw==/315x250%23c/OirTt%2F.png" alt="The Fire">
-                    <div class="card-overlay">
-                        <h4>The Fire</h4>
-                        <p>A contemporary pulp-noir retelling of Dostoevsky’s Demons.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/zork-i" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI0MjI3NDEyLnBuZw==/315x250%23c/sTa8FJ.png" alt="Zork I: The Great Underground Empire">
-                    <div class="card-overlay">
-                        <h4>Zork I</h4>
-                        <p>The Great Underground Empire (adapted).</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/faust-directors-cut" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI0MTgyMzI0LnBuZw==/315x250%23c/8w4bUd.png" alt="FAUST - Director's Cut">
-                    <div class="card-overlay">
-                        <h4>FAUST - Director's Cut</h4>
-                        <p>A canceled filmmaker strikes a pact with a seductive AI, trading fame for reality.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/provisional" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMjQ0MzIzLnBuZw==/315x250%23c/AHykwd.png" alt="Provisional">
-                    <div class="card-overlay">
-                        <h4>Provisional</h4>
-                        <p>They say you're guilty... You just need to find out why.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/kongens-fald" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMzQwNzc0LnBuZw==/315x250%23c/Gx1uD0.png" alt="Kongens Fald">
-                    <div class="card-overlay">
-                        <h4>Kongens Fald</h4>
-                        <p>A game adaptation of Johannes V. Jensens Kongens Fald.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/the-fall-of-the-king" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMzQwODUxLnBuZw==/315x250%23c/VFRHL6.png" alt="The Fall of the King">
-                    <div class="card-overlay">
-                        <h4>The Fall of the King</h4>
-                        <p>A game adaptation of the novel by Johannes V. Jensen.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/the-man-who-thought-things" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMTE4MTE1LnBuZw==/315x250%23c/pHQDcC.png" alt="The Man Who Thought Things">
-                    <div class="card-overlay">
-                        <h4>The Man Who Thought Things</h4>
-                        <p>Based on the 1938 novel by Valdemar Holst.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/genz" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMDAyNzk3LmpwZWc=/315x250%23c/SiakN1.jpeg" alt="GenZ">
-                    <div class="card-overlay">
-                        <h4>GenZ</h4>
-                        <p>Connect.. to Disconnect.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/hauntology-interactive-cinematic-fiction" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIyOTEyNzI3LmpwZw==/315x250%23c/lDAEIz.jpg" alt="Hauntology">
-                    <div class="card-overlay">
-                        <h4>Hauntology</h4>
-                        <p>Lost futures reclaimed!</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/the-commute" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMjkwMTMyLnBuZw==/315x250%23c/jifx1T.png" alt="The Commute">
-                    <div class="card-overlay">
-                        <h4>The Commute</h4>
-                        <p>On a journey going nowhere.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/leo-sat-on-the-old-stone-wall" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMTc4ODQ3LnBuZw==/315x250%23c/RgX0Yq.png" alt="Leo Sat on the Old Stone Wall">
-                    <div class="card-overlay">
-                        <h4>Leo Sat on the Old Stone Wall</h4>
-                        <p>A Kinexus test with video.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/dave-and-golubiro" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzNDMxOTcwLnBuZw==/315x250%23c/RevPBa.png" alt="Dave and Golubiro - POC">
-                    <div class="card-overlay">
-                        <h4>Dave and Golubiro - POC</h4>
-                        <p>Interactive Fiction.</p>
-                    </div>
-                </a>
-
-                <!-- ====== SET 2 (Duplicate for Infinite Scroll Loop) ====== -->
-                <a href="https://tintwotin.itch.io/meta-morphosis" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI1NTE4MTUxLnBuZw==/315x250%23c/78WpWy.png" alt="META-MORPHOSIS">
-                    <div class="card-overlay">
-                        <h4>META-MORPHOSIS</h4>
-                        <p>Gregor Samsa, a high-level executive, awakes to find himself transformed into AI-Slop.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/it-cant-happen-here" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI1MDg2NDYzLnBuZw==/315x250%23c/QaenHu.png" alt="It Can't Happen Here">
-                    <div class="card-overlay">
-                        <h4>It Can't Happen Here</h4>
-                        <p>A populist demagogue wins the U.S. presidency and gradually turns America into a fascist dictatorship.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/twenty-thirty" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI1MDI1NDg0LmpwZw==/315x250%23c/KVmvLY.jpg" alt="TWENTY-THIRTY">
-                    <div class="card-overlay">
-                        <h4>TWENTY-THIRTY</h4>
-                        <p>Nineteen Eighty-Four updated to TWENTY-THIRTY.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/the-caisson" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI1MDEwMzI5LmpwZw==/315x250%23c/L%2BhpVU.jpg" alt="The Caisson">
-                    <div class="card-overlay">
-                        <h4>The Caisson</h4>
-                        <p>The storm is coming, and so is the truth.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/katharismos" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI0OTAyMzE0LmpwZw==/315x250%23c/1wckq1.jpg" alt="Katharismós">
-                    <div class="card-overlay">
-                        <h4>Katharismós</h4>
-                        <p>Big Pharma/Small Family.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/heart-of-darkness" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI1MjQzMTc4LnBuZw==/315x250%23c/N4z2aa.png" alt="Heart of Darkness: Tech-Colonialism">
-                    <div class="card-overlay">
-                        <h4>Heart of Darkness</h4>
-                        <p>Zero Carbon. Infinite Profit. Total Madness.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/kaspar-hauser-the-soul-murdered" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI0NzMyOTY0LmpwZw==/315x250%23c/tZ2QOa.jpg" alt="Kaspar Hauser - The Soul Murdered">
-                    <div class="card-overlay">
-                        <h4>Kaspar Hauser</h4>
-                        <p>Your choices determine Kaspar Hauser's fate and the nature of his soul.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/azraels-manuscript" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI0NjAzNjgzLnBuZw==/315x250%23c/Or4%2Fvh.png" alt="Azrael's Manuscript">
-                    <div class="card-overlay">
-                        <h4>Azrael's Manuscript</h4>
-                        <p>A Strindberg Phantasmagoria.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/the-fire" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI0MzY2MTA1LnBuZw==/315x250%23c/OirTt%2F.png" alt="The Fire">
-                    <div class="card-overlay">
-                        <h4>The Fire</h4>
-                        <p>A contemporary pulp-noir retelling of Dostoevsky’s Demons.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/zork-i" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI0MjI3NDEyLnBuZw==/315x250%23c/sTa8FJ.png" alt="Zork I: The Great Underground Empire">
-                    <div class="card-overlay">
-                        <h4>Zork I</h4>
-                        <p>The Great Underground Empire (adapted).</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/faust-directors-cut" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzI0MTgyMzI0LnBuZw==/315x250%23c/8w4bUd.png" alt="FAUST - Director's Cut">
-                    <div class="card-overlay">
-                        <h4>FAUST - Director's Cut</h4>
-                        <p>A canceled filmmaker strikes a pact with a seductive AI, trading fame for reality.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/provisional" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMjQ0MzIzLnBuZw==/315x250%23c/AHykwd.png" alt="Provisional">
-                    <div class="card-overlay">
-                        <h4>Provisional</h4>
-                        <p>They say you're guilty... You just need to find out why.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/kongens-fald" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMzQwNzc0LnBuZw==/315x250%23c/Gx1uD0.png" alt="Kongens Fald">
-                    <div class="card-overlay">
-                        <h4>Kongens Fald</h4>
-                        <p>A game adaptation of Johannes V. Jensens Kongens Fald.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/the-fall-of-the-king" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMzQwODUxLnBuZw==/315x250%23c/VFRHL6.png" alt="The Fall of the King">
-                    <div class="card-overlay">
-                        <h4>The Fall of the King</h4>
-                        <p>A game adaptation of the novel by Johannes V. Jensen.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/the-man-who-thought-things" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMTE4MTE1LnBuZw==/315x250%23c/pHQDcC.png" alt="The Man Who Thought Things">
-                    <div class="card-overlay">
-                        <h4>The Man Who Thought Things</h4>
-                        <p>Based on the 1938 novel by Valdemar Holst.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/genz" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMDAyNzk3LmpwZWc=/315x250%23c/SiakN1.jpeg" alt="GenZ">
-                    <div class="card-overlay">
-                        <h4>GenZ</h4>
-                        <p>Connect.. to Disconnect.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/hauntology-interactive-cinematic-fiction" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIyOTEyNzI3LmpwZw==/315x250%23c/lDAEIz.jpg" alt="Hauntology">
-                    <div class="card-overlay">
-                        <h4>Hauntology</h4>
-                        <p>Lost futures reclaimed!</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/the-commute" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMjkwMTMyLnBuZw==/315x250%23c/jifx1T.png" alt="The Commute">
-                    <div class="card-overlay">
-                        <h4>The Commute</h4>
-                        <p>On a journey going nowhere.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/leo-sat-on-the-old-stone-wall" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzMTc4ODQ3LnBuZw==/315x250%23c/RgX0Yq.png" alt="Leo Sat on the Old Stone Wall">
-                    <div class="card-overlay">
-                        <h4>Leo Sat on the Old Stone Wall</h4>
-                        <p>A Kinexus test with video.</p>
-                    </div>
-                </a>
-                <a href="https://tintwotin.itch.io/dave-and-golubiro" target="_blank" class="carousel-card">
-                    <img src="https://img.itch.zone/aW1nLzIzNDMxOTcwLnBuZw==/315x250%23c/RevPBa.png" alt="Dave and Golubiro - POC">
-                    <div class="card-overlay">
-                        <h4>Dave and Golubiro - POC</h4>
-                        <p>Interactive Fiction.</p>
-                    </div>
-                </a>
-
+        <div class="portal-container reveal">
+            
+            <!-- Global Main Hero Header -->
+            <div class="portal-header-group">
+                <h1 class="hero-title">KINEXUS</h1>
+                <p class="hero-subtitle">Write. Direct. Play. The free zero-code game editing studio for creating cinematic interactive fiction, visual novels, and complex branching adventures right in your browser.</p>
+                <div class="btn-group">
+                    <a href="editor.html" class="btn btn-primary">Launch Studio</a>
+                    <a href="#game-collection" class="btn btn-secondary">Play Games</a>
+                </div>
             </div>
+
+            <!-- Spotlight Feature (Dynamic Carousel) -->
+            <div id="game-collection" class="billboard-spotlight">
+                <div class="billboard-bg" id="billboard-bg"></div>
+                <div class="billboard-content" id="billboard-content">
+                    <span class="billboard-badge">Spotlight Masterpiece</span>
+                    <h3 class="billboard-title" id="billboard-title"></h3>
+                    <p class="billboard-description" id="billboard-desc"></p>
+                    <div class="billboard-meta" id="billboard-meta"></div>
+                    <div class="billboard-actions" id="billboard-actions"></div>
+                </div>
+            </div>
+
+            <!-- Persistent Reading List (Displays conditionally based on LocalStorage) -->
+            <div id="mylist-row-wrapper" class="portal-row-wrapper" style="display: none;">
+                <h3 class="row-title">My Reading Queue <span class="row-count" id="mylist-count">(0)</span></h3>
+                <div class="portal-row">
+                    <button class="scroll-btn prev" onclick="scrollShelf(this, -1)">
+                        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                    </button>
+                    <div class="portal-shelf" id="shelf-mylist"></div>
+                    <button class="scroll-btn next" onclick="scrollShelf(this, 1)">
+                        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shelf 1: Classic & Literary Adaptations -->
+            <div class="portal-row-wrapper">
+                <h3 class="row-title">Literary Adaptations & Drama</h3>
+                <div class="portal-row">
+                    <button class="scroll-btn prev" onclick="scrollShelf(this, -1)">
+                        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                    </button>
+                    <div class="portal-shelf" id="shelf-classics"></div>
+                    <button class="scroll-btn next" onclick="scrollShelf(this, 1)">
+                        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shelf 2: Dystopias & Sci-Fi -->
+            <div class="portal-row-wrapper">
+                <h3 class="row-title">Dystopian Realities & Sci-Fi</h3>
+                <div class="portal-row">
+                    <button class="scroll-btn prev" onclick="scrollShelf(this, -1)">
+                        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                    </button>
+                    <div class="portal-shelf" id="shelf-scifi"></div>
+                    <button class="scroll-btn next" onclick="scrollShelf(this, 1)">
+                        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shelf 3: Horror & Suspense -->
+            <div class="portal-row-wrapper">
+                <h3 class="row-title">Horror & Suspense</h3>
+                <div class="portal-row">
+                    <button class="scroll-btn prev" onclick="scrollShelf(this, -1)">
+                        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                    </button>
+                    <div class="portal-shelf" id="shelf-horror"></div>
+                    <button class="scroll-btn next" onclick="scrollShelf(this, 1)">
+                        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shelf 4: Mysteries & Dynamic Tests -->
+            <div class="portal-row-wrapper">
+                <h3 class="row-title">Dark Mysteries & Dynamic Tests</h3>
+                <div class="portal-row">
+                    <button class="scroll-btn prev" onclick="scrollShelf(this, -1)">
+                        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                    </button>
+                    <div class="portal-shelf" id="shelf-mysteries"></div>
+                    <button class="scroll-btn next" onclick="scrollShelf(this, 1)">
+                        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Shelf 5: All Games -->
+            <div class="portal-row-wrapper">
+                <h3 class="row-title">All Games</h3>
+                <div class="portal-row">
+                    <button class="scroll-btn prev" onclick="scrollShelf(this, -1)">
+                        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                    </button>
+                    <div class="portal-shelf" id="shelf-all"></div>
+                    <button class="scroll-btn next" onclick="scrollShelf(this, 1)">
+                        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                    </button>
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -893,7 +941,7 @@
             <div class="showcase-row reveal">
                 <div class="showcase-text">
                     <h3>Live Playtest & Modern UI</h3>
-                    <p>Instantly playtest your game from the exact scene you are working on. The final exported game features a clean, responsive interface equipped with built-in save/load states, global sound toggles, and flawless desktop-to-mobile scaling.</p>
+                    <p>Instantly playtest your game from the exact scene you are working on. The final exported game features a clean, responsive interface equipped with built-in save/load states, global sound toggles, and desktop-to-mobile scaling.</p>
                 </div>
                 <div class="showcase-image">
                     <img src="https://github.com/user-attachments/assets/0a544a00-f62a-4ffc-a3c9-0bb05e63eef2" alt="Live Preview and Standalone Player">
@@ -903,7 +951,7 @@
             <div class="showcase-row reveal">
                 <div class="showcase-text">
                     <h3>One-Click Export & Publishing</h3>
-                    <p>Take your story straight to the players. Export your fully playable project as a self-contained ZIP file perfectly optimized for Itch.io. Kinexus handles all asset pathing automatically. Ready for desktop? Wrap it into a standalone <code>.exe</code> or <code>.app</code> with our companion tool.</p>
+                    <p>Take your story straight to the players. Export your fully playable project as a self-contained ZIP file optimized for Itch.io. Kinexus handles all asset pathing automatically. Ready for desktop? Wrap it into a standalone <code>.exe</code> or <code>.app</code> with our companion tool.</p>
                 </div>
                 <div class="showcase-image">
                     <img src="https://github.com/user-attachments/assets/4d73a9d1-35c6-4c93-9174-b546fe8f5126" alt="One Click Export">
@@ -920,9 +968,13 @@
         <div class="feature-grid">
             
             <div class="feature-card reveal">
-                <div class="feature-icon">🎬</div>
+                <div class="feature-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+                    </svg>
+                </div>
                 <h3>The Multi-Sensory Canvas</h3>
-                <p>Don't just write a story—direct an experience. Kinexus supports a massive array of media elements to fully immerse your players.</p>
+                <p>Don't just write a story - direct an experience. Kinexus supports a massive array of media elements to fully immerse your players.</p>
                 <div class="media-tags">
                     <span class="media-tag">Text</span>
                     <span class="media-tag">Music</span>
@@ -937,33 +989,53 @@
             </div>
 
             <div class="feature-card reveal">
-                <div class="feature-icon">🗺️</div>
+                <div class="feature-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/>
+                    </svg>
+                </div>
                 <h3>Visual Story Mapping</h3>
                 <p>Never lose the thread of a complex narrative. The dual Node Tree and Scene List views let you visually map branching plots, instantly spot dead ends, and track orphan scenes.</p>
             </div>
 
             <div class="feature-card reveal">
-                <div class="feature-icon">🧠</div>
+                <div class="feature-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3v1.44l-2.43 1.54A2.99 2.99 0 0 0 8 10c-1.66 0-3 1.34-3 3s1.34 3 3 3c.89 0 1.68-.39 2.23-1l3.77 1.42v.08c0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3c-.85 0-1.6.35-2.14.9L9.12 11.96A2.992 2.992 0 0 0 16 11z"/>
+                    </svg>
+                </div>
                 <h3>Advanced Logic, Zero Code</h3>
                 <p>Build deeply reactive worlds. Use built-in condition systems to track <strong>visited scenes</strong> and manage <strong>Boolean variables</strong>. Hide choices, alter paths, and track inventory.</p>
             </div>
 
             <div class="feature-card reveal">
-                <div class="feature-icon">📦</div>
+                <div class="feature-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18-.21 0-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18.21 0 .41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L6.04 7.5 12 10.85l5.96-3.35L12 4.15z"/>
+                    </svg>
+                </div>
                 <h3>One-Click Web Export</h3>
                 <p>Ready for Itch.io instantly. Export your playable project as a ZIP. Drag-and-drop your assets, and Kinexus automatically handles all structures and file pathing.</p>
             </div>
 
             <div class="feature-card reveal">
-                <div class="feature-icon">🖥️</div>
+                <div class="feature-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z"/>
+                    </svg>
+                </div>
                 <h3>Desktop App Ready</h3>
                 <p>Take your game beyond the browser. Use our companion tool to effortlessly wrap your finished HTML game into a standalone, professional <code>.exe</code> or <code>.app</code> file.</p>
             </div>
 
             <div class="feature-card feature-ai reveal">
-                <div class="feature-icon">✏️</div>
+                <div class="feature-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                </div>
                 <h3>Optional Prototyping</h3>
-                <p>Need a temporary asset before your artist finishes? Or a grammar check? Access totally optional, integrated tools for rapid sketch generation and text proofing.</p>
+                <p>Need a temporary asset before your artist finishes? Or a grammar check? Access optional, integrated tools for rapid sketch generation and text proofing.</p>
             </div>
 
         </div>
@@ -982,9 +1054,29 @@
         </div>
     </section>
 
+    <!-- Dynamic Game Detail Overlay Modal -->
+    <div class="portal-modal" id="game-modal">
+        <div class="modal-backdrop" onclick="closeModal()"></div>
+        <div class="modal-window">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div class="modal-hero" id="modal-hero"></div>
+            <div class="modal-details">
+                <div class="modal-header">
+                    <h3 id="modal-title">Game Title</h3>
+                    <div class="modal-tag-group" id="modal-tags"></div>
+                </div>
+                <p class="modal-desc" id="modal-desc">Detailed descriptions go here.</p>
+                <div class="modal-actions">
+                    <a href="" id="modal-play-btn" target="_blank" class="btn btn-primary btn-sm">Play Now</a>
+                    <button id="modal-list-btn" class="btn btn-secondary btn-sm">Add to Queue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer>
-        <p>Kinexus is an open-source project by tin2tin.</p>
+        <p>Kinexus is an open-source project by tintwotin.</p>
         <div class="social-links">
             <a href="https://github.com/tin2tin/Kinexus" target="_blank">GitHub</a>
             <a href="https://github.com/tin2tin/Kinexus/wiki" target="_blank">Documentation</a>
@@ -995,14 +1087,13 @@
 
     <!-- Interactive Scripts -->
     <script>
-        // --- Full Page Nexus Canvas Animation (Foreground) ---
+        // Full Page Nexus Canvas Animation (Foreground)
         const canvas = document.getElementById('nexus-canvas');
         const ctx = canvas.getContext('2d');
         
         let width, height;
-        let particles =[];
+        let particles = [];
         
-        // Settings
         const particleCount = 80;
         const connectionDistance = 160;
         const particleSpeed = 0.3;
@@ -1038,7 +1129,7 @@
         }
 
         function initParticles() {
-            particles =[];
+            particles = [];
             for (let i = 0; i < particleCount; i++) {
                 particles.push(new Particle());
             }
@@ -1080,8 +1171,7 @@
         initParticles();
         animate();
 
-
-        // --- Scroll Reveal Animation ---
+        // Scroll Reveal Animation
         function reveal() {
             var reveals = document.querySelectorAll(".reveal");
             for (var i = 0; i < reveals.length; i++) {
@@ -1098,6 +1188,487 @@
         window.addEventListener("scroll", reveal);
         setTimeout(reveal, 100); 
 
+        // Embedded Game Database (Resolves CORS and Local File loading issues)
+        const gamesDatabase = [
+            {
+                "id": "azraels-manuscript",
+                "title": "Azrael's Manuscript",
+                "url": "https://html-classic.itch.zone/html/15879647/index.html",
+                "image": "https://img.itch.zone/aW1nLzI0NjAzNjgzLnBuZw==/315x250%23c/Or4%2Fvh.png",
+                "desc": "A Strindberg Phantasmagoria. Drift through an surreal dreamscape of guilt, memories, and symbolic interaction.",
+                "categories": ["classics", "horror"],
+                "playtime": "20 Min Read",
+                "tags": ["Avant-Garde", "Strindberg", "Horror"]
+            },
+            {
+                "id": "dave-and-golubiro",
+                "title": "Dave and Golubiro - POC",
+                "url": "https://html-classic.itch.zone/html/16896277/index.html?v=1774204994",
+                "image": "https://img.itch.zone/aW1nLzIzNDMxOTcwLnBuZw==/315x250%23c/RevPBa.png",
+                "desc": "Help Dave and Golubiro to solve the mystery of the missing 12 feet high glass fiber pig.",
+                "categories": ["mysteries"],
+                "playtime": "5 Min Read",
+                "tags": ["Technical Demo", "Mystery"]
+            },
+            {
+                "id": "faust-directors-cut",
+                "title": "FAUST - Director's Cut",
+                "url": "https://html-classic.itch.zone/html/15766127/index.html",
+                "image": "https://img.itch.zone/aW1hZ2UvNDA1MTczNS8yNDE1MjYyMS5wbmc=/original/0lOZXo.png",
+                "desc": "A canceled filmmaker strikes a pact with a seductive AI, trading renewed fame for the fragile architecture of reality.",
+                "categories": ["scifi", "classics", "masterpiece"],
+                "playtime": "25 Min Read",
+                "tags": ["Dystopian", "Philosophy"]
+            },
+            {
+                "id": "genz",
+                "title": "GenZ",
+                "url": "https://html-classic.itch.zone/html/17713112/index.html?v=1779953657",
+                "image": "https://img.itch.zone/aW1nLzIzMDAyNzk3LmpwZWc=/315x250%23c/SiakN1.jpeg",
+                "desc": "Connect to Disconnect. Explore sensory overload, fast algorithms, and systemic alienation inside the visual spaces of modern social design.",
+                "categories": ["scifi"],
+                "playtime": "12 Min Read",
+                "tags": ["Satire", "Social Study"]
+            },
+            {
+                "id": "hauntology",
+                "title": "Hauntology",
+                "url": "https://html-classic.itch.zone/html/16491285/index.html?v=1771186016",
+                "image": "https://img.itch.zone/aW1nLzIyOTEyNzI3LmpwZw==/315x250%23c/lDAEIz.jpg",
+                "desc": "Lost futures reclaimed! A stylish drift through abandoned structural visual designs and aesthetic memories.",
+                "categories": ["scifi", "mysteries"],
+                "playtime": "18 Min Read",
+                "tags": ["Experimental", "Atmospheric"]
+            },
+            {
+                "id": "heart-of-darkness",
+                "title": "Heart of Darkness",
+                "url": "https://html-classic.itch.zone/html/16043837/index.html",
+                "image": "https://img.itch.zone/aW1nLzI1MjQzMTc4LnBuZw==/315x250%23c/N4z2aa.png",
+                "desc": "Zero Carbon. Infinite Profit. Total Madness. An interactive visual study of modern digital tech-colonialism in deep unexplored resource hubs.",
+                "categories": ["scifi", "classics", "masterpiece"],
+                "playtime": "25 Min Read",
+                "tags": ["Conrad Adaptation", "Dark"]
+            },
+            {
+                "id": "it-cant-happen-here",
+                "title": "It Can't Happen Here",
+                "url": "https://html-classic.itch.zone/html/16251444/index.html?v=1769379519",
+                "image": "https://img.itch.zone/aW1nLzI1MDg2NDYzLnBuZw==/315x250%23c/QaenHu.png",
+                "desc": "A populist demagogue wins the U.S. presidency and gradually turns America into a fascist dictatorship. An adaptation of Sinclair Lewis' classic political thriller.",
+                "categories": ["classics", "scifi", "masterpiece"],
+                "playtime": "30 Min Read",
+                "tags": ["Drama", "Political"]
+            },
+            {
+                "id": "journey-by-moonlight",
+                "title": "Journey by Moonlight",
+                "url": "https://html-classic.itch.zone/html/16949963/index.html?v=1774618504",
+                "image": "https://img.itch.zone/aW1nLzI0OTAyMzE0LmpwZw==/315x250%23c/1wckq1.jpg",
+                "desc": "A kinetic adaptation of Antal Szerb's masterpiece novel, focusing on the internal conflict between bourgeois conformity and the nostalgic death-wish.",
+                "categories": ["classics", "masterpiece"],
+                "playtime": "20 Min Read",
+                "tags": ["Adaptation", "Kinetic"]
+            },
+            {
+                "id": "kaspar-hauser",
+                "title": "Kaspar Hauser",
+                "url": "https://html-classic.itch.zone/html/16015531/index.html",
+                "image": "https://img.itch.zone/aW1nLzI0NzMyOTY0LmpwZw==/315x250%23c/tZ2QOa.jpg",
+                "desc": "Your choices determine Kaspar Hauser's tragic integration into high society and the eventual preservation of his soul.",
+                "categories": ["classics", "mysteries"],
+                "playtime": "15 Min Read",
+                "tags": ["Historical", "Philosophy"]
+            },
+            {
+                "id": "katharismos",
+                "title": "Katharismós",
+                "url": "https://html-classic.itch.zone/html/16081133/index.html",
+                "image": "https://img.itch.zone/aW1nLzI0OTAyMzE0LmpwZw==/315x250%23c/1wckq1.jpg",
+                "desc": "Big Pharma/Small Family. Manage systemic corporate greed and difficult household decisions.",
+                "categories": ["mysteries", "horror"],
+                "playtime": "10 Min Read",
+                "tags": ["Intense", "Drama"]
+            },
+            {
+                "id": "kinexus",
+                "title": "Kinexus Studio",
+                "url": "https://html-classic.itch.zone/html/16251444/index.html?v=1779949391",
+                "image": "https://img.itch.zone/aW1hZ2UvMzc0MjU2OC8yNzUzMDQwMy5wbmc=/original/aDADAl.png",
+                "desc": "A Studio for Cinematic Interactive Fiction and Visual Novels. Create branching narratives visually.",
+                "categories": ["mysteries"],
+                "playtime": "Tech Tool",
+                "tags": ["Tool", "Editor"]
+            },
+            {
+                "id": "kongens-fald",
+                "title": "Kongens Fald",
+                "url": "https://html-classic.itch.zone/html/17284123/index.html?v=1777027673",
+                "image": "https://img.itch.zone/aW1nLzIzMzQwNzc0LnBuZw==/315x250%23c/Gx1uD0.png",
+                "desc": "A localized adaptation of Johannes V. Jensen's historic masterpiece (Danish Version). Explore regret, time, and national decay.",
+                "categories": ["classics"],
+                "playtime": "20 Min Read",
+                "tags": ["Danish", "Historic"]
+            },
+            {
+                "id": "leo-sat-on-the-old-stone-wall",
+                "title": "Leo Sat on the Old Stone Wall",
+                "url": "https://html-classic.itch.zone/html/17282969/index.html?v=1777020304",
+                "image": "https://img.itch.zone/aW1nLzIzMTc4ODQ3LnBuZw==/315x250%23c/RgX0Yq.png",
+                "desc": "A specialized test of video integrations, dynamic transitions, and frame layouts within the Kinexus render player.",
+                "categories": ["mysteries"],
+                "playtime": "5 Min Read",
+                "tags": ["Technical Demo", "Video"]
+            },
+            {
+                "id": "meta-morphosis",
+                "title": "META-MORPHOSIS",
+                "url": "https://html-classic.itch.zone/html/16529998/index.html?v=1771503245",
+                "image": "https://img.itch.zone/aW1nLzI1NTE4MTUxLnBuZw==/315x250%23c/78WpWy.png",
+                "desc": "Kafka's Gregor Samsa, a high-level corporate executive, awakes to find himself transformed into standard AI-Slop.",
+                "categories": ["classics", "scifi", "masterpiece"],
+                "playtime": "15 Min Read",
+                "tags": ["Satire", "Modernized"]
+            },
+            {
+                "id": "provisional",
+                "title": "Provisional",
+                "url": "https://html-classic.itch.zone/html/16720363/index.html?v=1772872319",
+                "image": "https://img.itch.zone/aW1hZ2UvMzg5NTk3My8yNzUzMDE5MS5qcGc=/original/DA7ZNo.jpg",
+                "desc": "They say you're guilty... You just need to explore these shifting architectural corridors and find out why.",
+                "categories": ["classics", "mysteries"],
+                "playtime": "15 Min Read",
+                "tags": ["Kafkaesque", "Thriller"]
+            },
+            {
+                "id": "the-caisson",
+                "title": "The Caisson",
+                "url": "https://html-classic.itch.zone/html/17309272/index.html?v=1777201418",
+                "image": "https://img.itch.zone/aW1nLzI1MDEwMzI5LmpwZw==/315x250%23c/L%2BhpVU.jpg",
+                "desc": "An interactive industrial Nordic noir. The storm is coming, and so is the truth. Explore atmospheric isolation and dark corridors.",
+                "categories": ["mysteries", "horror"],
+                "playtime": "15 Min Read",
+                "tags": ["Noir", "Suspense"]
+            },
+            {
+                "id": "the-commute",
+                "title": "The Commute",
+                "url": "https://html-classic.itch.zone/html/17283524/index.html?v=1777023991",
+                "image": "https://img.itch.zone/aW1nLzIzMjkwMTMyLnBuZw==/315x250%23c/jifx1T.png",
+                "desc": "On a repetitive, visual transit journey going nowhere. Explore inner thoughts and external systemic monotony.",
+                "categories": ["mysteries", "scifi"],
+                "playtime": "8 Min Read",
+                "tags": ["Atmospheric", "Short Study"]
+            },
+            {
+                "id": "the-fall-of-the-king",
+                "title": "The Fall of the King",
+                "url": "https://html-classic.itch.zone/html/15088675/index.html",
+                "image": "https://img.itch.zone/aW1nLzIzMzQwODUxLnBuZw==/315x250%23c/VFRHL6.png",
+                "desc": "The English adaptation of the historic novel by Johannes V. Jensen. Trace the tragic, drifting lives of characters during historical transition.",
+                "categories": ["classics"],
+                "playtime": "20 Min Read",
+                "tags": ["Jensen", "Literary"]
+            },
+            {
+                "id": "the-fire",
+                "title": "The Fire",
+                "url": "https://html-classic.itch.zone/html/15765807/index.html",
+                "image": "https://img.itch.zone/aW1nLzI0MzY2MTA1LnBuZw==/315x250%23c/OirTt%2F.png",
+                "desc": "A contemporary pulp-noir retelling of Dostoevsky's Demons. Track localized ideological extremist circles and high-stakes social manipulation.",
+                "categories": ["classics", "mysteries"],
+                "playtime": "25 Min Read",
+                "tags": ["Dostoevsky", "Noir"]
+            },
+            {
+                "id": "the-girl-from-the-marsh-croft",
+                "title": "The Girl from the Marsh Croft",
+                "url": "https://html-classic.itch.zone/html/17516728/index.html?v=1778607315",
+                "image": "https://img.itch.zone/aW1hZ2UvNDUyMDE4Ny8yNzUzMDQ5Ni5wbmc=/original/3pn7%2Bd.png",
+                "desc": "A great love story based on Selma Lagerlöf's classic, set in 1890s Sønderho on the Danish isle of Fanø.",
+                "categories": ["classics"],
+                "playtime": "15 Min Read",
+                "tags": ["Romance", "Historical"]
+            },
+            {
+                "id": "the-hyggenaut",
+                "title": "The HyggeNaut",
+                "url": "https://html-classic.itch.zone/html/17675928/index.html?v=1779711560",
+                "image": "https://img.itch.zone/aW1hZ2UvNDU4NDMzMi8yNzMyMjU2NS5qcGc=/original/wnrU3E.jpg",
+                "desc": "There is something weird in the state of Denmark.",
+                "categories": ["mysteries", "scifi", "horror"],
+                "playtime": "10 Min Read",
+                "tags": ["Weird", "Atmospheric"]
+            },
+            {
+                "id": "the-man-who-thought-things",
+                "title": "The Man Who Thought Things",
+                "url": "https://html-classic.itch.zone/html/14945351/index.html?v=1774597588",
+                "image": "https://img.itch.zone/aW1nLzIzMTE4MTE1LnBuZw==/315x250%23c/pHQDcC.png",
+                "desc": "Based on the gripping 1938 psychological novel by Valdemar Holst. Control physical matter purely through intense focused mental projection.",
+                "categories": ["classics", "horror"],
+                "playtime": "15 Min Read",
+                "tags": ["Sci-Fi Classic", "Suspense"]
+            },
+            {
+                "id": "the-meat-protocol",
+                "title": "The M.E.A.T. Protocol",
+                "url": "https://html-classic.itch.zone/html/17355548/index.html?v=1777491560",
+                "image": "https://img.itch.zone/aW1hZ2UvNDQxNjk2OS8yNzUzMDM5NC5wbmc=/original/VSk6Yp.png",
+                "desc": "A modernized, visceral adaptation of Dracula by Bram Stoker. THIS IS A HORROR GAME.",
+                "categories": ["classics", "horror", "masterpiece"],
+                "playtime": "20 Min Read",
+                "tags": ["Horror", "Adaptation"]
+            },
+            {
+                "id": "the-odyssey",
+                "title": "The Odyssey",
+                "url": "https://html-classic.itch.zone/html/16711975/index.html?v=1772804696",
+                "image": "https://img.itch.zone/aW1hZ2UvNDMyODk1MC8yNzUzMDQ1MC5wbmc=/original/9%2BruXC.png",
+                "desc": "Forge your path through Homer's epic.",
+                "categories": ["classics"],
+                "playtime": "25 Min Read",
+                "tags": ["Epic", "Mythology"]
+            },
+            {
+                "id": "tokyo-freaks",
+                "title": "Tokyo Freaks",
+                "url": "https://html-classic.itch.zone/html/17098289/index.html?v=1775671925",
+                "image": "https://img.itch.zone/aW1hZ2UvNDQ1ODEzMC8yNjY3MjM4OC5wbmc=/original/eL%2Ff3x.png",
+                "desc": "The Unholy Three's crypto-heist spirals into a deadly frame-up. In a city of manufactured truth, finding your own voice might be the deadliest mistake.",
+                "categories": ["scifi", "mysteries"],
+                "playtime": "20 Min Read",
+                "tags": ["Cyberpunk", "Thriller"]
+            },
+            {
+                "id": "twenty-thirty",
+                "title": "TWENTY-THIRTY",
+                "url": "https://html-classic.itch.zone/html/16149929/index.html?v=1768557946",
+                "image": "https://img.itch.zone/aW1nLzI1MDI1NDg0LmpwZw==/315x250%23c/KVmvLY.jpg",
+                "desc": "George Orwell's Nineteen Eighty-Four updated to the near future of TWENTY-THIRTY. Live under constant, hyper-optimized digital surveillance loops.",
+                "categories": ["scifi", "classics"],
+                "playtime": "20 Min Read",
+                "tags": ["Dystopian", "Orwellian"]
+            },
+            {
+                "id": "zork-i",
+                "title": "Zork I",
+                "url": "https://html-classic.itch.zone/html/15632632/zork_i__the_great_underground_empire__complete__export/index.html",
+                "image": "https://img.itch.zone/aW1nLzI0MjI3NDEyLnBuZw==/315x250%23c/sTa8FJ.png",
+                "desc": "The classic text-adventure rewritten and visually augmented inside Kinexus. Explore the depths of the Great Underground Empire.",
+                "categories": ["classics", "mysteries", "masterpiece"],
+                "playtime": "35 Min Read",
+                "tags": ["Parser Classic", "Re-imagined"]
+            }
+        ];
+
+        // Dynamic State Variables
+        let spotlightGames = [];
+        let currentSpotlightIndex = 0;
+        let spotlightInterval;
+        let myList = JSON.parse(localStorage.getItem('kinexus_mylist')) || [];
+
+        // Data Entry Point - Now runs instantly
+        document.addEventListener('DOMContentLoaded', () => {
+            buildGameShelves();
+            initSpotlightCarousel();
+        });
+
+        // Initialize Carousel
+        function initSpotlightCarousel() {
+            spotlightGames = gamesDatabase.filter(g => g.categories && g.categories.includes("masterpiece"));
+            
+            // Fallback if no masterpieces are defined
+            if (spotlightGames.length === 0) {
+                spotlightGames = gamesDatabase.slice(0, 5);
+            }
+
+            if (spotlightGames.length > 0) {
+                updateSpotlight();
+                
+                const startInterval = () => {
+                    spotlightInterval = setInterval(() => {
+                        currentSpotlightIndex = (currentSpotlightIndex + 1) % spotlightGames.length;
+                        updateSpotlight();
+                    }, 6000);
+                };
+
+                startInterval();
+
+                // Pause Carousel on hover to allow the user to easily read/click
+                const spotlightContainer = document.getElementById('game-collection');
+                spotlightContainer.addEventListener('mouseenter', () => clearInterval(spotlightInterval));
+                spotlightContainer.addEventListener('mouseleave', startInterval);
+            }
+        }
+
+        // Draw active spotlight data
+        function updateSpotlight() {
+            if(spotlightGames.length === 0) return;
+
+            const game = spotlightGames[currentSpotlightIndex];
+            const bg = document.getElementById('billboard-bg');
+            const title = document.getElementById('billboard-title');
+            const desc = document.getElementById('billboard-desc');
+            const meta = document.getElementById('billboard-meta');
+            const actions = document.getElementById('billboard-actions');
+            const content = document.getElementById('billboard-content');
+
+            // Fade Out
+            content.style.opacity = 0;
+            
+            // Allow fade out to complete before swapping content
+            setTimeout(() => {
+                bg.style.backgroundImage = `url('${game.image}')`;
+                title.innerText = game.title;
+                desc.innerText = game.desc;
+                
+                meta.innerHTML = `
+                    <span class="billboard-tag">${game.playtime}</span>
+                    ${game.tags.map(t => `<span class="billboard-tag">${t}</span>`).join('')}
+                `;
+                
+                const btnText = myList.includes(game.id) ? "Remove from Queue" : "Add to Queue";
+                actions.innerHTML = `
+                    <button onclick="openGameDetails('${game.id}')" class="btn btn-primary btn-sm">Explore Details</button>
+                    <button onclick="toggleMyList('${game.id}')" class="btn btn-secondary btn-sm" id="billboard-queue-btn-${game.id}">
+                        ${btnText}
+                    </button>
+                `;
+                
+                // Fade In
+                content.style.opacity = 1;
+            }, 500);
+        }
+
+        // Generate the clean HTML card syntax
+        function createCardHTML(game) {
+            return `
+                <div class="portal-card" onclick="openGameDetails('${game.id}')">
+                    <div class="portal-card-img">
+                        <img src="${game.image}" alt="${game.title}" loading="lazy">
+                    </div>
+                    <div class="portal-card-content">
+                        <h4>${game.title}</h4>
+                        <p>${game.desc}</p>
+                        <div class="card-meta">
+                            <span>${game.playtime}</span>
+                            <span>${game.tags[0]}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Horizontal Row Manual Scroll Mechanics
+        function scrollShelf(btnElement, direction) {
+            const shelfRow = btnElement.closest('.portal-row').querySelector('.portal-shelf');
+            const stepWidth = shelfRow.offsetWidth * 0.75;
+            shelfRow.scrollBy({ left: stepWidth * direction, behavior: 'smooth' });
+        }
+
+        // Populate Netflix Style rows based on dynamic array
+        function buildGameShelves() {
+            const groups = { classics: [], scifi: [], horror: [], mysteries: [], all: gamesDatabase };
+            
+            gamesDatabase.forEach(g => {
+                if (g.categories) {
+                    g.categories.forEach(cat => {
+                        // Prevent duplicating logic into the 'all' key which already points directly to the DB reference
+                        if(groups[cat] && cat !== 'all') {
+                            groups[cat].push(g);
+                        }
+                    });
+                }
+            });
+
+            for (const [key, collection] of Object.entries(groups)) {
+                const row = document.getElementById(`shelf-${key}`);
+                if (row) {
+                    row.innerHTML = collection.map(g => createCardHTML(g)).join('');
+                }
+            }
+            refreshMyListQueue();
+        }
+
+        // Bookmark Storage and UI updates
+        function toggleMyList(id) {
+            const index = myList.indexOf(id);
+            if (index > -1) {
+                myList.splice(index, 1);
+            } else {
+                myList.push(id);
+            }
+            localStorage.setItem('kinexus_mylist', JSON.stringify(myList));
+            refreshMyListQueue();
+
+            updateBillboardButtonState(id);
+
+            // Update active detail modal state if currently open
+            const modalQueueBtn = document.getElementById('modal-list-btn');
+            if (modalQueueBtn) {
+                modalQueueBtn.innerText = myList.includes(id) ? "Remove from Queue" : "Add to Queue";
+            }
+        }
+
+        function updateBillboardButtonState(id) {
+            const btn = document.getElementById(`billboard-queue-btn-${id}`);
+            if (btn) {
+                btn.innerText = myList.includes(id) ? "Remove from Queue" : "Add to Queue";
+            }
+        }
+
+        function refreshMyListQueue() {
+            const wrapper = document.getElementById('mylist-row-wrapper');
+            const shelf = document.getElementById('shelf-mylist');
+            const indicator = document.getElementById('mylist-count');
+
+            const favorites = gamesDatabase.filter(g => myList.includes(g.id));
+
+            if(favorites.length > 0) {
+                wrapper.style.display = 'block';
+                indicator.innerText = `(${favorites.length})`;
+                shelf.innerHTML = favorites.map(g => createCardHTML(g)).join('');
+            } else {
+                wrapper.style.display = 'none';
+            }
+
+            if(spotlightGames.length > 0) {
+                updateBillboardButtonState(spotlightGames[currentSpotlightIndex].id);
+            }
+        }
+
+        // Detail Modal Interactions
+        function openGameDetails(id) {
+            const game = gamesDatabase.find(g => g.id === id);
+            if (!game) return;
+
+            document.getElementById('modal-title').innerText = game.title;
+            document.getElementById('modal-desc').innerText = game.desc;
+            document.getElementById('modal-hero').style.backgroundImage = `url('${game.image}')`;
+            
+            // Set launch button target link
+            const modalPlayBtn = document.getElementById('modal-play-btn');
+            modalPlayBtn.setAttribute('href', game.url);
+            modalPlayBtn.innerText = "Play Now";
+            
+            // Setup dynamic bookmark button inside modal
+            const listBtn = document.getElementById('modal-list-btn');
+            listBtn.innerText = myList.includes(game.id) ? "Remove from Queue" : "Add to Queue";
+            listBtn.onclick = function() { toggleMyList(game.id); };
+
+            // Render details specific tags
+            const tagsWrapper = document.getElementById('modal-tags');
+            tagsWrapper.innerHTML = `
+                <span class="billboard-tag">${game.playtime}</span>
+                ` + game.tags.map(t => `<span class="billboard-tag">${t}</span>`).join('');
+
+            document.getElementById('game-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('game-modal').classList.remove('active');
+        }
     </script>
 </body>
 </html>

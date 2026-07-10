@@ -73,8 +73,8 @@
 			background-repeat: no-repeat;
 			background-position: center;
 			background-color: var(--bg-color);
-			-family: var(---family);
-			-size: var(---size);
+			font-family: var(--font-family);
+			font-size: var(--font-size);
 			color: var(--text-color);
 		}
         #editor-transition-overlay {
@@ -188,7 +188,7 @@
 			border: 1px solid #444;
 			border-radius: 6px;
 			width: 240px;
-			-size: 13px;
+			font-size: 13px;
 			text-align: left;
 			overflow: visible;
 			box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -222,18 +222,18 @@
 		.node-editor-node.has-broken-link { border: 2px dashed var(--danger-color) !important; }
 		.node-editor-node.is-filtered-out { pointer-events: none; filter: grayscale(80%); }
 
-		.node-header { padding: 8px 12px; -weight: bold; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; cursor: move; user-select: none; background-color: var(--header-none-bg); color: #fff; transition: background-color 0.3s; border-radius: 5px 5px 0 0; }
+		.node-header { padding: 8px 12px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; cursor: move; user-select: none; background-color: var(--header-none-bg); color: #fff; transition: background-color 0.3s; border-radius: 5px 5px 0 0; }
         .node-header.media-image { background-color: var(--header-image-bg); }
         .node-header.media-video { background-color: var(--header-video-bg); }
 		.node-body { padding: 12px; transition: border-left 0.3s; background-color: var(--bg-element); }
-		.node-thumbnail { width: 100%; aspect-ratio: 16/9; background-color: #111; border-radius: 4px; display: flex; justify-content: center; align-items: center; -size: 0.8em; color: var(--text-secondary); overflow: hidden; border: 1px solid #444; margin-bottom: 8px; }
+		.node-thumbnail { width: 100%; aspect-ratio: 16/9; background-color: #111; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-size: 0.8em; color: var(--text-secondary); overflow: hidden; border: 1px solid #444; margin-bottom: 8px; }
 		.node-thumbnail img, .node-thumbnail canvas { width: 100%; height: 100%; object-fit: cover; }
         .node-thumbnail svg { width: 48px; height: 48px; color: var(--text-secondary); opacity: 0.5; }
 		.node-text-display { color: #aaa; max-height: 80px; overflow-y: auto; white-space: pre-wrap; word-break: break-word; }
 		.node-text-display::-webkit-scrollbar { width: 8px; }
 		.node-text-display::-webkit-scrollbar-thumb { background-color: #444; }
 
-		.node-footer { padding: 8px 12px; background-color: rgba(0,0,0,0.2); border-top: 1px solid #444; display: flex; justify-content: space-between; align-items: center; -size: 11px; border-radius: 0 0 5px 5px; }
+		.node-footer { padding: 8px 12px; background-color: rgba(0,0,0,0.2); border-top: 1px solid #444; display: flex; justify-content: space-between; align-items: center; font-size: 11px; border-radius: 0 0 5px 5px; }
 		.node-icons { display: flex; gap: 8px; align-items: center; }
 		.node-icons .icon-group { display: flex; align-items: center; gap: 2px; }
 		.node-icons svg, .scene-card-icon { width: 16px; height: 16px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -245,7 +245,7 @@
 		.icon-condition { color: var(--condition-icon-color); }
 		.icon-orphan { color: #fff; }
 
-		.choice-count-icon { background-color: #6c757d; color: white; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; -size: 11px; -weight: bold; line-height: 1; flex-shrink: 0; }
+		.choice-count-icon { background-color: #6c757d; color: white; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; line-height: 1; flex-shrink: 0; }
 		#node-svg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
         #edge-group-container { transform-origin: 0 0; }
 		.node-handle {background: #6c757d;}
@@ -483,6 +483,7 @@
 		#scene-editor-preview.layout-panel-right #preview-player-inner-container {
 			width: 25%; height: auto; flex-direction: column; max-width: none; max-height: 180vh;
 		}
+		.layout-panel-bottom #preview-player-choices .choice-btn { text-align: center !important; }
 		.layout-panel-left #preview-player-choices .choice-btn { text-align: left !important; }
 		.layout-panel-right #preview-player-choices .choice-btn { text-align: right !important; }
 
@@ -624,6 +625,9 @@
 		#player-container.layout-panel-left #player-image-container,
 		#player-container.layout-panel-right #player-image-container {
 			display: none;
+		}
+		#player-container.layout-panel-bottom #player-choices .choice-btn {
+			text-align: center;
 		}
 		#player-container.layout-panel-left #player-choices .choice-btn {
 			text-align: left;
@@ -1107,6 +1111,7 @@
             <button id="new-project-btn" class="btn-secondary">New Project</button>
             <button id="open-project-btn" class="btn-secondary">Open Project</button>
             <button id="save-story-btn" class="btn-success">Save Project</button>
+            <button id="restore-backup-btn" class="btn-secondary" title="Restore the previous saved version from story.backup.json">Restore Backup</button>
             <button id="about-editor-btn">Project Text Editor</button>
             <button id="batch-image-gen-btn" class="btn-secondary" disabled>Batch Image Generation</button>
             <button id="export-data-btn" class="btn-warning">Export Data</button>
@@ -1583,10 +1588,14 @@ const App = {
         typewriter: { intervalId: null, cleanup: null },
         currentNavView: 'nodes', // 'nodes' or 'list'
         navViewsDirty: true,
+        navRenderPromise: null,
         missingAssetWarnings: new Set(),
         brokenAssetLinks: new Map(),
         previewLoadId: 0,
         thumbnailLoadId: 0,
+        // Keyed by `${path}::${file.size}::${file.lastModified}` so replacing a file's
+        // content at the same path (re-drop, re-generate) invalidates automatically.
+        thumbnailCache: new Map(),
         player: {
             gameState: null,
 			typewriter: { intervalId: null, cleanup: null },
@@ -1676,7 +1685,11 @@ const App = {
         this.ui.enableEditor(false);
         this.ui.displayWelcomeMessage();
         this.modals.show('project-menu-modal');
-        this.ui.setViewMode(localStorage.getItem('cyoa-nav-view') || 'scenes');
+        // setViewMode() no-ops until a project is open (see its guard clause), so the
+        // saved preference is seeded onto state directly here. It takes effect once
+        // openProject()/newProject() call setViewMode(App.state.currentNavView).
+        const savedNavView = localStorage.getItem('cyoa-nav-view');
+        App.state.currentNavView = (savedNavView === 'nodes' || savedNavView === 'list') ? savedNavView : 'nodes';
         this.ui.initDraggableDivider();
     },
 
@@ -1698,7 +1711,7 @@ const App = {
                 ambienceSound: "", ambienceLoop: true, 
                 speechSound: "", speechLoop: false,
                 cinematicModeOverride: 'default',
-                choices:[], visited: false,
+                choices:[],
                 lastModified: Date.now(),
                 mediaType: 'none', color: null,
                 position: { x: 200, y: 50 }
@@ -1739,6 +1752,7 @@ const App = {
         document.getElementById('open-project-btn').addEventListener('click', () => App.io.openProject());
         App.elements['save-story-btn'].addEventListener('click', () => App.io.saveProject());
 			this.elements['save-project-dirty-btn'].addEventListener('click', () => App.io.saveProject());
+			document.getElementById('restore-backup-btn').addEventListener('click', () => App.io.restoreBackup());
 			
 			document.getElementById('refresh-scene-btn').addEventListener('click', () => {
 				App.editor.saveCurrentScene();
@@ -1803,17 +1817,31 @@ const App = {
         App.elements['preview-player-video'].addEventListener('pause', () => App.editor.ui.updateVideoPlaybackButton(false));
 
         const saveAndPreview = () => { App.editor.saveCurrentScene(); App.editor.renderPreview(); };
-        
+
         App.elements['scene-text'].addEventListener('input', saveAndPreview);
         App.elements['choices-container'].addEventListener('input', saveAndPreview);
         App.elements['choices-container'].addEventListener('change', saveAndPreview);
         document.getElementById('scene-image-prompt').addEventListener('input', () => App.editor.saveCurrentScene());
-        
+
+        // The nav-view refresh (invalidateNavViews + renderCurrentView) rescans every
+        // project asset and rebuilds the whole node graph / scene list, including
+        // thumbnail regeneration. Debounce just that part so fast typing in a path
+        // field doesn't trigger a full rebuild per keystroke. saveCurrentScene() stays
+        // synchronous on every keystroke so no edit is ever lost to the debounce.
+        let navRefreshDebounceTimer = null;
+        const debouncedNavRefresh = () => {
+            clearTimeout(navRefreshDebounceTimer);
+            navRefreshDebounceTimer = setTimeout(() => {
+                navRefreshDebounceTimer = null;
+                App.ui.invalidateNavViews();
+                App.ui.renderCurrentView();
+            }, 400);
+        };
+
         const mediaUpdateHandler = () => {
 			App.editor.saveCurrentScene();
 			App.editor.ui.updateMediaButtonStates();
-            App.ui.invalidateNavViews();
-            App.ui.renderCurrentView();
+            debouncedNavRefresh();
 		};
 
         App.elements['scene-sound'].addEventListener('input', mediaUpdateHandler);
@@ -1824,8 +1852,7 @@ const App = {
             App.editor.ui.updateVideoControlsVisibility();
 			App.editor.ui.updateMediaButtonStates();
 			App.ui.updateImageThumbnail(e.target.value);
-            App.ui.invalidateNavViews();
-            App.ui.renderCurrentView();
+            debouncedNavRefresh();
 		});['story-title', 'creator-name', 'about-text'].forEach(id => {
             App.elements[id].addEventListener('input', (e) => {
                 const key = id === 'story-title' ? 'title' : id === 'creator-name' ? 'creatorName' : 'aboutText';
@@ -1942,7 +1969,7 @@ const App = {
 
         App.elements['toggle-node-view-btn'].addEventListener('click', () => App.ui.setViewMode('nodes'));
         App.elements['toggle-scene-view-btn'].addEventListener('click', () => App.ui.setViewMode('list'));
-        App.elements['scene-list-sort'].addEventListener('change', () => App.sceneList.render());
+        App.elements['scene-list-sort'].addEventListener('change', () => App.sceneList.render(document.getElementById('scene-search-input').value));
 
         document.getElementById('node-auto-arrange-btn').addEventListener('click', () => App.nodeEditor.autoArrange());
         document.getElementById('node-find-orphans-btn').addEventListener('click', () => App.nodeEditor.findNextOrphan());
@@ -2131,18 +2158,28 @@ const App = {
             if (!App.state.projectDirectoryHandle) return;
 
 			if (App.state.navViewsDirty) {
-				this.cursor.wait();
-				App.debug.log('UI view is dirty. Re-rendering navigation views...', 'INFO');
-				try {
-					await App.io.checkAllProjectAssets();
-					const filterTerm = document.getElementById('scene-search-input').value;
-					if (App.nodeEditor) await App.nodeEditor.render(filterTerm);
-					if (App.sceneList) await App.sceneList.render(filterTerm);
-					App.state.navViewsDirty = false;
-					App.debug.log('Navigation views re-rendered successfully.', 'SUCCESS');
-				} finally {
-					this.cursor.default();
+				// Reuse an in-flight render instead of starting a concurrent one.
+				// Overlapping renders each clear and rebuild #node-element-container /
+				// #scene-list-view independently, which can leave duplicate or
+				// missing scene nodes/cards behind (looks like "scenes disappeared").
+				if (!App.state.navRenderPromise) {
+					this.cursor.wait();
+					App.debug.log('UI view is dirty. Re-rendering navigation views...', 'INFO');
+					App.state.navRenderPromise = (async () => {
+						try {
+							await App.io.checkAllProjectAssets();
+							const filterTerm = document.getElementById('scene-search-input').value;
+							if (App.nodeEditor) await App.nodeEditor.render(filterTerm);
+							if (App.sceneList) await App.sceneList.render(filterTerm);
+							App.state.navViewsDirty = false;
+							App.debug.log('Navigation views re-rendered successfully.', 'SUCCESS');
+						} finally {
+							this.cursor.default();
+							App.state.navRenderPromise = null;
+						}
+					})();
 				}
+				await App.state.navRenderPromise;
 			}
 
 			App.state.currentNavView = mode;
@@ -2157,6 +2194,11 @@ const App = {
 
             if (isNodeView) {
                 App.nodeEditor.onResize();
+                // Edge paths use each node's offsetHeight, which reads 0 while the node
+                // view is display:none. Recompute now that it's actually visible/laid out,
+                // in case renderEdges() last ran while this view was hidden.
+                App.nodeEditor.renderEdges();
+                App.nodeEditor.updateSelection();
             }
 		},
 		async renderCurrentView() {
@@ -2219,6 +2261,7 @@ const App = {
 			document.getElementById('scene-search-input').disabled = !isEnabled;
 			document.getElementById('scene-search-btn').disabled = !isEnabled;
 			App.elements['save-story-btn'].disabled = !isEnabled;
+			document.getElementById('restore-backup-btn').disabled = !isEnabled;
 			document.getElementById('export-project-btn').disabled = !isEnabled;
 			document.getElementById('export-data-btn').disabled = !isEnabled;
 			App.elements['style-editor-btn'].disabled = !isEnabled;
@@ -2304,7 +2347,7 @@ const App = {
 			try {
 				defaultSpan.textContent = 'Loading...';
 				const isVideo = App.assets.isVideo(path);
-				const url = await (isVideo ? App.assets.getVideoThumbnail(path) : App.io.getAssetDataUrl(path));
+				const url = await App.assets.getCachedThumbnailUrl(path);
 
 				if (currentLoadId !== App.state.thumbnailLoadId) return;
 
@@ -2489,6 +2532,24 @@ const App = {
             }
 
             try {
+                // Back up the previous story.json before overwriting it, so a bad save
+                // (e.g. triggered by an editor bug) can still be recovered from disk.
+                try {
+                    const existingHandle = await App.state.projectDirectoryHandle.getFileHandle('story.json');
+                    const existingFile = await existingHandle.getFile();
+                    if (existingFile.size > 0) {
+                        const existingText = await existingFile.text();
+                        const backupHandle = await App.state.projectDirectoryHandle.getFileHandle('story.backup.json', { create: true });
+                        const backupWritable = await backupHandle.createWritable();
+                        await backupWritable.write(existingText);
+                        await backupWritable.close();
+                    }
+                } catch (backupErr) {
+                    if (backupErr.name !== 'NotFoundError') {
+                        console.warn('Could not create story.backup.json:', backupErr);
+                    }
+                }
+
                 const storyFileHandle = await App.state.projectDirectoryHandle.getFileHandle('story.json', { create: true });
                 const writable = await storyFileHandle.createWritable();
 
@@ -2536,6 +2597,70 @@ const App = {
                     console.error('Save As was aborted or failed:', err);
                     App.ui.showNotification(`Could not save project: ${err.name}`);
                 }
+            }
+        },
+
+        async restoreBackup() {
+            if (!App.state.projectDirectoryHandle) {
+                App.ui.showNotification('Please open a project first.');
+                return;
+            }
+            const dirHandle = App.state.projectDirectoryHandle;
+
+            let backupFile;
+            try {
+                const backupHandle = await dirHandle.getFileHandle('story.backup.json');
+                backupFile = await backupHandle.getFile();
+            } catch (e) {
+                App.ui.showNotification('No backup was found for this project. A backup (story.backup.json) is created automatically the next time you save.');
+                return;
+            }
+
+            if (!confirm('Restore the last backup?\n\nThis replaces the currently loaded project with the previous saved version. Unsaved changes will be lost. You will need to Save Project afterward to make the restore permanent.')) {
+                return;
+            }
+
+            App.ui.showProgress('Restoring backup...');
+            App.ui.cursor.wait();
+            try {
+                const fileContent = await backupFile.text();
+                let storyData;
+                try {
+                    storyData = fileContent.trim() ? JSON.parse(fileContent) : App.getNewStoryObject();
+                } catch (e) {
+                    App.ui.showNotification(`Could not restore backup: the backup file contains invalid JSON.<br><br><i>${e.message}</i>`);
+                    return;
+                }
+
+                const result = await App.io.validateProjectData(storyData, { autofix: true });
+                if (!result.ok) {
+                    App.ui.showNotification(`<b>Could not restore backup:</b><br>${result.errors.join('<br>')}`);
+                    return;
+                }
+                storyData = result.data;
+
+                App.player.stop();
+                App.state.storyData = storyData;
+                App.state.player.cinematicEnabled = storyData.meta.styles['--cinematic-pacing-default'] === 'on';
+                App.styles.loadGoogleFont(storyData.meta.styles['--font-family']);
+                App.state.currentSceneId = null;
+                App.state.pendingAssetCopies.clear();
+                App.state.missingAssetWarnings.clear();
+                // The restored data now differs from story.json on disk (it matches the
+                // backup) until the user explicitly saves — never write it automatically.
+                App.setDirty(true);
+                App.ui.updateMetaInputs();
+                App.ui.updateAdvancedFeaturesVisibility();
+                App.ui.invalidateNavViews();
+                App.modals.hideAll();
+                await App.ui.setViewMode(App.state.currentNavView);
+                await App.ui.selectScene(App.state.storyData.meta.startSceneId);
+                App.nodeEditor.fitView();
+
+                App.ui.showNotification('Backup restored. Review the project, then use Save Project to make this permanent.');
+            } finally {
+                App.ui.cursor.default();
+                App.ui.hideProgress();
             }
         },
 
@@ -2667,7 +2792,6 @@ const App = {
                             speechLoop: scene.speechLoop ?? false,
                             cinematicModeOverride: cinematicModeOverride,
                             choices: safeChoices,
-                            visited: scene.visited === true,
                             lastModified: typeof scene.lastModified === 'number' ? scene.lastModified : Date.now(),
                             mediaType: scene.mediaType || 'none',
                             color: scene.color || null,
@@ -2748,6 +2872,7 @@ const App = {
                 App.state.storyData = newStory;
                 App.state.player.cinematicEnabled = newStory.meta.styles['--cinematic-pacing-default'] === 'on'; // Sync default
                 App.state.pendingAssetCopies.clear();
+                App.state.thumbnailCache.clear();
                 App.modals.hideAll();
                 App.ui.enableEditor(true);
                 App.setDirty(false);
@@ -2789,21 +2914,10 @@ const App = {
                     App.debug.log('Directory handle acquired.', 'SUCCESS');
                 }
 
-                App.debug.log('Resetting application state...');
-                App.ui.enableEditor(false);
-                App.state.storyData = {};
-                App.state.currentSceneId = null;
-                App.state.projectDirectoryHandle = null;
-                App.state.pendingAssetCopies.clear();
-                App.state.missingAssetWarnings.clear();
-                App.setDirty(false);
-                App.elements['node-element-container'].innerHTML = '';
-                App.elements['scene-list-view'].innerHTML = '';
-                document.getElementById('scene-search-input').value = '';
-                App.editor.render();
-                App.ui.updateMetaInputs();
-                App.debug.log('State reset complete.', 'SUCCESS');
-
+                // Load and validate into local variables first. We only touch live
+                // App.state (and thus the currently-open project, if any) once we know
+                // the new project data is readable and valid — a failed open must never
+                // leave the editor with an already-cleared/half-loaded project.
                 let storyData;
                 let fileContent = '';
                 try {
@@ -2848,6 +2962,28 @@ const App = {
                 if (result.warnings.length > 0) {
                      App.debug.log('Validation Warnings:\n' + result.warnings.join('\n'), 'WARN');
                 }
+                if (!result.ok) {
+                    App.debug.log('Validation reported errors; aborting load to protect the currently open project.', 'ERROR');
+                    App.ui.showNotification(`<b>Could not open project:</b><br>${result.errors.join('<br>')}`);
+                    return;
+                }
+
+                // Validation succeeded — now it's safe to reset the editor and adopt the new data.
+                App.debug.log('Resetting application state...');
+                App.ui.enableEditor(false);
+                App.state.storyData = {};
+                App.state.currentSceneId = null;
+                App.state.projectDirectoryHandle = null;
+                App.state.pendingAssetCopies.clear();
+                App.state.thumbnailCache.clear();
+                App.state.missingAssetWarnings.clear();
+                App.setDirty(false);
+                App.elements['node-element-container'].innerHTML = '';
+                App.elements['scene-list-view'].innerHTML = '';
+                document.getElementById('scene-search-input').value = '';
+                App.editor.render();
+                App.ui.updateMetaInputs();
+                App.debug.log('State reset complete.', 'SUCCESS');
 
                 App.ui.showProgress('Finishing up...');
                 App.debug.log('Populating application with project data...');
@@ -3206,15 +3342,15 @@ const App = {
                     }, 30);
                 }
 
-                function processChoice(choice) {
+                function processChoice(choice, autoForwardChain) {
 					if (cinematicRevealCleanup) {
 						cinematicRevealCleanup();
 						cinematicRevealCleanup = null;
 					}
 					const action = choice.action;
 					if (action.set_variable) gameState.variables[action.set_variable] = action.set_value;
-					if (action.target) renderScene(action.target);
-					else renderScene(gameState.currentSceneId); // If no target scene, apply variables and refresh
+					if (action.target) renderScene(action.target, autoForwardChain);
+					else renderScene(gameState.currentSceneId, autoForwardChain); // If no target scene, apply variables and refresh
 				}
 				
 				function handleCinematicReveal(scene, onReady) {
@@ -3273,14 +3409,29 @@ const App = {
                     if(onReady) onReady();
                 }
 
-                function renderScene(sceneId) {
+                function renderScene(sceneId, autoForwardChain) {
                     if (typewriterState.cleanup) typewriterState.cleanup();
 
+                    // Intentional design: any return to the start scene after at least one
+                    // other scene has been visited is treated as "the story looped back to
+                    // its beginning" and wipes all variables/visited history, acting as an
+                    // implicit restart. This is deliberate (lets authors use the start scene
+                    // as a natural reset/ending beat without a dedicated "Restart" choice) but
+                    // it also means a start scene visited mid-story as a normal plot beat
+                    // (not an ending) will unexpectedly reset all prior progress. Authors who
+                    // don't want that must avoid routing normal choices back through the start
+                    // scene. Not changed without an explicit author-facing opt-out, since doing
+                    // so would alter behavior for every existing story relying on this today.
                     const isLoopingBackToStart = sceneId === storyData.meta.startSceneId && Object.keys(gameState.visited).length > 0;
                     if (isLoopingBackToStart) initializeGameState();
                     
                     try {
                         gameState.currentSceneId = sceneId;
+                        // Capture pre-visit state before marking visited, so this scene's own
+                        // "visited_scene_<this scene>" conditions (e.g. "first time here?") can
+                        // still tell first-time visits from repeats. Other scenes' visited flags
+                        // are unaffected and keep reading the live map below.
+                        const wasVisitedBeforeThisRender = !!gameState.visited[sceneId];
                         gameState.visited[sceneId] = true;
                         const scene = storyData.scenes[sceneId];
                         if (!scene) { sceneText.innerHTML = 'Error: Scene "' + sceneId + '" not found.'; return; }
@@ -3359,7 +3510,9 @@ const App = {
                             if(choice.condition) {
                                 const rawVarName = choice.condition.variable;
                                 if (rawVarName.startsWith('visited_scene_')) {
-							        conditionMet = (!!gameState.visited[rawVarName.substring(14)]) === choice.condition.value;
+									const targetScene = rawVarName.substring(14);
+									const wasVisited = targetScene === sceneId ? wasVisitedBeforeThisRender : !!gameState.visited[targetScene];
+									conditionMet = wasVisited === choice.condition.value;
 								} else {
 									let varKey = rawVarName.startsWith('var_') ? rawVarName.substring(4) : rawVarName;
 									conditionMet = (!!gameState.variables[varKey]) === choice.condition.value;
@@ -3367,8 +3520,14 @@ const App = {
 							}
 							if (conditionMet) {
 								if (!choice.action.text && choice.action.target) {
-									if(choice.action.target === sceneId) { console.error('Infinite loop detected in scene ' + sceneId); continue; }
-									processChoice(choice); return;
+									// Track every scene visited via this chain of textless
+									// auto-forwarding choices so a cycle across multiple scenes
+									// (not just a direct self-loop) is caught before it blows the
+									// call stack.
+									const chain = autoForwardChain ? new Set(autoForwardChain) : new Set();
+									chain.add(sceneId);
+									if (chain.has(choice.action.target)) { console.error('Infinite auto-forward loop detected: scene ' + choice.action.target + ' would be re-entered via a chain of textless choices starting at ' + sceneId + '.'); continue; }
+									processChoice(choice, chain); return;
 								}
 								if (choice.action.text) visibleChoices.push(choice);
 								else if (choice.action.set_variable) {
@@ -3421,6 +3580,21 @@ const App = {
                     activeVideoElement.onplay = activeVideoElement.onpause = updatePlayIcon;
                     playBtn.onclick = e => { e.stopPropagation(); if (activeVideoElement.paused) activeVideoElement.play(); else activeVideoElement.pause(); };
                     updatePlayIcon();
+
+                    const muteBtn = document.getElementById('player-video-mute-btn');
+                    muteBtn.classList.remove('hidden');
+                    const updateMuteIcon = () => {
+                        muteBtn.querySelector('.icon-on').style.display = activeVideoElement.muted ? 'none' : 'block';
+                        muteBtn.querySelector('.icon-off').style.display = activeVideoElement.muted ? 'block' : 'none';
+                    };
+                    muteBtn.onclick = e => { e.stopPropagation(); activeVideoElement.muted = !activeVideoElement.muted; updateMuteIcon(); };
+                    updateMuteIcon();
+
+                    const loopBtn = document.getElementById('player-video-loop-btn');
+                    loopBtn.classList.remove('hidden');
+                    const updateLoopButton = () => { loopBtn.classList.toggle('active', activeVideoElement.loop); };
+                    loopBtn.onclick = e => { e.stopPropagation(); activeVideoElement.loop = !activeVideoElement.loop; updateLoopButton(); };
+                    updateLoopButton();
                 }
 
                 async function main() {
@@ -3910,7 +4084,7 @@ const App = {
                 const scene = App.state.storyData.scenes[sceneId];
                 if (scene && scene.image) {
                     try {
-                        const url = App.assets.isVideo(scene.image) ? await App.assets.getVideoThumbnail(scene.image) : await App.io.getAssetDataUrl(scene.image);
+                        const url = await App.assets.getCachedThumbnailUrl(scene.image);
                         if (url) {
                             div.innerHTML = '';
                             const mediaElement = document.createElement(App.assets.isVideo(scene.image) ? 'canvas' : 'img');
@@ -3968,7 +4142,11 @@ const App = {
 
                     const sceneData = App.state.storyData.scenes[oldId]; sceneData.id = newId; sceneData.lastModified = Date.now();
                     App.state.storyData.scenes[newId] = sceneData; delete App.state.storyData.scenes[oldId];
-                    Object.values(App.state.storyData.scenes).forEach(scene => scene.choices?.forEach(choice => { if (choice.action?.target === oldId) choice.action.target = newId; }));
+                    const oldVisitedVar = `visited_scene_${oldId}`, newVisitedVar = `visited_scene_${newId}`;
+                    Object.values(App.state.storyData.scenes).forEach(scene => scene.choices?.forEach(choice => {
+                        if (choice.action?.target === oldId) choice.action.target = newId;
+                        if (choice.condition && choice.condition.variable === oldVisitedVar) choice.condition.variable = newVisitedVar;
+                    }));
                     if (App.state.storyData.meta.startSceneId === oldId) App.state.storyData.meta.startSceneId = newId;
 
                     App.state.currentSceneId = newId; App.setDirty(true); App.ui.invalidateNavViews(); App.ui.setViewMode(App.state.currentNavView).then(() => App.editor.render());
@@ -3982,7 +4160,15 @@ const App = {
             if (!confirm(`Are you sure you want to permanently delete scene "${sceneId}"? This cannot be undone.`)) return;
 
             delete App.state.storyData.scenes[sceneId];
-            Object.values(App.state.storyData.scenes).forEach(scene => scene.choices?.forEach(choice => { if (choice.action?.target === sceneId) choice.action.target = ''; }));
+            const deletedVisitedVar = `visited_scene_${sceneId}`;
+            let clearedConditions = 0;
+            Object.values(App.state.storyData.scenes).forEach(scene => scene.choices?.forEach(choice => {
+                if (choice.action?.target === sceneId) choice.action.target = null;
+                if (choice.condition && choice.condition.variable === deletedVisitedVar) {
+                    choice.condition = null;
+                    clearedConditions++;
+                }
+            }));
 
             App.setDirty(true);
             if (App.state.currentSceneId === sceneId) {
@@ -3991,6 +4177,10 @@ const App = {
             App.ui.invalidateNavViews();
             await App.ui.setViewMode(App.state.currentNavView);
             App.ui.selectScene(App.state.storyData.meta.startSceneId);
+
+            if (clearedConditions > 0) {
+                App.ui.showNotification(`Scene "${sceneId}" deleted. ${clearedConditions} choice condition(s) referencing it were cleared.`);
+            }
         },
 		async setAsStartScene() {
             const sceneId = App.state.contextSceneId;
@@ -4030,12 +4220,22 @@ const App = {
 
             if (!scene) {
                 editorPanel.style.display = 'none';
+                editorPanel.dataset.sceneId = '';
                 if(previewWrapper) previewWrapper.style.display = 'none';
                 return;
             }
             editorPanel.style.display = 'block';
             if(previewWrapper) previewWrapper.style.display = 'block';
 
+            // Clearing choices-container below can blur a still-focused input left over
+            // from the previous scene's form (e.g. the user clicked a different scene
+            // node without tabbing/clicking away first). A text input fires a native
+            // 'change' event on blur-after-edit, which bubbles to the delegated
+            // 'change' listener on choices-container and reenters saveCurrentScene()
+            // WHILE this function is still populating the DOM for the new scene. Keep
+            // the dataset stamp pointed at the OLD scene until every field below has
+            // been (re)populated, so that reentrant call's mismatch guard still blocks
+            // it; only stamp the new scene once the DOM genuinely reflects it.
             App.elements['scene-id'].value = App.state.currentSceneId;
             App.elements['scene-text'].value = scene.text || '';
             App.elements['choices-container'].innerHTML = '';
@@ -4043,10 +4243,10 @@ const App = {
             App.elements['scene-image'].value = scene.image || '';
             App.ui.updateImageThumbnail(scene.image);
             App.elements['scene-image-prompt'].value = scene.imagePrompt || '';
-            
+
             App.elements['scene-sound'].value = scene.ambienceSound || '';
             App.elements['toggle-loop-btn'].classList.toggle('active', scene.ambienceLoop ?? true);
-            
+
             App.elements['scene-speech'].value = scene.speechSound || '';
             App.elements['toggle-speech-loop-btn'].classList.toggle('active', scene.speechLoop ?? false);
 
@@ -4060,7 +4260,11 @@ const App = {
             App.elements['toggle-video-mute-btn'].classList.toggle('active', isMuted);
             this.ui.updateVideoMuteButton(isMuted);
             this.ui.updateVideoControlsVisibility();
-            App.ui.updateAiImagePreview(null); App.state.aiImageUrl = null;
+            App.ui.updateAiImagePreview(null); App.assets.releaseAiImageUrl();
+
+            // Now that the DOM fully and correctly reflects this scene, saveCurrentScene()
+            // is safe to act on it.
+            editorPanel.dataset.sceneId = App.state.currentSceneId;
         },
         renderPreview() {
             const previewContainer = App.elements['scene-editor-preview'];
@@ -4159,7 +4363,17 @@ const App = {
             if (!App.state.currentSceneId) return;
             const scene = App.state.storyData.scenes[App.state.currentSceneId];
             if (!scene) return;
-        
+
+            // Safety guard: only write the DOM's contents into storyData if the editor
+            // panel was actually rendered for this scene. Prevents any desync between
+            // currentSceneId and the visible form from silently overwriting scene data.
+            const editorPanel = document.getElementById('editor-panel');
+            if (editorPanel.dataset.sceneId !== App.state.currentSceneId) {
+                console.warn(`saveCurrentScene: skipped save. Editor panel is showing scene '${editorPanel.dataset.sceneId}' but currentSceneId is '${App.state.currentSceneId}'.`);
+                App.debug.log(`saveCurrentScene: skipped save due to scene mismatch (panel='${editorPanel.dataset.sceneId}', current='${App.state.currentSceneId}').`, 'WARN');
+                return;
+            }
+
             const newChoices = Array.from(App.elements['choices-container'].querySelectorAll('.choice-editor')).map(div => {
                 const isConditional = div.classList.contains('is-conditional');
                 const view = isConditional ? div.querySelector('.condition-view') : div.querySelector('.default-view');
@@ -4505,10 +4719,37 @@ const App = {
                 }
             },
             remove(index) {
+                const varName = App.state.storyData.meta.variables[index];
+                if (varName === undefined) return;
+
+                // Clear any choice conditions/actions that reference this variable so
+                // they don't silently vanish the next time that scene is saved (the
+                // <select> can no longer hold a value for a variable that no longer exists).
+                let affectedCount = 0;
+                Object.values(App.state.storyData.scenes || {}).forEach(scene => {
+                    (scene.choices || []).forEach(choice => {
+                        if (choice.condition && choice.condition.variable === varName) {
+                            choice.condition = null;
+                            affectedCount++;
+                        }
+                        if (choice.action && choice.action.set_variable === varName) {
+                            choice.action.set_variable = null;
+                            choice.action.set_value = false;
+                            affectedCount++;
+                        }
+                    });
+                });
+
                 App.state.storyData.meta.variables.splice(index, 1);
                 this.renderList();
                 App.editor.ui.repopulateAllChoiceDropdowns();
                 App.setDirty(true);
+
+                if (affectedCount > 0) {
+                    App.ui.invalidateNavViews();
+                    if (App.state.currentSceneId) App.editor.render();
+                    App.ui.showNotification(`Removed variable "${varName}". ${affectedCount} choice reference(s) to it were cleared.`);
+                }
             }
         }
     },
@@ -4517,6 +4758,42 @@ const App = {
         isVideo(path) {
             return path && App.constants.VIDEO_EXTENSIONS.some(ext => path.toLowerCase().endsWith(ext));
         },
+		releaseAiImageUrl() {
+			if (App.state.aiImageUrl) {
+				URL.revokeObjectURL(App.state.aiImageUrl);
+				App.state.aiImageUrl = null;
+			}
+		},
+		// A failed AI request can fail two different ways: a JSON error body from the API
+		// itself, or (e.g. when the backing host is cold-starting) a full HTML status page
+		// from the hosting provider. Log the raw body for debugging but never surface it to
+		// the user as-is — it can be many KB of unrelated markup.
+		async describeImageApiError(response) {
+			const rawBody = await response.text();
+			console.error(`AI API error ${response.status}:`, rawBody);
+			let detail = '';
+			try { detail = JSON.parse(rawBody)?.error?.message || ''; } catch (_) { /* non-JSON body, e.g. an HTML error page */ }
+			const friendly = [502, 503, 504].includes(response.status)
+				? 'The AI service is temporarily unavailable (it may be starting up). Please try again shortly.'
+				: `AI request failed (HTTP ${response.status}).`;
+			return detail ? `${friendly} — ${detail}` : friendly;
+		},
+		// Node/list-view thumbnails re-render on every nav-view refresh; without a cache
+		// each pass re-reads every asset from disk and, for video, re-seeks and redraws a
+		// canvas frame per scene. Cache by path+size+lastModified so a file swapped in at
+		// the same path (re-drop, regenerate) is detected and recomputed automatically.
+		async getCachedThumbnailUrl(path) {
+			if (!path) return null;
+			const file = await App.io.getAssetFile(path);
+			if (!file) return null;
+			const key = `${path}::${file.size}::${file.lastModified}`;
+			if (App.state.thumbnailCache.has(key)) {
+				return App.state.thumbnailCache.get(key);
+			}
+			const url = App.assets.isVideo(path) ? await App.assets.getVideoThumbnail(path) : await App.io.getAssetDataUrl(path);
+			App.state.thumbnailCache.set(key, url);
+			return url;
+		},
 		async getVideoThumbnail(path) {
 			return new Promise(async (resolve) => {
 				const file = await App.io.getAssetFile(path);
@@ -4635,7 +4912,7 @@ const App = {
         async renderPollinationImage() {
             const promptText = App.elements['scene-image-prompt'].value.trim();
             if (!promptText) { App.ui.showNotification("Please enter a prompt first."); return; }
-            App.state.aiImageUrl = null;
+            App.assets.releaseAiImageUrl();
             App.state.aiImageBlob = null;
             App.ui.updateAiImagePreview(null, 'Rendering...');
 
@@ -4653,7 +4930,7 @@ const App = {
                 seed: Math.floor(Math.random() * 1000000000),
                 nologo: 'true',
                 enhance: 'true',
-                quality: 'hd'
+                safe: 'true'
             });
 
             const finalUrl = `${baseUrl}?${params.toString()}`;
@@ -4669,12 +4946,12 @@ const App = {
                 });
 
                 if (!response.ok) {
-                    throw new Error(`API Error! Status: ${response.status} - ${await response.text()}`);
+                    throw new Error(await App.assets.describeImageApiError(response));
                 }
 
                 // This endpoint returns the image directly, not a JSON response
                 const imageBlob = await response.blob();
-                
+
                 App.state.aiImageBlob = imageBlob;
                 App.state.aiImageUrl = URL.createObjectURL(imageBlob);
                 App.ui.updateAiImagePreview(App.state.aiImageUrl);
@@ -4702,7 +4979,7 @@ const App = {
                 
                 // Clear the state after use
                 App.ui.updateAiImagePreview(null, 'Ready');
-                App.state.aiImageUrl = null; 
+                App.assets.releaseAiImageUrl();
                 App.state.aiImageBlob = null;
             } catch (err) {
                 console.error("Error adding AI image:", err);
@@ -4745,8 +5022,7 @@ const App = {
                 });
 
                 if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`API Error! Status: ${response.status} - ${errText}`);
+                    throw new Error(await App.assets.describeImageApiError(response));
                 }
 
                 const data = await response.json();
@@ -4782,6 +5058,10 @@ const App = {
             this.pauseAllEditorMedia();
 
             const isPlayerAlreadyActive = App.elements['player-container'].style.display === 'flex';
+            // Reopening the player onto the start scene while it's already running (e.g. the
+            // author clicks "Play from Start" again mid-session) is treated as a fresh
+            // playthrough, matching the same "start scene = implicit restart" convention used
+            // during play in renderScene() below. See the comment there for the full rationale.
             const isLoopingBackToStart = isPlayerAlreadyActive && sceneId === App.state.storyData.meta.startSceneId;
 
             if (fromStart || isLoopingBackToStart) {
@@ -4801,11 +5081,13 @@ const App = {
                 this.gameState.variables[varName] = false;
             });
         },
-        processChoice(choice) {
+        processChoice(choice, autoForwardChain = null) {
 			const action = choice.action;
 			if (action.set_variable) this.gameState.variables[action.set_variable] = action.set_value;
-			if (action.target) this.renderScene(action.target);
-			else this.renderScene(this.gameState.currentSceneId); // If no target scene, apply variables and refresh
+			if (action.target) this.renderScene(action.target, autoForwardChain);
+			// this.gameState (App.player's local game state) has no currentSceneId field —
+			// only variables/visited. The active scene is tracked on App.state.currentSceneId.
+			else this.renderScene(App.state.currentSceneId, autoForwardChain); // If no target scene, apply variables and refresh
 		},
         typeWriter(text, choices) {
 			const { 'player-text': textEl, 'player-choices': choicesEl, 'player-content-container': contentContainer, 'player-container': playerContainer } = App.elements;
@@ -4869,13 +5151,21 @@ const App = {
 				}
 			}, 30);
 		},
-        async renderScene(sceneId) {
+        async renderScene(sceneId, autoForwardChain = null) {
             if (App.state.player.typewriter.cleanup) App.state.player.typewriter.cleanup();
 
+            // Intentional design: see the matching comment in the exported player template's
+            // renderScene() (getFormattedPlayerHTML) for the full rationale — returning to the
+            // start scene after visiting others is treated as an implicit restart.
             const isLoopingBackToStart = sceneId === App.state.storyData.meta.startSceneId && Object.keys(this.gameState.visited).length > 0;
             if (isLoopingBackToStart) this.initializeGameState();
             
             App.state.currentSceneId = sceneId;
+            // Capture pre-visit state before marking visited, so this scene's own
+            // "visited_scene_<this scene>" conditions (e.g. "first time here?") can
+            // still tell first-time visits from repeats. Other scenes' visited flags
+            // are unaffected and keep reading the live map below.
+            const wasVisitedBeforeThisRender = !!this.gameState.visited[sceneId];
             this.gameState.visited[sceneId] = true;
 
             const scene = App.state.storyData.scenes[sceneId];
@@ -5016,13 +5306,29 @@ const App = {
                 let conditionMet = true;
                 if(choice.condition) {
                     const varName = choice.condition.variable;
-                    if(varName.startsWith('visited_scene_')) conditionMet = !!this.gameState.visited[varName.substring(14)] === choice.condition.value;
-						else conditionMet = (!!this.gameState.variables[varName]) === choice.condition.value;
+                    if(varName.startsWith('visited_scene_')) {
+						const targetScene = varName.substring(14);
+						const wasVisited = targetScene === sceneId ? wasVisitedBeforeThisRender : !!this.gameState.visited[targetScene];
+						conditionMet = wasVisited === choice.condition.value;
+					}
+						else {
+							// Legacy projects may still store condition variable names with a
+							// 'var_' prefix (the <select> option encoding). Strip it here to
+							// match the exported player's lookup, so conditional choices behave
+							// the same in editor Play as they do in Preview/exported games.
+							const varKey = varName.startsWith('var_') ? varName.substring(4) : varName;
+							conditionMet = (!!this.gameState.variables[varKey]) === choice.condition.value;
+						}
 					}
 					if (conditionMet) {
 						if (!choice.action.text && choice.action.target) {
-							if (choice.action.target === sceneId) { console.error(`Infinite loop detected in scene '${sceneId}'.`); continue; }
-							this.processChoice(choice); return;
+							// Track every scene visited via this chain of textless auto-forwarding
+							// choices so a cycle across multiple scenes (not just a direct
+							// self-loop) is caught before it blows the call stack.
+							const chain = autoForwardChain ? new Set(autoForwardChain) : new Set();
+							chain.add(sceneId);
+							if (chain.has(choice.action.target)) { console.error(`Infinite auto-forward loop detected: scene '${choice.action.target}' would be re-entered via a chain of textless choices starting at '${sceneId}'.`); continue; }
+							this.processChoice(choice, chain); return;
 						}
 						if (choice.action.text) visibleChoices.push(choice);
 						else if (choice.action.set_variable) {
@@ -5546,7 +5852,7 @@ const App = {
                 seed: Math.floor(Math.random() * 1000000000),
                 nologo: 'true',
                 enhance: 'true',
-                quality: 'hd'
+                safe: 'true'
             });
 
             const finalUrl = `${baseUrl}?${params.toString()}`;
@@ -5562,9 +5868,9 @@ const App = {
                 });
 
                 if (!response.ok) {
-                    throw new Error(`API Error! Status: ${response.status} - ${await response.text()}`);
+                    throw new Error(await App.assets.describeImageApiError(response));
                 }
-                
+
                 // This endpoint returns the image directly
                 const imageBlob = await response.blob();
                 const filename = `${scene.id}_${Date.now()}.jpg`;
@@ -5903,7 +6209,7 @@ const App = {
             if (mediaType !== 'none' && scene.image) {
                 const thumbDiv = nodeEl.querySelector('.node-thumbnail');
                 try {
-                    const url = mediaType === 'video' ? await App.assets.getVideoThumbnail(scene.image) : await App.io.getAssetDataUrl(scene.image);
+                    const url = await App.assets.getCachedThumbnailUrl(scene.image);
                     if (url) {
                         thumbDiv.innerHTML = '';
                         const mediaEl = mediaType === 'video' ? document.createElement('canvas') : document.createElement('img');

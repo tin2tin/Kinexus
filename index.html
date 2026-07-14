@@ -661,14 +661,14 @@
         }
 
         /* Showcase Section (Craft) */
-        .showcase { padding: 8rem 2rem; }
+        .showcase { padding: 5rem 2rem; }
 
         .showcase-container {
             max-width: 1200px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 7rem;
+            gap: 3.5rem;
         }
 
         .section-title {
@@ -680,12 +680,14 @@
             letter-spacing: 3px;
         }
 
+        .showcase .section-title { margin-bottom: 3rem; }
+
         .showcase-row {
             display: flex;
             align-items: center;
-            gap: 5rem;
+            gap: 3.5rem;
             background: rgba(10, 10, 12, 0.4);
-            padding: 3rem;
+            padding: 2.25rem;
             border-radius: 16px;
             border: 1px solid rgba(255,255,255,0.03);
             backdrop-filter: blur(8px);
@@ -1323,6 +1325,16 @@
 
         // Embedded Game Database (Resolves CORS and Local File loading issues)
         const gamesDatabase = [
+            {
+                "id": "kinexus-studio",
+                "title": "Kinexus Studio",
+                "url": "editor.html",
+                "image": "https://img.itch.zone/aW1hZ2UvMzc0MjU2OC8yNzUzMDQwMy5wbmc=/original/aDADAl.png",
+                "desc": "The free, open-source, zero-code studio behind every game in this collection. Write, direct, and export cinematic interactive fiction right in your browser — no installs, no cost.",
+                "categories": ["masterpiece"],
+                "playtime": "Free Tool",
+                "tags": ["Editor", "Open Source"]
+            },
             {
                 "id": "azraels-manuscript",
                 "title": "Azrael's Manuscript",

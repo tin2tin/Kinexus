@@ -1701,6 +1701,7 @@ const App = {
                 creatorName: "",
                 aboutText: "",
                 aiApiKey: "",
+                promptSuffix: "",
                 variables:[],
                 styles: App.styles.getDefaults(),
                 layout: 'layout-panel-bottom'
@@ -1859,6 +1860,12 @@ const App = {
                 App.state.storyData.meta[key] = e.target.value;
                 App.setDirty(true);
             });
+        });
+
+        document.getElementById('batch-suffix-input').addEventListener('input', (e) => {
+            if (!App.state.storyData.meta) return;
+            App.state.storyData.meta.promptSuffix = e.target.value;
+            App.setDirty(true);
         });
 
         App.elements['render-ai-image-btn'].addEventListener('click', () => App.assets.renderPollinationImage());
@@ -5747,6 +5754,7 @@ const App = {
             modalContent.style.left = `${rect.left}px`;
             modalContent.style.width = `${rect.width - (sidebar.offsetWidth - sidebar.clientWidth)}px`;
             modalContent.style.height = `${rect.height}px`;
+            document.getElementById('batch-suffix-input').value = App.state.storyData.meta?.promptSuffix || '';
             App.modals.show('batch-image-modal');
         },
         logInfo(message) {
